@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoreCRM — Super Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --sidebar-w: 240px;
+      --primary: #1a56db;
+      --primary-dark: #1344b5;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #94a3b8;
+      --sidebar-active: #1a56db;
+      --topbar-h: 58px;
+      --surface: #ffffff;
+      --bg: #f1f5f9;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --hot: #ef4444;
+      --warm: #f59e0b;
+      --cold: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--sidebar-bg);
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .sidebar-brand .brand-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    .sidebar-brand .brand-sub {
+      font-size: 0.68rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+    .sidebar-section {
+      padding: 16px 14px 4px;
+      font-size: 0.62rem;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+    }
+    .sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 14px;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-size: 0.855rem;
+      border-radius: 6px;
+      margin: 1px 8px;
+      transition: all 0.15s;
+    }
+    .sidebar nav a i { font-size: 1rem; width: 18px; text-align: center; }
+    .sidebar nav a:hover { background: #1e293b; color: #e2e8f0; }
+    .sidebar nav a.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-top: 1px solid #1e293b;
+    }
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .sidebar-footer a:hover { background: #1e293b; color: #e2e8f0; }
+
+    /* TOPBAR */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 99;
+      gap: 12px;
+    }
+    .topbar .page-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+    .topbar .admin-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .topbar .admin-pill .dot {
+      width: 7px; height: 7px;
+      background: var(--success);
+      border-radius: 50%;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      margin-left: var(--sidebar-w);
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+    .content-area { padding: 24px; }
+
+    /* PAGE HEADER */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .page-header h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .page-header .sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .card-body { padding: 20px; }
+
+    /* STAT CARDS */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .stat-val { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+    /* TABLE */
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .table-card .table-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-card .table-header h6 { font-size: 0.88rem; font-weight: 600; margin: 0; }
+    .crm-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .crm-table thead th {
+      background: #f8fafc;
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .crm-table tbody td {
+      padding: 11px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .crm-table tbody tr:last-child td { border-bottom: none; }
+    .crm-table tbody tr:hover td { background: #f8fafc; }
+
+    /* BADGES */
+    .badge-hot { background: #fef2f2; color: #dc2626; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-warm { background: #fffbeb; color: #d97706; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-cold { background: #eff6ff; color: #2563eb; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-enabled { background: #ecfdf5; color: #059669; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-disabled { background: #f9fafb; color: #9ca3af; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-stage {
+      font-size: 0.68rem; padding: 3px 8px; border-radius: 20px; font-weight: 600;
+      background: #f1f5f9; color: #475569;
+    }
+    .badge-stage.new { background: #f0f9ff; color: #0369a1; }
+    .badge-stage.contacted { background: #faf5ff; color: #7c3aed; }
+    .badge-stage.interested { background: #ecfdf5; color: #059669; }
+    .badge-stage.closed { background: #dcfce7; color: #16a34a; }
+    .badge-stage.lost { background: #fef2f2; color: #dc2626; }
+
+    /* BUTTONS */
+    .btn-primary { background: var(--primary); border-color: var(--primary); font-size: 0.83rem; }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .btn-sm { padding: 4px 10px; font-size: 0.75rem; border-radius: 6px; }
+    .btn-action { background: #f8fafc; border: 1px solid var(--border); color: var(--muted); }
+    .btn-action:hover { background: #f1f5f9; color: var(--text); }
+
+    /* FORM */
+    .form-label { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .form-control, .form-select {
+      font-size: 0.84rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: var(--surface);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+    }
+    .form-section {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--muted);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+      margin-top: 4px;
+    }
+
+    /* ALERTS */
+    .alert { font-size: 0.84rem; border-radius: 8px; }
+
+    /* FILTERS BAR */
+    .filters-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .filters-bar .form-control,
+    .filters-bar .form-select { font-size: 0.8rem; padding: 6px 10px; height: auto; }
+    .filters-bar .form-control { max-width: 200px; }
+    .filters-bar .form-select { max-width: 160px; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 10px; display: block; color: #cbd5e1; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .main-content { margin-left: 0; }
+      .topbar { left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-name">CoreCRM</div>
+    <div class="brand-sub">Super Admin</div>
+  </div>
+
+  <nav>
+    <div class="sidebar-section">Overview</div>
+    <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+
+    <div class="sidebar-section">CRM</div>
+    <a href="{% url 'leads' %}" class="{% if 'lead' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-person-lines-fill"></i> Leads
+    </a>
+    <a href="{% url 'calls' %}" class="{% if 'call' in request.resolver_match.url_name and 'wrapup' not in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-telephone-fill"></i> Call Logs
+    </a>
+    <a href="{% url 'wrapups' %}" class="{% if 'wrapup' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-clipboard-check-fill"></i> Wrap-Ups
+    </a>
+    <a href="{% url 'followups' %}" class="{% if 'followup' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-calendar-check-fill"></i> Follow-Ups
+    </a>
+
+    <div class="sidebar-section">Management</div>
+    <a href="{% url 'branch' %}" class="{% if 'branch' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-building"></i> Branches
+    </a>
+    <a href="{% url 'users' %}" class="{% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-people-fill"></i> Users
+    </a>
+    <a href="{% url 'hr_panel' %}" class="{% if 'hr' in request.resolver_match.url_name or 'attendance' in request.resolver_match.url_name or 'leave' in request.resolver_match.url_name or 'payroll' in request.resolver_match.url_name %}active{% endif %}">
+  <i class="bi bi-person-badge-fill"></i> HR Panel
+</a>
+
+    <div class="sidebar-section">System</div>
+    <a href="{% url 'settings' %}" class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-gear-fill"></i> Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="{% url 'logout_view' %}">
+      <i class="bi bi-box-arrow-left"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="page-title">{% block page_title %}CoreCRM{% endblock %}</div>
+  <div class="admin-pill">
+    <span class="dot"></span>
+    {{ request.user.get_full_name|default:request.user.username }}
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+  <div class="content-area">
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show mb-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

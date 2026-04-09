@@ -1,0 +1,62 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Add Leave{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Add Leave Request</h4></div>
+  <a href="{% url 'leaves' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:580px;">
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Employee *</label>
+          <select name="employee" class="form-select" required>
+            <option value="">Select employee</option>
+            {% for e in employees %}<option value="{{ e.id }}">{{ e.user.get_full_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Leave Type *</label>
+          <select name="leave_type" class="form-select" required>
+            <option value="casual">Casual Leave</option>
+            <option value="sick">Sick Leave</option>
+            <option value="annual">Annual Leave</option>
+            <option value="unpaid">Unpaid Leave</option>
+            <option value="maternity">Maternity Leave</option>
+            <option value="compoff">Comp Off</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">From Date *</label>
+          <input type="date" name="from_date" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">To Date *</label>
+          <input type="date" name="to_date" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Status</label>
+          <select name="leave_status" class="form-select">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Reason *</label>
+          <textarea name="reason" class="form-control" rows="3" required placeholder="Reason for leave..."></textarea>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm px-4">Save</button>
+        <a href="{% url 'leaves' %}" class="btn btn-sm btn-action">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Follow-Ups{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Follow-Up Manager</h4><div class="sub">All follow-ups across all branches</div></div>
+  <a href="{% url 'add_followup' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Follow-Up</a>
+</div>
+
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search lead name..." value="{{ search }}">
+    <select name="status" class="form-select">
+      <option value="">All Status</option>
+      <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+      <option value="rescheduled" {% if status_filter == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
+      <option value="missed" {% if status_filter == 'missed' %}selected{% endif %}>Missed</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'followups' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Lead</th>
+        <th>Type</th>
+        <th>Scheduled</th>
+        <th>Status</th>
+        <th>Assigned To</th>
+        <th>Branch</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in followups %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">
+          <a href="{% url 'view_lead' f.lead.id %}" style="color:#1e293b; text-decoration:none;">
+            {{ f.lead.name }}
+          </a>
+        </td>
+        <td>{{ f.get_followup_type_display }}</td>
+        <td style="white-space:nowrap; font-size:0.82rem;">{{ f.followup_at|date:"d M Y, g:i A" }}</td>
+        <td>
+          <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600;
+            {% if f.followup_status == 'pending' %}background:#fff7ed;color:#ea580c;
+            {% elif f.followup_status == 'completed' %}background:#ecfdf5;color:#059669;
+            {% elif f.followup_status == 'missed' %}background:#fef2f2;color:#dc2626;
+            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
+            {{ f.get_followup_status_display }}
+          </span>
+        </td>
+        <td style="font-size:0.78rem;">{{ f.assigned_to.user.get_full_name|default:"—" }}</td>
+        <td style="font-size:0.78rem;">{{ f.branch.name|default:"—" }}</td>
+        <td style="font-size:0.75rem; color:#475569; max-width:160px;">{{ f.notes|default:"—"|truncatechars:50 }}</td>
+        <td style="white-space:nowrap;">
+          <a href="{% url 'edit_followup' f.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
+          <a href="{% url 'delete_followup' f.id %}" class="btn btn-sm btn-action"
+             onclick="return confirm('Delete this follow-up?')">
+            <i class="bi bi-trash" style="color:#dc2626"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9">
+        <div class="empty-state">
+          <i class="bi bi-calendar-check-fill"></i>
+          <p>No follow-ups yet. <a href="{% url 'add_followup' %}">Schedule one</a></p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

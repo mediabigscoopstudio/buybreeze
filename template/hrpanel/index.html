@@ -1,0 +1,183 @@
+{% extends 'hrpanel/base.html' %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h4>Dashboard</h4>
+    <div class="sub">Cross-branch overview — all data</div>
+  </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#eff6ff">
+        <i class="bi bi-person-lines-fill" style="color:#2563eb"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ total_leads }}</div>
+        <div class="stat-label">Total Leads</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef2f2">
+        <i class="bi bi-fire" style="color:#dc2626"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ hot_leads }}</div>
+        <div class="stat-label">Hot Leads</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#f0fdf4">
+        <i class="bi bi-telephone-fill" style="color:#16a34a"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ total_calls }}</div>
+        <div class="stat-label">Total Calls</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#faf5ff">
+        <i class="bi bi-building" style="color:#7c3aed"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ total_branches }}</div>
+        <div class="stat-label">Branches</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fff7ed">
+        <i class="bi bi-people-fill" style="color:#ea580c"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ total_users }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#ecfdf5">
+        <i class="bi bi-calendar-check-fill" style="color:#059669"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ pending_followups }}</div>
+        <div class="stat-label">Pending F/U</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+
+  <!-- BRANCH LEADS -->
+  <div class="col-md-5">
+    <div class="table-card">
+      <div class="table-header">
+        <h6><i class="bi bi-building me-2" style="color:#7c3aed"></i>Leads by Branch</h6>
+      </div>
+      <div style="padding: 4px 0;">
+        {% for b in branch_leads %}
+        <div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 18px; border-bottom: 1px solid #f1f5f9;">
+          <span style="font-size:0.84rem; font-weight:500;">{{ b.name }}</span>
+          <span style="font-size:0.84rem; font-weight:700; color:#1a56db;">{{ b.lead_count }}</span>
+        </div>
+        {% empty %}
+        <div class="empty-state"><i class="bi bi-building"></i><p>No branches yet</p></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- UPCOMING FOLLOW-UPS -->
+  <div class="col-md-7">
+    <div class="table-card">
+      <div class="table-header">
+        <h6><i class="bi bi-calendar-check-fill me-2" style="color:#059669"></i>Upcoming Follow-Ups (24h)</h6>
+        <a href="{% url 'followups' %}" class="btn btn-sm btn-action">View All</a>
+      </div>
+      <table class="crm-table">
+        <thead>
+          <tr>
+            <th>Lead</th>
+            <th>Type</th>
+            <th>Time</th>
+            <th>Assigned</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in upcoming_followups %}
+          <tr>
+            <td style="font-weight:500;">{{ f.lead.name }}</td>
+            <td>{{ f.get_followup_type_display }}</td>
+            <td>{{ f.followup_at|date:"d M, g:i A" }}</td>
+            <td>{{ f.assigned_to.user.get_full_name|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><p>No upcoming follow-ups in next 24 hours</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- RECENT LEADS -->
+<div class="table-card">
+  <div class="table-header">
+    <h6><i class="bi bi-person-lines-fill me-2" style="color:#2563eb"></i>Recent Leads</h6>
+    <a href="{% url 'leads' %}" class="btn btn-sm btn-action">View All</a>
+  </div>
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Source</th>
+        <th>Temp</th>
+        <th>Stage</th>
+        <th>Branch</th>
+        <th>Assigned</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lead in recent_leads %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td>
+          <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color:#1e293b; text-decoration:none;">
+            {{ lead.name }}
+          </a>
+        </td>
+        <td style="color:#475569;">{{ lead.phone }}</td>
+        <td>{{ lead.get_source_display }}</td>
+        <td>
+          {% if lead.temperature == 'hot' %}<span class="badge-hot">Hot</span>
+          {% elif lead.temperature == 'warm' %}<span class="badge-warm">Warm</span>
+          {% else %}<span class="badge-cold">Cold</span>{% endif %}
+        </td>
+        <td><span class="badge-stage {{ lead.stage }}">{{ lead.get_stage_display }}</span></td>
+        <td>{{ lead.branch.name|default:"—" }}</td>
+        <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8"><div class="empty-state"><i class="bi bi-person-lines-fill"></i><p>No leads yet. <a href="{% url 'add_lead' %}">Add your first lead</a></p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Call Logs{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Call Logs</h4><div class="sub">All calls across all branches</div></div>
+  <a href="{% url 'add_call' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Log Call</a>
+</div>
+
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search lead name..." value="{{ search }}">
+    <select name="outcome" class="form-select">
+      <option value="">All Outcomes</option>
+      <option value="interested" {% if outcome_filter == 'interested' %}selected{% endif %}>Interested</option>
+      <option value="not_interested" {% if outcome_filter == 'not_interested' %}selected{% endif %}>Not Interested</option>
+      <option value="callback" {% if outcome_filter == 'callback' %}selected{% endif %}>Callback</option>
+      <option value="not_answered" {% if outcome_filter == 'not_answered' %}selected{% endif %}>Not Answered</option>
+      <option value="converted" {% if outcome_filter == 'converted' %}selected{% endif %}>Converted</option>
+      <option value="site_visit" {% if outcome_filter == 'site_visit' %}selected{% endif %}>Site Visit Scheduled</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'calls' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Lead</th>
+        <th>Type</th>
+        <th>Outcome</th>
+        <th>Duration</th>
+        <th>Called By</th>
+        <th>Branch</th>
+        <th>Next F/U</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in calls %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">
+          <a href="{% url 'view_lead' c.lead.id %}" style="color:#1e293b; text-decoration:none;">
+            {{ c.lead.name }}
+          </a>
+        </td>
+        <td>{{ c.get_call_type_display }}</td>
+        <td>
+          <span style="font-size:0.72rem; padding:3px 8px; border-radius:20px; font-weight:600;
+            {% if c.call_outcome == 'converted' %}background:#ecfdf5;color:#059669;
+            {% elif c.call_outcome == 'interested' %}background:#eff6ff;color:#2563eb;
+            {% elif c.call_outcome == 'not_interested' %}background:#fef2f2;color:#dc2626;
+            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
+            {{ c.get_call_outcome_display }}
+          </span>
+        </td>
+        <td>{{ c.duration_display }}</td>
+        <td style="font-size:0.78rem;">{{ c.called_by.user.get_full_name|default:"—" }}</td>
+        <td style="font-size:0.78rem;">{{ c.branch.name|default:"—" }}</td>
+        <td style="font-size:0.75rem; white-space:nowrap;">{{ c.next_followup_at|date:"d M g:i A"|default:"—" }}</td>
+        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ c.created_at|date:"d M Y" }}</td>
+        <td style="white-space:nowrap;">
+          <a href="{% url 'edit_call' c.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
+          <a href="{% url 'delete_call' c.id %}" class="btn btn-sm btn-action"
+             onclick="return confirm('Delete this call log?')">
+            <i class="bi bi-trash" style="color:#dc2626"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="10">
+        <div class="empty-state">
+          <i class="bi bi-telephone-fill"></i>
+          <p>No call logs found. <a href="{% url 'add_call' %}">Log a call</a></p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

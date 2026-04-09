@@ -1,0 +1,61 @@
+{% extends 'hrpanel/base.html' %}
+{% block page_title %}Settings{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>System Settings</h4><div class="sub">Configure global CRM behaviour</div></div>
+</div>
+
+<div class="card" style="max-width:620px;">
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="form-section">Wrap-Up Configuration</div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label">Wrap-Up Edit Window (minutes)</label>
+          <input type="number" name="wrapup_window_minutes" class="form-control"
+            value="{{ settings.wrapup_window_minutes.value|default:'10' }}" min="1" max="60">
+          <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
+            Time after call ends during which wrap-up can be edited. After this window, it locks automatically.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">Lead Assignment</div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label">Lead Auto-Assign Mode</label>
+          <select name="lead_auto_assign" class="form-select">
+            <option value="manual" {% if settings.lead_auto_assign.value == 'manual' %}selected{% endif %}>Manual Assignment Only</option>
+            <option value="round_robin" {% if settings.lead_auto_assign.value == 'round_robin' %}selected{% endif %}>Round Robin (Auto)</option>
+          </select>
+          <div style="font-size:0.75rem; color:#94a3b8; margin-top:4px;">
+            How leads are distributed to call team members.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">WhatsApp Integration</div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label">WhatsApp Business API Provider</label>
+          <select name="whatsapp_provider" class="form-select">
+            <option value="" {% if not settings.whatsapp_provider.value %}selected{% endif %}>Not Configured</option>
+            <option value="wati" {% if settings.whatsapp_provider.value == 'wati' %}selected{% endif %}>WATI</option>
+            <option value="twilio" {% if settings.whatsapp_provider.value == 'twilio' %}selected{% endif %}>Twilio</option>
+            <option value="360dialog" {% if settings.whatsapp_provider.value == '360dialog' %}selected{% endif %}>360dialog</option>
+            <option value="gupshup" {% if settings.whatsapp_provider.value == 'gupshup' %}selected{% endif %}>Gupshup</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm px-4">Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

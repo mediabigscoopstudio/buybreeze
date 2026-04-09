@@ -1,0 +1,123 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Leads{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h4>Lead Management</h4>
+    <div class="sub">All leads across all branches</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'bulk_upload_leads' %}" class="btn btn-sm btn-action">
+      <i class="bi bi-upload me-1"></i> Bulk Upload
+    </a>
+    <a href="{% url 'add_lead' %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg me-1"></i> Add Lead
+    </a>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search name / phone..." value="{{ search }}">
+    <select name="temperature" class="form-select">
+      <option value="">All Temps</option>
+      <option value="hot" {% if temp_filter == 'hot' %}selected{% endif %}>🔥 Hot</option>
+      <option value="warm" {% if temp_filter == 'warm' %}selected{% endif %}>🌤 Warm</option>
+      <option value="cold" {% if temp_filter == 'cold' %}selected{% endif %}>❄️ Cold</option>
+    </select>
+    <select name="stage" class="form-select">
+      <option value="">All Stages</option>
+      <option value="new" {% if stage_filter == 'new' %}selected{% endif %}>New</option>
+      <option value="contacted" {% if stage_filter == 'contacted' %}selected{% endif %}>Contacted</option>
+      <option value="interested" {% if stage_filter == 'interested' %}selected{% endif %}>Interested</option>
+      <option value="site_visit" {% if stage_filter == 'site_visit' %}selected{% endif %}>Site Visit</option>
+      <option value="negotiation" {% if stage_filter == 'negotiation' %}selected{% endif %}>Negotiation</option>
+      <option value="closed" {% if stage_filter == 'closed' %}selected{% endif %}>Closed</option>
+      <option value="lost" {% if stage_filter == 'lost' %}selected{% endif %}>Lost</option>
+    </select>
+    <select name="source" class="form-select">
+      <option value="">All Sources</option>
+      <option value="meta" {% if source_filter == 'meta' %}selected{% endif %}>Meta Ads</option>
+      <option value="google" {% if source_filter == 'google' %}selected{% endif %}>Google Ads</option>
+      <option value="website" {% if source_filter == 'website' %}selected{% endif %}>Website</option>
+      <option value="referral" {% if source_filter == 'referral' %}selected{% endif %}>Referral</option>
+      <option value="walkin" {% if source_filter == 'walkin' %}selected{% endif %}>Walk-in</option>
+      <option value="other" {% if source_filter == 'other' %}selected{% endif %}>Other</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'leads' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Source</th>
+        <th>Temp</th>
+        <th>Stage</th>
+        <th>Property</th>
+        <th>Branch</th>
+        <th>Assigned To</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td>
+          <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color:#1e293b; text-decoration:none;">
+            {{ lead.name }}
+          </a>
+        </td>
+        <td style="color:#475569;">{{ lead.phone }}</td>
+        <td style="font-size:0.78rem;">{{ lead.get_source_display }}</td>
+        <td>
+          {% if lead.temperature == 'hot' %}<span class="badge-hot">Hot</span>
+          {% elif lead.temperature == 'warm' %}<span class="badge-warm">Warm</span>
+          {% else %}<span class="badge-cold">Cold</span>{% endif %}
+        </td>
+        <td><span class="badge-stage {{ lead.stage }}">{{ lead.get_stage_display }}</span></td>
+        <td style="font-size:0.78rem;">{{ lead.get_property_type_display|default:"—" }}</td>
+        <td style="font-size:0.78rem;">{{ lead.branch.name|default:"—" }}</td>
+        <td style="font-size:0.78rem;">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
+        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ lead.created_at|date:"d M Y" }}</td>
+        <td style="white-space:nowrap;">
+          <a href="{% url 'view_lead' lead.id %}" class="btn btn-sm btn-action me-1" title="View">
+            <i class="bi bi-eye"></i>
+          </a>
+          <a href="{% url 'edit_lead' lead.id %}" class="btn btn-sm btn-action me-1" title="Edit">
+            <i class="bi bi-pencil"></i>
+          </a>
+          <a href="{% url 'delete_lead' lead.id %}" class="btn btn-sm btn-action"
+             onclick="return confirm('Delete this lead?')" title="Delete">
+            <i class="bi bi-trash" style="color:#dc2626"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="11">
+        <div class="empty-state">
+          <i class="bi bi-person-lines-fill"></i>
+          <p>No leads found. <a href="{% url 'add_lead' %}">Add your first lead</a></p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

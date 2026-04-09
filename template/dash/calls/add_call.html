@@ -1,0 +1,90 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Log Call{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Log a Call</h4><div class="sub">Add a new call record</div></div>
+  <a href="{% url 'calls' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:680px;">
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="form-section">Call Details</div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Lead *</label>
+          <select name="lead" class="form-select" required>
+            <option value="">Select lead</option>
+            {% for l in all_leads %}
+              <option value="{{ l.id }}">{{ l.name }} — {{ l.phone }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Call Type *</label>
+          <select name="call_type" class="form-select" required>
+            <option value="outbound">Outbound</option>
+            <option value="inbound">Inbound</option>
+            <option value="missed">Missed</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Duration (seconds)</label>
+          <input type="number" name="call_duration" class="form-control" placeholder="e.g. 180" min="0">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Outcome *</label>
+          <select name="call_outcome" class="form-select" required>
+            <option value="">Select outcome</option>
+            <option value="interested">Interested</option>
+            <option value="not_interested">Not Interested</option>
+            <option value="callback">Callback Requested</option>
+            <option value="not_answered">Not Answered</option>
+            <option value="converted">Converted</option>
+            <option value="site_visit">Site Visit Scheduled</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Next Follow-up Date & Time</label>
+          <input type="datetime-local" name="next_followup_at" class="form-control">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Call Notes</label>
+          <textarea name="call_notes" class="form-control" rows="3" placeholder="What was discussed..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Assignment</div>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <label class="form-label">Called By</label>
+          <select name="called_by" class="form-select">
+            <option value="">Select member</option>
+            {% for m in members %}
+              <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Branch</label>
+          <select name="branch" class="form-select">
+            <option value="">Select branch</option>
+            {% for b in branches %}
+              <option value="{{ b.id }}">{{ b.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm px-4">Save Call Log</button>
+        <a href="{% url 'calls' %}" class="btn btn-sm btn-action">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

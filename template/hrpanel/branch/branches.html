@@ -1,0 +1,76 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Branches{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h4>Branch Management</h4>
+    <div class="sub">{{ branches.count }} branches total</div>
+  </div>
+  <a href="{% url 'add_branch' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i> Add Branch
+  </a>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Branch Name</th>
+        <th>Location</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>GPS Radius</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in branches %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">{{ item.name }}</td>
+        <td>{{ item.location }}</td>
+        <td>{{ item.phone|default:"—" }}</td>
+        <td>{{ item.email|default:"—" }}</td>
+        <td>{{ item.gps_radius }}m</td>
+        <td>
+          {% if item.status == 'Enabled' %}
+            <span class="badge-enabled">Active</span>
+          {% else %}
+            <span class="badge-disabled">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'edit_branch' item.id %}" class="btn btn-sm btn-action me-1">
+            <i class="bi bi-pencil"></i>
+          </a>
+          {% if item.status == 'Enabled' %}
+            <a href="{% url 'disable_branch' item.id %}" class="btn btn-sm btn-action me-1" title="Disable">
+              <i class="bi bi-pause-circle"></i>
+            </a>
+          {% else %}
+            <a href="{% url 'enable_branch' item.id %}" class="btn btn-sm btn-action me-1" title="Enable">
+              <i class="bi bi-play-circle"></i>
+            </a>
+          {% endif %}
+          <a href="{% url 'delete_branch' item.id %}" class="btn btn-sm btn-action"
+             onclick="return confirm('Delete this branch?')" title="Delete">
+            <i class="bi bi-trash" style="color:#dc2626"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">
+        <div class="empty-state">
+          <i class="bi bi-building"></i>
+          <p>No branches yet. <a href="{% url 'add_branch' %}">Add your first branch</a></p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'hrpanel/base.html' %}
+{% block page_title %}Edit Payroll{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Edit Payroll Record</h4></div>
+  <a href="{% url 'payroll' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:580px;">
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+      <div class="row g-3 mb-3">
+        <div class="col-12">
+          <label class="form-label">Employee *</label>
+          <select name="employee" class="form-select" required>
+            {% for e in employees %}
+              <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>
+                {{ e.user.get_full_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Month *</label>
+          <select name="month" class="form-select" required>
+            <option value="January" {% if data.month == 'January' %}selected{% endif %}>January</option>
+            <option value="February" {% if data.month == 'February' %}selected{% endif %}>February</option>
+            <option value="March" {% if data.month == 'March' %}selected{% endif %}>March</option>
+            <option value="April" {% if data.month == 'April' %}selected{% endif %}>April</option>
+            <option value="May" {% if data.month == 'May' %}selected{% endif %}>May</option>
+            <option value="June" {% if data.month == 'June' %}selected{% endif %}>June</option>
+            <option value="July" {% if data.month == 'July' %}selected{% endif %}>July</option>
+            <option value="August" {% if data.month == 'August' %}selected{% endif %}>August</option>
+            <option value="September" {% if data.month == 'September' %}selected{% endif %}>September</option>
+            <option value="October" {% if data.month == 'October' %}selected{% endif %}>October</option>
+            <option value="November" {% if data.month == 'November' %}selected{% endif %}>November</option>
+            <option value="December" {% if data.month == 'December' %}selected{% endif %}>December</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Year *</label>
+          <input type="number" name="year" class="form-control" required value="{{ data.year }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Base Salary (₹) *</label>
+          <input type="number" name="base_salary" class="form-control" required value="{{ data.base_salary }}" step="0.01">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Bonus (₹)</label>
+          <input type="number" name="bonus" class="form-control" value="{{ data.bonus }}" step="0.01">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Deductions (₹)</label>
+          <input type="number" name="deductions" class="form-control" value="{{ data.deductions }}" step="0.01">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Notes</label>
+          <textarea name="notes" class="form-control" rows="2">{{ data.notes }}</textarea>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm px-4">Update Payroll</button>
+        <a href="{% url 'payroll' %}" class="btn btn-sm btn-action">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

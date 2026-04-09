@@ -1,0 +1,84 @@
+{% extends 'hrpanel/base.html' %}
+{% block page_title %}Payroll{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Payroll Records</h4><div class="sub">Salary records across all branches</div></div>
+  <a href="{% url 'add_payroll' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Payroll</a>
+</div>
+
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search employee..." value="{{ search }}">
+    <select name="month" class="form-select">
+      <option value="">All Months</option>
+      <option value="January" {% if month_filter == 'January' %}selected{% endif %}>January</option>
+      <option value="February" {% if month_filter == 'February' %}selected{% endif %}>February</option>
+      <option value="March" {% if month_filter == 'March' %}selected{% endif %}>March</option>
+      <option value="April" {% if month_filter == 'April' %}selected{% endif %}>April</option>
+      <option value="May" {% if month_filter == 'May' %}selected{% endif %}>May</option>
+      <option value="June" {% if month_filter == 'June' %}selected{% endif %}>June</option>
+      <option value="July" {% if month_filter == 'July' %}selected{% endif %}>July</option>
+      <option value="August" {% if month_filter == 'August' %}selected{% endif %}>August</option>
+      <option value="September" {% if month_filter == 'September' %}selected{% endif %}>September</option>
+      <option value="October" {% if month_filter == 'October' %}selected{% endif %}>October</option>
+      <option value="November" {% if month_filter == 'November' %}selected{% endif %}>November</option>
+      <option value="December" {% if month_filter == 'December' %}selected{% endif %}>December</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'payroll' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Employee</th>
+        <th>Month</th>
+        <th>Year</th>
+        <th>Base Salary</th>
+        <th>Bonus</th>
+        <th>Deductions</th>
+        <th>Net Salary</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">{{ r.employee.user.get_full_name }}</td>
+        <td>{{ r.month }}</td>
+        <td>{{ r.year }}</td>
+        <td>₹{{ r.base_salary|floatformat:0 }}</td>
+        <td style="color:#059669;">₹{{ r.bonus|floatformat:0 }}</td>
+        <td style="color:#dc2626;">₹{{ r.deductions|floatformat:0 }}</td>
+        <td style="font-weight:700; color:#1a56db;">₹{{ r.net_salary|floatformat:0 }}</td>
+        <td style="white-space:nowrap;">
+          <a href="{% url 'edit_payroll' r.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
+          <a href="{% url 'delete_payroll' r.id %}" class="btn btn-sm btn-action" onclick="return confirm('Delete this payroll record?')">
+            <i class="bi bi-trash" style="color:#dc2626"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9">
+        <div class="empty-state">
+          <i class="bi bi-cash-stack"></i>
+          <p>No payroll records found</p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

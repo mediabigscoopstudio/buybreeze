@@ -1,0 +1,126 @@
+{% extends 'hrpanel/base.html' %}
+{% block page_title %}HR Panel{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>HR Panel</h4><div class="sub">Employee management across all branches</div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#eff6ff"><i class="bi bi-people-fill" style="color:#2563eb"></i></div>
+      <div><div class="stat-val">{{ total_employees }}</div><div class="stat-label">Total Employees</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#ecfdf5"><i class="bi bi-check-circle-fill" style="color:#059669"></i></div>
+      <div><div class="stat-val">{{ present_today }}</div><div class="stat-label">Present Today</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fff7ed"><i class="bi bi-calendar-x-fill" style="color:#ea580c"></i></div>
+      <div><div class="stat-val">{{ on_leave_today }}</div><div class="stat-label">On Leave Today</div></div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef2f2"><i class="bi bi-hourglass-split" style="color:#dc2626"></i></div>
+      <div><div class="stat-val">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <a href="{% url 'attendance' %}" class="card text-decoration-none" style="display:block;">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#eff6ff"><i class="bi bi-clock-fill" style="color:#2563eb"></i></div>
+        <div><div style="font-weight:700; font-size:0.9rem;">Attendance</div><div style="font-size:0.78rem; color:#64748b;">View & manage punch records</div></div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{% url 'leaves' %}" class="card text-decoration-none" style="display:block;">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#fff7ed"><i class="bi bi-calendar-check-fill" style="color:#ea580c"></i></div>
+        <div><div style="font-weight:700; font-size:0.9rem;">Leave Management</div><div style="font-size:0.78rem; color:#64748b;">Approve or reject leave requests</div></div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{% url 'payroll' %}" class="card text-decoration-none" style="display:block;">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#ecfdf5"><i class="bi bi-cash-stack" style="color:#059669"></i></div>
+        <div><div style="font-weight:700; font-size:0.9rem;">Payroll</div><div style="font-size:0.78rem; color:#64748b;">Salary records & payslips</div></div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search employee..." value="{{ search }}">
+    <select name="role" class="form-select">
+      <option value="">All Roles</option>
+      <option value="manager" {% if role_filter == 'manager' %}selected{% endif %}>Branch Manager</option>
+      <option value="tl" {% if role_filter == 'tl' %}selected{% endif %}>Team Leader</option>
+      <option value="member" {% if role_filter == 'member' %}selected{% endif %}>Call Member</option>
+      <option value="hr" {% if role_filter == 'hr' %}selected{% endif %}>HR</option>
+      <option value="marketing" {% if role_filter == 'marketing' %}selected{% endif %}>Marketing</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'hr_panel' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr><th>#</th><th>Employee</th><th>Role</th><th>Branch</th><th>Phone</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for e in employees %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">{{ e.user.get_full_name }}</td>
+        <td>
+          <span style="font-size:0.72rem; padding:3px 8px; border-radius:20px; background:#f1f5f9; color:#475569; font-weight:600;">
+            {{ e.get_role_display }}
+          </span>
+        </td>
+        <td>{{ e.branch.name|default:"—" }}</td>
+        <td>{{ e.phone|default:"—" }}</td>
+        <td style="white-space:nowrap;">
+          <a href="{% url 'employee_detail' e.id %}" class="btn btn-sm btn-action me-1" title="View Details">
+            <i class="bi bi-person-lines-fill"></i>
+          </a>
+          <a href="{% url 'leaves' %}?q={{ e.user.get_full_name }}" class="btn btn-sm btn-action me-1" title="Leaves">
+            <i class="bi bi-calendar-check"></i>
+          </a>
+          <a href="{% url 'payroll' %}?q={{ e.user.get_full_name }}" class="btn btn-sm btn-action" title="Payroll">
+            <i class="bi bi-cash"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">
+        <div class="empty-state">
+          <i class="bi bi-people-fill"></i>
+          <p>No employees found</p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

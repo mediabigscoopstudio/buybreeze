@@ -1,0 +1,84 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Edit Follow-Up{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Edit Follow-Up</h4><div class="sub">Update follow-up details</div></div>
+  <a href="{% url 'followups' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:620px;">
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label class="form-label">Lead *</label>
+          <select name="lead" class="form-select" required>
+            <option value="">Select lead</option>
+            {% for l in all_leads %}
+              <option value="{{ l.id }}" {% if data.lead_id == l.id %}selected{% endif %}>
+                {{ l.name }} — {{ l.phone }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Follow-Up Date & Time *</label>
+          <input type="datetime-local" name="followup_at" class="form-control" required
+            value="{{ data.followup_at|date:'Y-m-d\TH:i' }}">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Type *</label>
+          <select name="followup_type" class="form-select" required>
+            <option value="call" {% if data.followup_type == 'call' %}selected{% endif %}>Call</option>
+            <option value="whatsapp" {% if data.followup_type == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
+            <option value="email" {% if data.followup_type == 'email' %}selected{% endif %}>Email</option>
+            <option value="site_visit" {% if data.followup_type == 'site_visit' %}selected{% endif %}>Site Visit</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Status</label>
+          <select name="followup_status" class="form-select">
+            <option value="pending" {% if data.followup_status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="completed" {% if data.followup_status == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="rescheduled" {% if data.followup_status == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
+            <option value="missed" {% if data.followup_status == 'missed' %}selected{% endif %}>Missed</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Assigned To</label>
+          <select name="assigned_to" class="form-select">
+            <option value="">Unassigned</option>
+            {% for m in members %}
+              <option value="{{ m.id }}" {% if data.assigned_to_id == m.id %}selected{% endif %}>
+                {{ m.user.get_full_name }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Branch</label>
+          <select name="branch" class="form-select">
+            <option value="">Select branch</option>
+            {% for b in branches %}
+              <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Notes / Instructions</label>
+          <textarea name="notes" class="form-control" rows="3">{{ data.notes }}</textarea>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-sm px-4">Update Follow-Up</button>
+        <a href="{% url 'followups' %}" class="btn btn-sm btn-action">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

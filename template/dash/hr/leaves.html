@@ -1,0 +1,67 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Leave Management{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div><h4>Leave Management</h4><div class="sub">All leave requests across all branches</div></div>
+  <a href="{% url 'add_leave' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Leave</a>
+</div>
+
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search employee..." value="{{ search }}">
+    <select name="status" class="form-select">
+      <option value="">All Status</option>
+      <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+      <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}<option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'leaves' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr><th>#</th><th>Employee</th><th>Leave Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">{{ r.employee.user.get_full_name }}</td>
+        <td>{{ r.get_leave_type_display }}</td>
+        <td style="font-size:0.82rem;">{{ r.from_date|date:"d M Y" }}</td>
+        <td style="font-size:0.82rem;">{{ r.to_date|date:"d M Y" }}</td>
+        <td style="font-weight:700;">{{ r.total_days }}</td>
+        <td style="font-size:0.78rem; color:#475569; max-width:160px;">{{ r.reason|truncatechars:50 }}</td>
+        <td>
+          <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600;
+            {% if r.leave_status == 'approved' %}background:#ecfdf5;color:#059669;
+            {% elif r.leave_status == 'rejected' %}background:#fef2f2;color:#dc2626;
+            {% else %}background:#fff7ed;color:#ea580c;{% endif %}">
+            {{ r.get_leave_status_display }}
+          </span>
+        </td>
+        <td style="white-space:nowrap;">
+          {% if r.leave_status == 'pending' %}
+            <a href="{% url 'approve_leave' r.id %}" class="btn btn-sm btn-action me-1" title="Approve" style="color:#059669;"><i class="bi bi-check-lg"></i></a>
+            <a href="{% url 'reject_leave' r.id %}" class="btn btn-sm btn-action me-1" title="Reject" style="color:#dc2626;"><i class="bi bi-x-lg"></i></a>
+          {% endif %}
+          <a href="{% url 'edit_leave' r.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
+          <a href="{% url 'delete_leave' r.id %}" class="btn btn-sm btn-action" onclick="return confirm('Delete?')"><i class="bi bi-trash" style="color:#dc2626"></i></a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9"><div class="empty-state"><i class="bi bi-calendar-x"></i><p>No leave requests found</p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

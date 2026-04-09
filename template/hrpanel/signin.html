@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoreCRM — Login</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      min-height: 100vh;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+    .login-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .brand { margin-bottom: 28px; }
+    .brand h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+    .brand p { font-size: 0.8rem; color: #64748b; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 1px; }
+    .form-label { font-size: 0.82rem; font-weight: 600; color: #1e293b; margin-bottom: 5px; }
+    .form-control {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 13px;
+      font-size: 0.88rem;
+      color: #1e293b;
+    }
+    .form-control:focus {
+      border-color: #1a56db;
+      box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+    }
+    .btn-login {
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      width: 100%;
+      margin-top: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-login:hover { background: #1344b5; }
+    .alert { font-size: 0.82rem; border-radius: 8px; }
+    .divider { font-size: 0.7rem; color: #94a3b8; text-align: center; margin: 20px 0 0; }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="brand">
+      <h1>CoreCRM</h1>
+      <p>HR Panel Portal</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-danger">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'login_view' %}">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
+      </div>
+      <div class="mb-4">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn-login">Sign In</button>
+    </form>
+
+    <div class="divider">CoreCRM · Real Estate CRM · BigScoop Studio</div>
+  </div>
+</body>
+</html>

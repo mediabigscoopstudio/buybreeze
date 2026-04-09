@@ -1,0 +1,141 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Lead Detail{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h4>{{ lead.name }}</h4>
+    <div class="sub">Lead Detail — ID #{{ lead.id }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'edit_lead' lead.id %}" class="btn btn-primary btn-sm"><i class="bi bi-pencil me-1"></i> Edit</a>
+    <a href="{% url 'leads' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+
+  <!-- LEAD INFO -->
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="form-section mb-3">Contact</div>
+        <div style="font-size:0.84rem; display:flex; flex-direction:column; gap:10px;">
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Name</span><strong>{{ lead.name }}</strong></div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Phone</span>{{ lead.phone }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Email</span>{{ lead.email|default:"—" }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Location</span>{{ lead.location|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS -->
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="form-section mb-3">Status</div>
+        <div style="font-size:0.84rem; display:flex; flex-direction:column; gap:10px;">
+          <div>
+            <span style="color:#94a3b8; font-size:0.75rem; display:block;">Temperature</span>
+            {% if lead.temperature == 'hot' %}<span class="badge-hot">🔥 Hot</span>
+            {% elif lead.temperature == 'warm' %}<span class="badge-warm">🌤 Warm</span>
+            {% else %}<span class="badge-cold">❄️ Cold</span>{% endif %}
+          </div>
+          <div>
+            <span style="color:#94a3b8; font-size:0.75rem; display:block;">Stage</span>
+            <span class="badge-stage {{ lead.stage }}">{{ lead.get_stage_display }}</span>
+          </div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Source</span>{{ lead.get_source_display }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Assigned To</span>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Branch</span>{{ lead.branch.name|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROPERTY -->
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="form-section mb-3">Property Interest</div>
+        <div style="font-size:0.84rem; display:flex; flex-direction:column; gap:10px;">
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Type</span>{{ lead.get_property_type_display|default:"—" }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">BHK</span>{{ lead.get_bhk_preference_display|default:"—" }}</div>
+          <div>
+            <span style="color:#94a3b8; font-size:0.75rem; display:block;">Budget</span>
+            {% if lead.budget_min or lead.budget_max %}
+              ₹{{ lead.budget_min|default:"?" }} — ₹{{ lead.budget_max|default:"?" }}
+            {% else %}—{% endif %}
+          </div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Purpose</span>{{ lead.get_purpose_display|default:"—" }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Timeline</span>{{ lead.get_timeline_display|default:"—" }}</div>
+          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Readiness</span>{{ lead.get_readiness_display|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CALL HISTORY -->
+<div class="table-card mb-3">
+  <div class="table-header">
+    <h6><i class="bi bi-telephone-fill me-2" style="color:#16a34a"></i>Call History ({{ calls.count }})</h6>
+  </div>
+  <table class="crm-table">
+    <thead>
+      <tr><th>#</th><th>Type</th><th>Outcome</th><th>Duration</th><th>Notes</th><th>Next Follow-up</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for c in calls %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td>{{ c.get_call_type_display }}</td>
+        <td>{{ c.get_call_outcome_display }}</td>
+        <td>{{ c.duration_display }}</td>
+        <td style="max-width:200px; font-size:0.78rem; color:#475569;">{{ c.call_notes|default:"—"|truncatechars:60 }}</td>
+        <td>{{ c.next_followup_at|date:"d M Y g:i A"|default:"—" }}</td>
+        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ c.created_at|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7"><div class="empty-state"><p>No call logs yet</p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- FOLLOW-UPS -->
+<div class="table-card mb-3">
+  <div class="table-header">
+    <h6><i class="bi bi-calendar-check-fill me-2" style="color:#059669"></i>Follow-Ups ({{ followups.count }})</h6>
+  </div>
+  <table class="crm-table">
+    <thead>
+      <tr><th>#</th><th>Type</th><th>Scheduled</th><th>Status</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      {% for f in followups %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td>{{ f.get_followup_type_display }}</td>
+        <td style="white-space:nowrap;">{{ f.followup_at|date:"d M Y g:i A" }}</td>
+        <td>
+          <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600;
+            {% if f.followup_status == 'pending' %}background:#fff7ed;color:#ea580c;
+            {% elif f.followup_status == 'completed' %}background:#ecfdf5;color:#059669;
+            {% elif f.followup_status == 'missed' %}background:#fef2f2;color:#dc2626;
+            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
+            {{ f.get_followup_status_display }}
+          </span>
+        </td>
+        <td style="font-size:0.78rem; color:#475569;">{{ f.notes|default:"—"|truncatechars:60 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5"><div class="empty-state"><p>No follow-ups yet</p></div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

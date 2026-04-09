@@ -1,0 +1,105 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Users{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h4>User Management</h4>
+    <div class="sub">All roles across all branches</div>
+  </div>
+  <a href="{% url 'add_user' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i> Add User
+  </a>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+    <input type="text" name="q" class="form-control" placeholder="Search name..." value="{{ request.GET.q }}">
+    <select name="role" class="form-select">
+      <option value="">All Roles</option>
+      <option value="manager" {% if role_filter == 'manager' %}selected{% endif %}>Branch Manager</option>
+      <option value="tl" {% if role_filter == 'tl' %}selected{% endif %}>Team Leader</option>
+      <option value="member" {% if role_filter == 'member' %}selected{% endif %}>Call Member</option>
+      <option value="hr" {% if role_filter == 'hr' %}selected{% endif %}>HR Panel</option>
+      <option value="marketing" {% if role_filter == 'marketing' %}selected{% endif %}>Marketing</option>
+    </select>
+    <select name="branch" class="form-select">
+      <option value="">All Branches</option>
+      {% for b in branches %}
+        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+    <a href="{% url 'users' %}" class="btn btn-sm btn-action">Clear</a>
+  </form>
+</div>
+
+<div class="table-card">
+  <table class="crm-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Branch</th>
+        <th>Phone</th>
+        <th>Reports To</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
+        <td style="font-weight:600;">{{ u.user.get_full_name|default:u.user.username }}</td>
+        <td style="color:#64748b; font-size:0.8rem;">{{ u.user.username }}</td>
+        <td>
+          <span style="font-size:0.72rem; padding:3px 8px; border-radius:20px; font-weight:600;
+            {% if u.role == 'manager' %}background:#faf5ff;color:#7c3aed;
+            {% elif u.role == 'tl' %}background:#fff7ed;color:#ea580c;
+            {% elif u.role == 'member' %}background:#eff6ff;color:#2563eb;
+            {% elif u.role == 'hr' %}background:#ecfdf5;color:#059669;
+            {% elif u.role == 'marketing' %}background:#fef2f2;color:#dc2626;
+            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
+            {{ u.get_role_display }}
+          </span>
+        </td>
+        <td>{{ u.branch.name|default:"—" }}</td>
+        <td>{{ u.phone|default:"—" }}</td>
+        <td>{{ u.reports_to.user.get_full_name|default:"—" }}</td>
+        <td>
+          {% if u.status == 'Enabled' %}
+            <span class="badge-enabled">Active</span>
+          {% else %}
+            <span class="badge-disabled">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'edit_user' u.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
+          {% if u.status == 'Enabled' %}
+            <a href="{% url 'disable_user' u.id %}" class="btn btn-sm btn-action me-1" title="Disable"><i class="bi bi-pause-circle"></i></a>
+          {% else %}
+            <a href="{% url 'enable_user' u.id %}" class="btn btn-sm btn-action me-1" title="Enable"><i class="bi bi-play-circle"></i></a>
+          {% endif %}
+          <a href="{% url 'delete_user' u.id %}" class="btn btn-sm btn-action"
+             onclick="return confirm('Delete this user permanently?')">
+            <i class="bi bi-trash" style="color:#dc2626"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9">
+        <div class="empty-state">
+          <i class="bi bi-people-fill"></i>
+          <p>No users found. <a href="{% url 'add_user' %}">Add first user</a></p>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
