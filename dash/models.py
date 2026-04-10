@@ -147,6 +147,14 @@ class Lead(models.Model):
     assigned_to      = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
                                          related_name='assigned_leads')
     branch           = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    # Assignment chain
+    assigned_to      = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
+                                     related_name='assigned_leads')
+    # ADD THESE TWO NEW FIELDS:
+    assigned_to_manager = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='manager_leads')
+    assigned_to_tl      = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
+                                        related_name='tl_leads')
 
     # Meta
     notes            = models.TextField(blank=True, null=True)

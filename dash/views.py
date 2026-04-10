@@ -283,8 +283,9 @@ def disable_user(request, id):
 # ============================================================
 @user_passes_test(superadmin_required, login_url='/login/')
 def leads(request):
-    all_leads     = Lead.objects.select_related('branch', 'assigned_to__user').order_by('-created_at')
+    all_leads     = Lead.objects.select_related('branch', 'assigned_to__user', 'assigned_to_manager__user', 'assigned_to_tl__user').order_by('-created_at')
     branches      = Branch.objects.filter(status='Enabled')
+    managers      = UserProfile.objects.filter(role='manager', status='Enabled').select_related('user')
     stage_filter  = request.GET.get('stage', '')
     temp_filter   = request.GET.get('temperature', '')
     source_filter = request.GET.get('source', '')
@@ -305,6 +306,7 @@ def leads(request):
     return render(request, 'dash/leads/leads.html', {
         'leads': all_leads,
         'branches': branches,
+        'managers': managers,
         'stage_filter': stage_filter,
         'temp_filter': temp_filter,
         'source_filter': source_filter,
@@ -416,6 +418,39 @@ def view_lead(request, id):
     return render(request, 'dash/leads/view_lead.html', {
         'lead': item, 'calls': calls, 'followups': followups, 'wrapups': wrapups
     })
+
+
+# ============================================================
+# ASSIGN LEAD TO MANAGER (Super Admin)
+# ============================================================
+@user_passes_test(superadmin_required, login_url='/login/')
+def assign_lead_to_manager(request, lead_id):
+    if request.method == 'POST':
+        lead       = get_object_or_404(Lead, id=lead_id)
+        manager_id = request.POST.get('manager_id')
+        if manager_id:
+            manager = get_object_or_404(UserProfile, id=manager_id, role='manager')
+            lead.assigned_to_manager = manager
+            # Clear downstream assignments when reassigning
+            lead.assigned_to_tl = None
+            lead.assigned_to    = None
+            lead.save()
+            messages.success(request, f'Lead "{lead.name}" assigned to Manager {manager.user.get_full_name()}.')
+        else:
+            messages.error(request, 'Please select a Manager.')
+    return redirect('leads')
+
+
+@user_passes_test(superadmin_required, login_url='/login/')
+def unassign_lead_from_manager(request, lead_id):
+    if request.method == 'POST':
+        lead = get_object_or_404(Lead, id=lead_id)
+        lead.assigned_to_manager = None
+        lead.assigned_to_tl      = None
+        lead.assigned_to         = None
+        lead.save()
+        messages.success(request, f'Lead "{lead.name}" unassigned.')
+    return redirect('leads')
 
 
 # ============================================================

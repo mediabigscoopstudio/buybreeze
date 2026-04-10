@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -63,15 +63,17 @@ def index(request):
         calls_count=Count('call_logs'),
     )
 
-    # Leads assigned to this TL
+    # Only leads assigned TO this TL by Manager
     leads = Lead.objects.filter(
-        assigned_to=tl_profile
-    ).select_related('branch').order_by('-created_at')
+        assigned_to_tl=tl_profile
+    ).select_related('assigned_to__user', 'branch').order_by('-created_at')
 
     total_leads      = leads.count()
     hot_leads        = leads.filter(temperature='hot').count()
     closed_leads     = leads.filter(stage='closed').count()
     total_employees  = employees.count()
+    assigned_leads   = leads.filter(assigned_to__isnull=False).count()
+    unassigned_leads = leads.filter(assigned_to__isnull=True).count()
 
     return render(request, 'teamleader/index.html', {
         'employees': employees,
@@ -80,4 +82,39 @@ def index(request):
         'hot_leads': hot_leads,
         'closed_leads': closed_leads,
         'total_employees': total_employees,
+        'assigned_leads': assigned_leads,
+        'unassigned_leads': unassigned_leads,
     })
+
+
+# ============================================================
+# ASSIGN LEAD TO EMPLOYEE (TL)
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def assign_lead(request, lead_id):
+    if request.method == 'POST':
+        tl_profile = request.user.profile
+        lead = get_object_or_404(Lead, id=lead_id, assigned_to_tl=tl_profile)
+        emp_id = request.POST.get('emp_id')
+        if emp_id:
+            emp_profile = get_object_or_404(UserProfile, id=emp_id, reports_to=tl_profile)
+            lead.assigned_to = emp_profile
+            lead.save()
+            messages.success(request, f'Lead "{lead.name}" assigned to {emp_profile.user.get_full_name()}.')
+        else:
+            messages.error(request, 'Please select an Employee.')
+    return redirect('index')
+
+
+# ============================================================
+# UNASSIGN LEAD FROM EMPLOYEE (TL)
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def unassign_lead(request, lead_id):
+    if request.method == 'POST':
+        tl_profile = request.user.profile
+        lead = get_object_or_404(Lead, id=lead_id, assigned_to_tl=tl_profile)
+        lead.assigned_to = None
+        lead.save()
+        messages.success(request, f'Lead "{lead.name}" unassigned from employee.')
+    return redirect('index')

@@ -51,26 +51,27 @@ def logout_view(request):
 # ============================================================
 @user_passes_test(manager_required, login_url='/login/')
 def index(request):
-    # Get manager's branch
     manager_profile = request.user.profile
     branch = manager_profile.branch
 
-    # Team leaders under this branch
+    # Team leaders under this manager's branch
     team_leaders = UserProfile.objects.filter(
         role='tl', status='Enabled', branch=branch
     ).select_related('user', 'branch').annotate(
-        assigned_leads_count=Count('assigned_leads'),
-        hot_leads_count=Count('assigned_leads', filter=Q(assigned_leads__temperature='hot')),
-        closed_leads_count=Count('assigned_leads', filter=Q(assigned_leads__stage='closed')),
+        assigned_leads_count=Count('tl_leads'),
+        hot_leads_count=Count('tl_leads', filter=Q(tl_leads__temperature='hot')),
+        closed_leads_count=Count('tl_leads', filter=Q(tl_leads__stage='closed')),
     )
 
-    # Leads in this branch
-    leads = Lead.objects.filter(branch=branch).select_related('assigned_to__user').order_by('-created_at')
+    # Only leads assigned TO this manager by Super Admin
+    leads = Lead.objects.filter(
+        assigned_to_manager=manager_profile
+    ).select_related('assigned_to_tl__user', 'branch').order_by('-created_at')
 
-    total_leads     = leads.count()
-    assigned_leads  = leads.filter(assigned_to__isnull=False).count()
-    unassigned_leads = leads.filter(assigned_to__isnull=True).count()
-    total_tls       = team_leaders.count()
+    total_leads      = leads.count()
+    assigned_leads   = leads.filter(assigned_to_tl__isnull=False).count()
+    unassigned_leads = leads.filter(assigned_to_tl__isnull=True).count()
+    total_tls        = team_leaders.count()
 
     return render(request, 'manager/index.html', {
         'team_leaders': team_leaders,
@@ -83,31 +84,36 @@ def index(request):
 
 
 # ============================================================
-# ASSIGN LEAD TO TL
+# ASSIGN LEAD TO TL (Manager)
 # ============================================================
 @user_passes_test(manager_required, login_url='/login/')
 def assign_lead(request, lead_id):
     if request.method == 'POST':
-        lead   = get_object_or_404(Lead, id=lead_id)
-        tl_id  = request.POST.get('tl_id')
+        manager_profile = request.user.profile
+        lead = get_object_or_404(Lead, id=lead_id, assigned_to_manager=manager_profile)
+        tl_id = request.POST.get('tl_id')
         if tl_id:
             tl_profile = get_object_or_404(UserProfile, id=tl_id, role='tl')
-            lead.assigned_to = tl_profile
+            lead.assigned_to_tl = tl_profile
+            # Clear employee assignment when reassigning to new TL
+            lead.assigned_to = None
             lead.save()
-            messages.success(request, f'Lead "{lead.name}" assigned to {tl_profile.user.get_full_name()}.')
+            messages.success(request, f'Lead "{lead.name}" assigned to TL {tl_profile.user.get_full_name()}.')
         else:
             messages.error(request, 'Please select a Team Leader.')
     return redirect('index')
 
 
 # ============================================================
-# UNASSIGN LEAD
+# UNASSIGN LEAD FROM TL (Manager)
 # ============================================================
 @user_passes_test(manager_required, login_url='/login/')
 def unassign_lead(request, lead_id):
     if request.method == 'POST':
-        lead = get_object_or_404(Lead, id=lead_id)
-        lead.assigned_to = None
+        manager_profile = request.user.profile
+        lead = get_object_or_404(Lead, id=lead_id, assigned_to_manager=manager_profile)
+        lead.assigned_to_tl = None
+        lead.assigned_to    = None
         lead.save()
-        messages.success(request, f'Lead "{lead.name}" unassigned.')
+        messages.success(request, f'Lead "{lead.name}" unassigned from TL.')
     return redirect('index')

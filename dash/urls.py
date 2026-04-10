@@ -2,11 +2,8 @@ from django.urls import path
 from dash import views
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib import admin
 
 urlpatterns = [
-    #backdoor access
-    path('admin/', admin.site.urls),
     # Auth
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),
@@ -62,6 +59,10 @@ urlpatterns = [
     path('view_lead/<int:id>', views.view_lead, name='view_lead'),
     path('leads/bulk-upload', views.bulk_upload_leads, name='bulk_upload_leads'),
     path('leads/download-template', views.download_lead_template, name='download_lead_template'),
+
+    # Lead Assignment (Super Admin → Manager)
+    path('leads/assign_to_manager/<int:lead_id>/', views.assign_lead_to_manager, name='assign_lead_to_manager'),
+    path('leads/unassign_from_manager/<int:lead_id>/', views.unassign_lead_from_manager, name='unassign_lead_from_manager'),
 
     # Calls
     path('calls', views.calls, name='calls'),
