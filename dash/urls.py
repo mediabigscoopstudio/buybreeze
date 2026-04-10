@@ -2,12 +2,15 @@ from django.urls import path
 from dash import views
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 
 urlpatterns = [
+    #backdoor access
+    path('admin/', admin.site.urls),
     # Auth
     path('', views.index, name='index'),
-    path('login', views.login_view, name='login_view'),
-    path('logout', views.logout_view, name='logout_view'),
+    path('login/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
 
     # Branch
     path('branches', views.branch, name='branch'),

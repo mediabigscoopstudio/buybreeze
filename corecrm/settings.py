@@ -23,11 +23,6 @@ INSTALLED_APPS = [
     'dash',
     'hrpanel',
     
-    # New Subdomain Apps
-    'branch_manager',
-    'team_leader',
-    'employee_dash',
-    
     # Third-party
     'django_hosts',
 ]
@@ -38,10 +33,7 @@ INSTALLED_APPS = [
 ROOT_HOSTCONF = 'corecrm.hosts'
 DEFAULT_HOST = 'dash'
 
-# Critical for multi-subdomain login persistence
-SESSION_COOKIE_DOMAIN = '.localhost' 
-# Add this line:
-LOGIN_URL = 'login_view'
+
 
 MIDDLEWARE = [
     'django_hosts.middleware.HostsRequestMiddleware',

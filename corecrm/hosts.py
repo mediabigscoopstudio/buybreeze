@@ -8,13 +8,7 @@ host_patterns = patterns(
     
     # HR Panel Subdomain
     host(r'hrpanel', 'hrpanel.urls', name='hrpanel'),  
-    
-    # Branch Manager Subdomain
-    host(r'manager', 'branch_manager.urls', name='manager'),
-    
-    # Team Leader Subdomain
-    host(r'tl', 'team_leader.urls', name='tl'),
-    
-    # Employee Subdomain
-    host(r'employee', 'employee_dash.urls', name='employee'),
+    host(r'employee', 'employee.urls', name='employee'),  
+    host(r'manager', 'manager.urls', name='manager'),  
+    host(r'teamleader', 'teamleader.urls', name='teamleader'),  
 )

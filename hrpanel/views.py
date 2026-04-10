@@ -19,7 +19,7 @@ from dash.models import (
 # ============================================================
 # AUTH GUARD
 # ============================================================
-def superadmin_required(user):
+def hr_required(user):
     return (
         user.is_authenticated and 
         hasattr(user, 'profile') and 
@@ -32,16 +32,28 @@ def superadmin_required(user):
 # ============================================================
 def login_view(request):
     if request.user.is_authenticated:
+        # If already logged in, send them to the index
         return redirect('index')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        
         user = authenticate(request, username=username, password=password)
-        if user is not None and user.profile.role == 'hr':
-            login(request, user)
-            return redirect('index')
+        
+        if user is not None:
+            try:
+                # Strictly verify the role is 'hr'
+                if user.profile.role == 'hr':
+                    login(request, user)
+                    return redirect('/')
+                else:
+                    messages.error(request, 'Access Denied: This panel is for HR only.')
+            except UserProfile.DoesNotExist:
+                messages.error(request, 'Profile configuration missing. Please contact Admin.')
         else:
-            messages.error(request, 'Invalid credentials or insufficient permissions.')
+            messages.error(request, 'Invalid username or password.')
+
     return render(request, 'hrpanel/signin.html')
 
 
@@ -53,17 +65,56 @@ def logout_view(request):
 # ============================================================
 # DASHBOARD HOME
 # ============================================================
+@user_passes_test(hr_required, login_url='/login')
+def index(request):
+    total_leads    = Lead.objects.count()
+    hot_leads      = Lead.objects.filter(temperature='hot').count()
+    total_calls    = CallLog.objects.count()
+    total_branches = Branch.objects.filter(status='Enabled').count()
+    total_users    = UserProfile.objects.filter(status='Enabled').count()
+    pending_followups = FollowUp.objects.filter(followup_status='pending').count()
+
+    # Stage breakdown
+    stage_data = Lead.objects.values('stage').annotate(count=Count('id'))
+
+    # Branch-wise leads
+    branch_leads = Branch.objects.annotate(lead_count=Count('lead')).filter(status='Enabled')
+
+    # Recent leads
+    recent_leads = Lead.objects.order_by('-created_at')[:8]
+
+    # Upcoming follow-ups (next 24 hrs)
+    upcoming_followups = FollowUp.objects.filter(
+        followup_status='pending',
+        followup_at__gte=timezone.now(),
+        followup_at__lte=timezone.now() + timedelta(hours=24)
+    ).order_by('followup_at')[:5]
+
+    context = {
+        'total_leads': total_leads,
+        'hot_leads': hot_leads,
+        'total_calls': total_calls,
+        'total_branches': total_branches,
+        'total_users': total_users,
+        'pending_followups': pending_followups,
+        'stage_data': stage_data,
+        'branch_leads': branch_leads,
+        'recent_leads': recent_leads,
+        'upcoming_followups': upcoming_followups,
+    }
+    return render(request, 'hrpanel/index.html', context)
+
 
 # ============================================================
 # BRANCH MANAGEMENT
 # ============================================================
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def branch(request):
     branches = Branch.objects.all().order_by('-id')
     return render(request, 'hrpanel/branch/branches.html', {'branches': branches})
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def add_branch(request):
     if request.method == 'POST':
         Branch.objects.create(
@@ -81,7 +132,7 @@ def add_branch(request):
     return render(request, 'hrpanel/branch/add_branch.html')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def edit_branch(request, id):
     item = get_object_or_404(Branch, id=id)
     if request.method == 'POST':
@@ -99,7 +150,7 @@ def edit_branch(request, id):
     return render(request, 'hrpanel/branch/edit_branch.html', {'data': item})
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def delete_branch(request, id):
     item = get_object_or_404(Branch, id=id)
     item.delete()
@@ -107,7 +158,7 @@ def delete_branch(request, id):
     return redirect('branch')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def enable_branch(request, id):
     item = get_object_or_404(Branch, id=id)
     item.status = 'Enabled'
@@ -115,7 +166,7 @@ def enable_branch(request, id):
     return redirect('branch')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def disable_branch(request, id):
     item = get_object_or_404(Branch, id=id)
     item.status = 'Disabled'
@@ -126,7 +177,7 @@ def disable_branch(request, id):
 # ============================================================
 # USER MANAGEMENT
 # ============================================================
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def users(request):
     all_users = UserProfile.objects.select_related('user', 'branch').order_by('-id')
     branches  = Branch.objects.filter(status='Enabled')
@@ -144,7 +195,7 @@ def users(request):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def add_user(request):
     branches = Branch.objects.filter(status='Enabled')
     all_profiles = UserProfile.objects.select_related('user').filter(status='Enabled')
@@ -182,7 +233,7 @@ def add_user(request):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def edit_user(request, id):
     profile  = get_object_or_404(UserProfile, id=id)
     branches = Branch.objects.filter(status='Enabled')
@@ -208,7 +259,7 @@ def edit_user(request, id):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def delete_user(request, id):
     profile = get_object_or_404(UserProfile, id=id)
     profile.user.delete()
@@ -216,7 +267,7 @@ def delete_user(request, id):
     return redirect('users')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def enable_user(request, id):
     item = get_object_or_404(UserProfile, id=id)
     item.status = 'Enabled'
@@ -224,7 +275,7 @@ def enable_user(request, id):
     return redirect('users')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def disable_user(request, id):
     item = get_object_or_404(UserProfile, id=id)
     item.status = 'Disabled'
@@ -234,7 +285,7 @@ def disable_user(request, id):
 # ============================================================
 # SETTINGS
 # ============================================================
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def settings_view(request):
     setting_keys = ['wrapup_window_minutes', 'lead_auto_assign', 'whatsapp_provider']
     settings_data = {}
@@ -255,7 +306,7 @@ def settings_view(request):
 # ============================================================
 from dash.models import Attendance, LeaveRequest, Payroll
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def hr_panel(request):
     branches  = Branch.objects.filter(status='Enabled')
     employees = UserProfile.objects.filter(status='Enabled').select_related('user', 'branch')
@@ -296,7 +347,7 @@ def hr_panel(request):
 
 
 # --- ATTENDANCE ---
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def attendance(request):
     branches  = Branch.objects.filter(status='Enabled')
     records   = Attendance.objects.select_related('employee__user', 'branch').order_by('-date', '-created_at')
@@ -328,7 +379,7 @@ def attendance(request):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def add_attendance(request):
     employees = UserProfile.objects.filter(status='Enabled').select_related('user')
     branches  = Branch.objects.filter(status='Enabled')
@@ -351,7 +402,7 @@ def add_attendance(request):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def edit_attendance(request, id):
     record    = get_object_or_404(Attendance, id=id)
     employees = UserProfile.objects.filter(status='Enabled').select_related('user')
@@ -374,7 +425,7 @@ def edit_attendance(request, id):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def delete_attendance(request, id):
     get_object_or_404(Attendance, id=id).delete()
     messages.success(request, 'Record deleted.')
@@ -382,7 +433,7 @@ def delete_attendance(request, id):
 
 
 # --- LEAVE ---
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def leaves(request):
     branches  = Branch.objects.filter(status='Enabled')
     records   = LeaveRequest.objects.select_related('employee__user', 'approved_by__user').order_by('-created_at')
@@ -408,7 +459,7 @@ def leaves(request):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def add_leave(request):
     employees = UserProfile.objects.filter(status='Enabled').select_related('user')
     if request.method == 'POST':
@@ -425,7 +476,7 @@ def add_leave(request):
     return render(request, 'hrpanel/hr/add_leave.html', {'employees': employees})
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def edit_leave(request, id):
     record    = get_object_or_404(LeaveRequest, id=id)
     employees = UserProfile.objects.filter(status='Enabled').select_related('user')
@@ -447,14 +498,14 @@ def edit_leave(request, id):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def delete_leave(request, id):
     get_object_or_404(LeaveRequest, id=id).delete()
     messages.success(request, 'Leave request deleted.')
     return redirect('leaves')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def approve_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'approved'
@@ -464,7 +515,7 @@ def approve_leave(request, id):
     return redirect('leaves')
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def reject_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'rejected'
@@ -475,7 +526,7 @@ def reject_leave(request, id):
 
 
 # --- PAYROLL ---
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def payroll(request):
     branches  = Branch.objects.filter(status='Enabled')
     records   = Payroll.objects.select_related('employee__user').order_by('-year', '-created_at')
@@ -501,7 +552,7 @@ def payroll(request):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def add_payroll(request):
     employees = UserProfile.objects.filter(status='Enabled').select_related('user')
     if request.method == 'POST':
@@ -523,7 +574,7 @@ def add_payroll(request):
     return render(request, 'hrpanel/hr/add_payroll.html', {'employees': employees})
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def edit_payroll(request, id):
     record    = get_object_or_404(Payroll, id=id)
     employees = UserProfile.objects.filter(status='Enabled').select_related('user')
@@ -547,7 +598,7 @@ def edit_payroll(request, id):
     })
 
 
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def delete_payroll(request, id):
     get_object_or_404(Payroll, id=id).delete()
     messages.success(request, 'Payroll record deleted.')
@@ -556,7 +607,7 @@ def delete_payroll(request, id):
 # ============================================================
 # EMPLOYEE DETAIL — Attendance, Leave, Payroll in one page
 # ============================================================
-@user_passes_test(superadmin_required, login_url='/login')
+@user_passes_test(hr_required, login_url='/login')
 def employee_detail(request, id):
     employee     = get_object_or_404(UserProfile, id=id)
     branches     = Branch.objects.filter(status='Enabled')
