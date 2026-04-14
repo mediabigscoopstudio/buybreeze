@@ -51,7 +51,7 @@
             <option value="">Select role</option>
             <option value="manager">Branch Manager</option>
             <option value="tl">Team Leader</option>
-            <option value="member">Call Team Member</option>
+            <option value="employee">Call Team Member</option>
             <option value="hr">HR Panel</option>
             <option value="marketing">Marketing Admin</option>
           </select>
@@ -70,7 +70,10 @@
           <select name="reports_to" class="form-select">
             <option value="">None</option>
             {% for p in all_profiles %}
-              <option value="{{ p.id }}">{{ p.user.get_full_name }} ({{ p.get_role_display }})</option>
+              <option value="{{ p.id }}" {% if data.reports_to_id == p.id %}selected{% endif %}>
+              {{ p.user.get_full_name|default:p.user.username }} 
+              ({{ p.get_role_display }} | {{ p.branch.name|default:"No Branch" }})
+              </option>
             {% endfor %}
           </select>
         </div>

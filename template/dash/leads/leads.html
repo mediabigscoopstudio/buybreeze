@@ -1,123 +1,314 @@
 {% extends 'dash/base.html' %}
 {% block page_title %}Leads{% endblock %}
+
 {% block content %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1600px;">
 
-<div class="page-header">
-  <div>
-    <h4>Lead Management</h4>
-    <div class="sub">All leads across all branches</div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'bulk_upload_leads' %}" class="btn btn-sm btn-action">
-      <i class="bi bi-upload me-1"></i> Bulk Upload
-    </a>
-    <a href="{% url 'add_lead' %}" class="btn btn-primary btn-sm">
-      <i class="bi bi-plus-lg me-1"></i> Add Lead
-    </a>
-  </div>
-</div>
+    <!-- ACTION -->
+    <div class="d-flex justify-content-end mb-4">
+        <a href="/add_lead" class="btn btn-dark fw-bold px-4 rounded-3 shadow-sm">
+            + Add New Lead
+        </a>
+    </div>
 
-<!-- FILTERS -->
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <input type="text" name="q" class="form-control" placeholder="Search name / phone..." value="{{ search }}">
-    <select name="temperature" class="form-select">
-      <option value="">All Temps</option>
-      <option value="hot" {% if temp_filter == 'hot' %}selected{% endif %}>🔥 Hot</option>
-      <option value="warm" {% if temp_filter == 'warm' %}selected{% endif %}>🌤 Warm</option>
-      <option value="cold" {% if temp_filter == 'cold' %}selected{% endif %}>❄️ Cold</option>
-    </select>
-    <select name="stage" class="form-select">
-      <option value="">All Stages</option>
-      <option value="new" {% if stage_filter == 'new' %}selected{% endif %}>New</option>
-      <option value="contacted" {% if stage_filter == 'contacted' %}selected{% endif %}>Contacted</option>
-      <option value="interested" {% if stage_filter == 'interested' %}selected{% endif %}>Interested</option>
-      <option value="site_visit" {% if stage_filter == 'site_visit' %}selected{% endif %}>Site Visit</option>
-      <option value="negotiation" {% if stage_filter == 'negotiation' %}selected{% endif %}>Negotiation</option>
-      <option value="closed" {% if stage_filter == 'closed' %}selected{% endif %}>Closed</option>
-      <option value="lost" {% if stage_filter == 'lost' %}selected{% endif %}>Lost</option>
-    </select>
-    <select name="source" class="form-select">
-      <option value="">All Sources</option>
-      <option value="meta" {% if source_filter == 'meta' %}selected{% endif %}>Meta Ads</option>
-      <option value="google" {% if source_filter == 'google' %}selected{% endif %}>Google Ads</option>
-      <option value="website" {% if source_filter == 'website' %}selected{% endif %}>Website</option>
-      <option value="referral" {% if source_filter == 'referral' %}selected{% endif %}>Referral</option>
-      <option value="walkin" {% if source_filter == 'walkin' %}selected{% endif %}>Walk-in</option>
-      <option value="other" {% if source_filter == 'other' %}selected{% endif %}>Other</option>
-    </select>
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'leads' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
-
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Source</th>
-        <th>Temp</th>
-        <th>Stage</th>
-        <th>Property</th>
-        <th>Branch</th>
-        <th>Assigned To</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for lead in leads %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td>
-          <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color:#1e293b; text-decoration:none;">
-            {{ lead.name }}
-          </a>
-        </td>
-        <td style="color:#475569;">{{ lead.phone }}</td>
-        <td style="font-size:0.78rem;">{{ lead.get_source_display }}</td>
-        <td>
-          {% if lead.temperature == 'hot' %}<span class="badge-hot">Hot</span>
-          {% elif lead.temperature == 'warm' %}<span class="badge-warm">Warm</span>
-          {% else %}<span class="badge-cold">Cold</span>{% endif %}
-        </td>
-        <td><span class="badge-stage {{ lead.stage }}">{{ lead.get_stage_display }}</span></td>
-        <td style="font-size:0.78rem;">{{ lead.get_property_type_display|default:"—" }}</td>
-        <td style="font-size:0.78rem;">{{ lead.branch.name|default:"—" }}</td>
-        <td style="font-size:0.78rem;">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
-        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ lead.created_at|date:"d M Y" }}</td>
-        <td style="white-space:nowrap;">
-          <a href="{% url 'view_lead' lead.id %}" class="btn btn-sm btn-action me-1" title="View">
-            <i class="bi bi-eye"></i>
-          </a>
-          <a href="{% url 'edit_lead' lead.id %}" class="btn btn-sm btn-action me-1" title="Edit">
-            <i class="bi bi-pencil"></i>
-          </a>
-          <a href="{% url 'delete_lead' lead.id %}" class="btn btn-sm btn-action"
-             onclick="return confirm('Delete this lead?')" title="Delete">
-            <i class="bi bi-trash" style="color:#dc2626"></i>
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="11">
-        <div class="empty-state">
-          <i class="bi bi-person-lines-fill"></i>
-          <p>No leads found. <a href="{% url 'add_lead' %}">Add your first lead</a></p>
+    <!-- KPI ROW -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
+                <h3 class="fw-bold mb-1">{{ total_leads }}</h3>
+                <span class="text-muted small fw-semibold text-uppercase">Total Leads</span>
+            </div>
         </div>
-      </td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
+                <h3 class="fw-bold text-danger mb-1">{{ hot_leads }}</h3>
+                <span class="text-muted small fw-semibold text-uppercase">Hot</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
+                <h3 class="fw-bold text-warning mb-1">{{ pending_followups }}</h3>
+                <span class="text-muted small fw-semibold text-uppercase">Pending</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
+                <h3 class="fw-bold text-primary mb-1">{{ unassigned_leads_count }}</h3>
+                <span class="text-muted small fw-semibold text-uppercase">Unassigned</span>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
+                <h3 class="fw-bold text-success mb-1">{{ conversion_rate }}%</h3>
+                <span class="text-muted small fw-semibold text-uppercase">Conversion</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN 2-COLUMN LAYOUT -->
+    <div class="row g-4">
+        
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: WORK AREA (70%)               -->
+        <!-- ========================================== -->
+        <div class="col-lg-8">
+            
+            <!-- UNASSIGNED LEADS -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                <!-- Sticky Header & Assign Panel -->
+                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center flex-wrap gap-2 sticky-top z-1">
+                    <h5 class="mb-0 fw-bold text-dark">Unassigned Leads</h5>
+                    
+                    <div class="d-flex gap-2 bg-light p-1 rounded-3">
+                        <select id="managerSelect" class="form-select border-0 shadow-none bg-white fw-medium">
+                            <option value="">Select Manager...</option>
+                            {% for manager in managers %}
+                                <option value="{{ manager.id }}">{{ manager.user.username }}</option>
+                            {% endfor %}
+                        </select>
+                        <button id="btnAssign" class="btn btn-primary fw-bold px-4" disabled>Assign</button>
+                    </div>
+                </div>
+
+                <!-- Scrollable Table Body -->
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light sticky-top z-0" style="top: -1px;">
+                            <tr>
+                                <th class="ps-3"><input type="checkbox" class="form-check-input" id="selectAll"></th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Source</th>
+                                <th>Campaign</th>
+                                <th>Temp</th>
+                                <th>Stage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lead in unassigned_leads %}
+                            <tr>
+                                <td class="ps-3"><input type="checkbox" class="form-check-input lead-checkbox" value="{{ lead.id }}"></td>
+                                <td class="fw-semibold text-dark">{{ lead.name }}</td>
+                                <td class="text-secondary small">{{ lead.phone }}</td>
+                                <td class="text-secondary small">{{ lead.source }}</td>
+                                <td class="text-secondary small">{{ lead.campaign_name }}</td>
+                                <td>
+                                    {% if lead.temperature == 'hot' %}
+                                        <span title="Hot">🔥</span>
+                                    {% elif lead.temperature == 'warm' %}
+                                        <span title="Warm">⚡</span>
+                                    {% else %}
+                                        <span title="Cold">❄️</span>
+                                    {% endif %}
+                                </td>
+                                <td><span class="badge bg-light text-dark border rounded-pill">{{ lead.stage }}</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">No unassigned leads found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RECENT ACTIVITY -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-bottom p-3">
+                    <h5 class="mb-0 fw-bold text-dark">Recent Activity</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Lead</th>
+                                <th>Assigned To</th>
+                                <th>Stage</th>
+                                <th>Temp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lead in recent_leads %}
+                            <tr>
+                                <td class="ps-3 fw-semibold text-dark">{{ lead.name }}</td>
+                                <td>
+                                    <span class="d-inline-flex align-items-center gap-1">
+                                        <span class="badge bg-secondary rounded-circle p-1">👤</span>
+                                        <span class="fw-medium">{{ lead.assigned_to.user.username }}</span>
+                                    </span>
+                                </td>
+                                <td><span class="badge bg-light text-dark border rounded-pill">{{ lead.stage }}</span></td>
+                                <td class="text-capitalize text-secondary small">{{ lead.temperature }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No recent activity.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: MONITORING PANEL (30%)       -->
+        <!-- ========================================== -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-bottom p-3">
+                    <h5 class="mb-0 fw-bold text-dark">Track Managers</h5>
+                </div>
+                
+                <div class="card-body p-3 bg-light">
+                    <div class="d-flex flex-column gap-3">
+                        {% for m in manager_stats %}
+                        <!-- Manager Stat Card -->
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                    <h6 class="fw-bold mb-0 text-dark">{{ m.user.username }}</h6>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mb-1 small">
+                                    <span class="text-muted">Total Leads</span>
+                                    <span class="fw-bold">{{ m.total_leads }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1 small">
+                                    <span class="text-muted">Hot Leads</span>
+                                    <span class="fw-bold text-danger">{{ m.hot_leads }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3 small">
+                                    <span class="text-muted">New Leads</span>
+                                    <span class="fw-bold text-primary">{{ m.new_leads }}</span>
+                                </div>
+                                
+                                <a href="/manager_performance/{{ m.id }}/" class="btn btn-sm btn-outline-dark w-100 fw-medium rounded-pill">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted py-4 small">
+                            No manager data available.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        });
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const btn = document.getElementById('btnAssign');
+    const selectAll = document.getElementById('selectAll');
+    const manager = document.getElementById('managerSelect');
+
+    function getSelectedLeads() {
+        return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
+    }
+
+    function updateBtn() {
+        const selected = getSelectedLeads().length;
+        btn.disabled = !(selected > 0 && manager.value);
+    }
+
+    // Select all
+    selectAll?.addEventListener('change', (e) => {
+        document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = e.target.checked);
+        updateBtn();
+    });
+
+    // Individual checkboxes
+    document.querySelectorAll('.lead-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateBtn);
+    });
+
+    manager?.addEventListener('change', updateBtn);
+
+    // ASSIGN BUTTON
+    btn?.addEventListener('click', async () => {
+
+        const selectedLeads = getSelectedLeads();
+
+        if (selectedLeads.length === 0) {
+            alert("Please select leads");
+            return;
+        }
+
+        if (!manager.value) {
+            alert("Please select a manager");
+            return;
+        }
+
+        if (!confirm(`Assign ${selectedLeads.length} lead(s)?`)) return;
+
+        // Loading state
+        btn.disabled = true;
+        btn.innerHTML = 'Assigning...';
+
+        try {
+            const response = await fetch('/assign-leads/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    lead_ids: selectedLeads,
+                    manager_id: manager.value
+                })
+            });
+
+            // 🔥 HANDLE NON-JSON RESPONSE (your main bug)
+            const contentType = response.headers.get("content-type");
+
+            if (!contentType || !contentType.includes("application/json")) {
+                const text = await response.text();
+                console.error("Server returned HTML:", text);
+                alert("Server error. Check backend.");
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                alert("Leads assigned successfully ✅");
+                location.reload();
+            } else {
+                alert("Error: " + data.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Assign';
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Something went wrong");
+            btn.disabled = false;
+            btn.innerHTML = 'Assign';
+        }
+    });
+
+});
+</script>
 
 {% endblock %}

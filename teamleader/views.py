@@ -3,20 +3,17 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.db.models import Count, Q
-from dash.models import Branch, UserProfile, Lead, CallLog
-
+from dash.models import Branch, UserProfile, Lead
+from django.http import JsonResponse
+import json
 
 def tl_required(user):
     return (
         user.is_authenticated and
-        hasattr(user, 'profile') and
-        user.profile.role == 'tl'
+        hasattr(user, 'userprofile') and
+        user.userprofile.role == 'tl'
     )
 
-
-# ============================================================
-# AUTH VIEWS
-# ============================================================
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('index')
@@ -28,11 +25,11 @@ def login_view(request):
 
         if user is not None:
             try:
-                if user.profile.role == 'tl':
+                if user.userprofile.role == 'tl':
                     login(request, user)
                     return redirect('index')
                 else:
-                    messages.error(request, 'Access Denied: This panel is for Team Leaders only.')
+                    messages.error(request, 'Access Denied: This panel is for team leaders only.')
             except UserProfile.DoesNotExist:
                 messages.error(request, 'Profile not configured. Contact Admin.')
         else:
@@ -40,81 +37,130 @@ def login_view(request):
 
     return render(request, 'teamleader/signin.html')
 
-
 def logout_view(request):
     logout(request)
     return redirect('login_view')
 
-
-# ============================================================
-# DASHBOARD
-# ============================================================
 @user_passes_test(tl_required, login_url='/login/')
 def index(request):
-    tl_profile = request.user.profile
+    tl = request.user.userprofile
 
-    # Employees reporting to this TL
+    # Only leads assigned to this TL
+    leads = Lead.objects.filter(
+        assigned_to=tl
+    ).order_by('-created_at')
+
+    # KPIs
+    total_leads = leads.count()
+    hot_leads = leads.filter(temperature='hot').count()
+    new_leads = leads.filter(stage='new').count()
+    closed_leads = leads.filter(stage='closed').count()
     employees = UserProfile.objects.filter(
-        reports_to=tl_profile, status='Enabled'
-    ).select_related('user', 'branch').annotate(
-        assigned_leads_count=Count('assigned_leads'),
-        hot_leads_count=Count('assigned_leads', filter=Q(assigned_leads__temperature='hot')),
-        closed_leads_count=Count('assigned_leads', filter=Q(assigned_leads__stage='closed')),
-        calls_count=Count('call_logs'),
+    role='employee',
+    status='Enabled',
+    reports_to=tl
+    ).select_related('user').annotate(
+
+    # Leads assigned to this employee
+    total_leads=Count('assigned_leads', distinct=True),
+
+    hot_leads=Count(
+        'assigned_leads',
+        filter=Q(assigned_leads__temperature='hot'),
+        distinct=True
+    ),
+
+    # 🔥 New = leads recently assigned (or stage='new')
+    new_leads=Count(
+        'assigned_leads',
+        filter=Q(assigned_leads__stage='new'),
+        distinct=True
+    )
     )
 
-    # Only leads assigned TO this TL by Manager
-    leads = Lead.objects.filter(
-        assigned_to_tl=tl_profile
-    ).select_related('assigned_to__user', 'branch').order_by('-created_at')
-
-    total_leads      = leads.count()
-    hot_leads        = leads.filter(temperature='hot').count()
-    closed_leads     = leads.filter(stage='closed').count()
-    total_employees  = employees.count()
-    assigned_leads   = leads.filter(assigned_to__isnull=False).count()
-    unassigned_leads = leads.filter(assigned_to__isnull=True).count()
-
     return render(request, 'teamleader/index.html', {
-        'employees': employees,
         'leads': leads,
         'total_leads': total_leads,
         'hot_leads': hot_leads,
+        'new_leads': new_leads,
         'closed_leads': closed_leads,
-        'total_employees': total_employees,
-        'assigned_leads': assigned_leads,
-        'unassigned_leads': unassigned_leads,
+        'employees':employees,
     })
 
+@user_passes_test(tl_required)
+def assign_to_employee(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
 
-# ============================================================
-# ASSIGN LEAD TO EMPLOYEE (TL)
-# ============================================================
+            lead_ids = data.get('lead_ids', [])
+            employee_id = data.get('employee_id')
+
+            if not lead_ids or not employee_id:
+                return JsonResponse({'status': 'error', 'message': 'Missing data'})
+
+            tl = request.user.userprofile
+
+            # Get employee (must be under this TL)
+            employee = UserProfile.objects.get(
+                id=employee_id,
+                role='employee',
+                reports_to=tl
+            )
+
+            # Only assign leads that belong to this TL
+            leads = Lead.objects.filter(
+                id__in=lead_ids,
+                assigned_to=tl
+            )
+
+            for lead in leads:
+                lead.assigned_to = employee
+                lead.save()
+
+            return JsonResponse({'status': 'success'})
+
+        except Exception as e:
+            print("ERROR:", e)
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error'})
+
+from django.contrib.auth.decorators import user_passes_test
+from dash.models import UserProfile, Lead
+
 @user_passes_test(tl_required, login_url='/login/')
-def assign_lead(request, lead_id):
-    if request.method == 'POST':
-        tl_profile = request.user.profile
-        lead = get_object_or_404(Lead, id=lead_id, assigned_to_tl=tl_profile)
-        emp_id = request.POST.get('emp_id')
-        if emp_id:
-            emp_profile = get_object_or_404(UserProfile, id=emp_id, reports_to=tl_profile)
-            lead.assigned_to = emp_profile
-            lead.save()
-            messages.success(request, f'Lead "{lead.name}" assigned to {emp_profile.user.get_full_name()}.')
-        else:
-            messages.error(request, 'Please select an Employee.')
-    return redirect('index')
+def employee_performance(request, id):
+    tl = request.user.userprofile
 
+    # Get employee (must belong to this TL)
+    employee = get_object_or_404(
+        UserProfile,
+        id=id,
+        role='employee',
+        reports_to=tl
+    )
 
-# ============================================================
-# UNASSIGN LEAD FROM EMPLOYEE (TL)
-# ============================================================
-@user_passes_test(tl_required, login_url='/login/')
-def unassign_lead(request, lead_id):
-    if request.method == 'POST':
-        tl_profile = request.user.profile
-        lead = get_object_or_404(Lead, id=lead_id, assigned_to_tl=tl_profile)
-        lead.assigned_to = None
-        lead.save()
-        messages.success(request, f'Lead "{lead.name}" unassigned from employee.')
-    return redirect('index')
+    # Leads assigned to this employee
+    leads = Lead.objects.filter(
+        assigned_to=employee
+    ).order_by('-created_at')
+
+    # KPIs
+    total_leads = leads.count()
+
+    hot_leads = leads.filter(temperature='hot').count()
+
+    # 🔥 New = stage 'new' OR recently assigned
+    new_leads = leads.filter(stage='new').count()
+
+    closed_leads = leads.filter(stage='closed').count()
+
+    return render(request, 'teamleader/employee_performance.html', {
+        'employee': employee,
+        'leads': leads,
+        'total_leads': total_leads,
+        'hot_leads': hot_leads,
+        'new_leads': new_leads,
+        'closed_leads': closed_leads,
+    })

@@ -10,7 +10,7 @@ import io
 import csv
 import openpyxl
 from django.http import HttpResponse
-
+from .services import assign_lead, can_assign
 from .models import (
     Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting
 )
@@ -193,7 +193,11 @@ def users(request):
 @user_passes_test(superadmin_required, login_url='/login/')
 def add_user(request):
     branches     = Branch.objects.filter(status='Enabled')
-    all_profiles = UserProfile.objects.select_related('user').filter(status='Enabled')
+    all_profiles = UserProfile.objects.select_related('user', 'branch')\
+    .filter(
+        status='Enabled',
+        role__in=['manager', 'tl']   # 👈 IMPORTANT
+    )
     if request.method == 'POST':
         first_name    = request.POST.get('first_name')
         last_name     = request.POST.get('last_name')
@@ -232,7 +236,11 @@ def add_user(request):
 def edit_user(request, id):
     profile      = get_object_or_404(UserProfile, id=id)
     branches     = Branch.objects.filter(status='Enabled')
-    all_profiles = UserProfile.objects.select_related('user').filter(status='Enabled').exclude(id=id)
+    all_profiles = UserProfile.objects.select_related('user', 'branch')\
+    .filter(
+        status='Enabled',
+        role__in=['manager', 'tl']   # 👈 IMPORTANT
+    ).exclude(id=id)
     if request.method == 'POST':
         profile.user.first_name = request.POST.get('first_name')
         profile.user.last_name  = request.POST.get('last_name')
@@ -281,39 +289,138 @@ def disable_user(request, id):
 # ============================================================
 # LEAD MANAGEMENT
 # ============================================================
+
+def assign_lead_view(request, lead_id):
+    lead = get_object_or_404(Lead, id=lead_id)
+
+    assigned_by = request.user.userprofile
+    assigned_to_id = request.POST.get('assigned_to')
+
+    assigned_to = get_object_or_404(UserProfile, id=assigned_to_id)
+
+    # Validate role hierarchy
+    if not can_assign(assigned_by, assigned_to):
+        return HttpResponse("Not allowed", status=403)
+
+    assign_lead(lead, assigned_by, assigned_to)
+
+    return redirect('dashboard')
+
+from django.shortcuts import render
+from django.db.models import Q, Count
+from django.http import JsonResponse
+from .models import Lead, Branch, UserProfile, FollowUp, LeadAssignmentHistory
+import json
+
 @user_passes_test(superadmin_required, login_url='/login/')
 def leads(request):
-    all_leads     = Lead.objects.select_related('branch', 'assigned_to__user', 'assigned_to_manager__user', 'assigned_to_tl__user').order_by('-created_at')
-    branches      = Branch.objects.filter(status='Enabled')
-    managers      = UserProfile.objects.filter(role='manager', status='Enabled').select_related('user')
-    stage_filter  = request.GET.get('stage', '')
-    temp_filter   = request.GET.get('temperature', '')
-    source_filter = request.GET.get('source', '')
-    branch_filter = request.GET.get('branch', '')
-    search        = request.GET.get('q', '')
-    if stage_filter:
-        all_leads = all_leads.filter(stage=stage_filter)
-    if temp_filter:
-        all_leads = all_leads.filter(temperature=temp_filter)
-    if source_filter:
-        all_leads = all_leads.filter(source=source_filter)
-    if branch_filter:
-        all_leads = all_leads.filter(branch_id=branch_filter)
-    if search:
-        all_leads = all_leads.filter(
-            Q(name__icontains=search) | Q(phone__icontains=search) | Q(email__icontains=search)
-        )
+
+    # KPIs
+    total_leads = Lead.objects.count()
+    hot_leads = Lead.objects.filter(temperature='hot').count()
+    pending_followups = FollowUp.objects.filter(followup_status='pending').count()
+    unassigned_leads_count = Lead.objects.filter(assigned_to__isnull=True).count()
+    closed_leads = Lead.objects.filter(stage='closed').count()
+
+    conversion_rate = round((closed_leads / total_leads) * 100, 2) if total_leads > 0 else 0
+
+    # Unassigned leads
+    unassigned_leads = Lead.objects.filter(
+        assigned_to__isnull=True
+    ).order_by('-created_at')[:100]
+
+    # Recent leads
+    recent_leads = Lead.objects.select_related(
+        'assigned_to__user'
+    ).order_by('-updated_at')[:50]
+
+    # Managers list
+    managers = UserProfile.objects.filter(
+        role='manager',
+        status='Enabled'
+    ).select_related('user')
+
+    # Manager tracking stats
+    manager_stats = UserProfile.objects.filter(role='manager').annotate(
+        total_leads=Count('assigned_leads'),
+        hot_leads=Count('assigned_leads', filter=Q(assigned_leads__temperature='hot')),
+        new_leads=Count('assigned_leads', filter=Q(assigned_leads__stage='new'))
+    )
+
     return render(request, 'dash/leads/leads.html', {
-        'leads': all_leads,
-        'branches': branches,
+        'total_leads': total_leads,
+        'hot_leads': hot_leads,
+        'pending_followups': pending_followups,
+        'unassigned_leads_count': unassigned_leads_count,
+        'conversion_rate': conversion_rate,
+
+        'unassigned_leads': unassigned_leads,
+        'recent_leads': recent_leads,
         'managers': managers,
-        'stage_filter': stage_filter,
-        'temp_filter': temp_filter,
-        'source_filter': source_filter,
-        'branch_filter': branch_filter,
-        'search': search,
+        'manager_stats': manager_stats,
     })
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+@csrf_exempt
+@user_passes_test(superadmin_required)
+def bulk_assign_leads(request):
+    try:
+        if request.method != "POST":
+            return JsonResponse({'status': 'error', 'message': 'Invalid method'})
+
+        data = json.loads(request.body)
+
+        lead_ids = data.get('lead_ids', [])
+        manager_id = data.get('manager_id')
+
+        if not lead_ids or not manager_id:
+            return JsonResponse({'status': 'error', 'message': 'Missing data'})
+
+        manager = UserProfile.objects.get(id=manager_id)
+
+        leads = Lead.objects.filter(id__in=lead_ids)
+
+        for lead in leads:
+            lead.assigned_to = manager
+            lead.save()
+
+        return JsonResponse({'status': 'success'})
+
+    except Exception as e:
+        print("ERROR:", str(e))  # 🔥 this will show real issue in terminal
+        return JsonResponse({'status': 'error', 'message': str(e)})
+    
+@user_passes_test(superadmin_required)
+def manager_performance(request, id):
+
+    manager = get_object_or_404(UserProfile, id=id, role='manager')
+
+    # Get all employees under this manager
+    leads = Lead.objects.filter(
+    Q(assigned_to=manager) |
+    Q(assigned_to__reports_to=manager) |
+    Q(assigned_to__reports_to__reports_to=manager)).select_related(
+    'assigned_to__user',
+    'assigned_to__reports_to__user',
+    'assigned_to__reports_to__reports_to__user').order_by('-created_at')
+
+    # KPIs
+    total_leads = leads.count()
+    hot_leads = leads.filter(temperature='hot').count()
+    new_leads = leads.filter(stage='new').count()
+    closed_leads = leads.filter(stage='closed').count()
+
+    return render(request, 'dash/leads/manager_performance.html', {
+        'manager': manager,
+        'leads': leads,
+        'total_leads': total_leads,
+        'hot_leads': hot_leads,
+        'new_leads': new_leads,
+        'closed_leads': closed_leads,
+    })
 
 @user_passes_test(superadmin_required, login_url='/login/')
 def add_lead(request):

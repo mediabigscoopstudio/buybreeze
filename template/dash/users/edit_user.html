@@ -42,7 +42,7 @@
           <select name="role" class="form-select" required>
             <option value="manager" {% if data.role == 'manager' %}selected{% endif %}>Branch Manager</option>
             <option value="tl" {% if data.role == 'tl' %}selected{% endif %}>Team Leader</option>
-            <option value="member" {% if data.role == 'member' %}selected{% endif %}>Call Team Member</option>
+            <option value="employee" {% if data.role == 'employee' %}selected{% endif %}>Call Team Member</option>
             <option value="hr" {% if data.role == 'hr' %}selected{% endif %}>HR Panel</option>
             <option value="marketing" {% if data.role == 'marketing' %}selected{% endif %}>Marketing Admin</option>
           </select>
@@ -62,7 +62,8 @@
             <option value="">None</option>
             {% for p in all_profiles %}
               <option value="{{ p.id }}" {% if data.reports_to_id == p.id %}selected{% endif %}>
-                {{ p.user.get_full_name }} ({{ p.get_role_display }})
+              {{ p.user.get_full_name|default:p.user.username }} 
+              ({{ p.get_role_display }} | {{ p.branch.name|default:"No Branch" }})
               </option>
             {% endfor %}
           </select>

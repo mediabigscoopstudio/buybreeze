@@ -3,828 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BuyBreeze — Manager Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <title>Manager Dashboard | CRM</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        :root {
-            --bg: #f0f4ff;
-            --sidebar: #0a0f1e;
-            --sidebar-hover: #111827;
-            --accent: #3b7ef6;
-            --accent2: #06d6a0;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --text: #0f172a;
-            --muted: #64748b;
-            --card: #ffffff;
-            --border: #e2e8f0;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* ========================= */
-        /* ✅ ADDED FONT FIX */
-        /* ========================= */
-        .page-title,
-        .section-title,
-        .stat-value,
-        .tl-stat-val {
-            font-family: 'Syne', sans-serif !important;
-            font-weight: 700;
-            letter-spacing: -0.2px;
-        }
-
-        .stat-value {
-            font-size: 26px;
-        }
-
-        .section-title {
-            font-size: 15px;
-        }
-
-        /* ===== EVERYTHING BELOW IS YOUR ORIGINAL CODE (UNCHANGED) ===== */
-
-        /* SIDEBAR */
-        .sidebar {
-            position: fixed;
-            left: 0; top: 0; bottom: 0;
-            width: 240px;
-            background: var(--sidebar);
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .sidebar-brand {
-            padding: 24px 20px;
-            border-bottom: 1px solid #1e2d45;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .brand-text {
-            font-family: 'Syne', sans-serif;
-            font-size: 18px;
-            font-weight: 800;
-            color: white;
-            letter-spacing: -0.3px;
-        }
-
-        .brand-text span { color: var(--accent); }
-
-        .sidebar-role {
-            padding: 12px 20px;
-            font-size: 10px;
-            color: #3b7ef6;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 600;
-            border-bottom: 1px solid #1e2d45;
-        }
-
-        /* 🔽 CONTINUES EXACTLY SAME… */
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 16px 12px;
-            overflow-y: auto;
-        }
-
-        .nav-label {
-            font-size: 10px;
-            color: #374151;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-            padding: 8px 8px 4px;
-            margin-top: 8px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            color: #9ca3af;
-            font-size: 14px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            margin-bottom: 2px;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: #1e2d45;
-            color: white;
-        }
-
-        .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 16px; width: 20px; }
-
-        .sidebar-footer {
-            padding: 16px 12px;
-            border-top: 1px solid #1e2d45;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            background: #111827;
-            margin-bottom: 8px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 13px;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .user-name {
-            font-size: 13px;
-            color: white;
-            font-weight: 500;
-        }
-
-        .user-role {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .btn-logout {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            padding: 9px 12px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 8px;
-            color: #fca5a5;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-
-        .btn-logout:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-        }
-
-        /* MAIN CONTENT */
-        .main {
-            margin-left: 240px;
-            min-height: 100vh;
-            padding: 0;
-        }
-
-        .topbar {
-            background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 16px 28px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .page-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .page-subtitle {
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .badge-role {
-            background: rgba(59, 126, 246, 0.1);
-            color: var(--accent);
-            border: 1px solid rgba(59, 126, 246, 0.3);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .content {
-            padding: 28px;
-        }
-
-        /* STAT CARDS */
-        .stat-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 22px;
-            transition: all 0.2s;
-        }
-
-        .stat-card:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            transform: translateY(-1px);
-        }
-
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            margin-bottom: 14px;
-        }
-
-        .stat-value {
-            font-family: 'Syne', sans-serif;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        /* SECTION CARDS */
-        .section-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 24px;
-        }
-
-        .section-header {
-            padding: 18px 22px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .section-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title i {
-            color: var(--accent);
-        }
-
-        .section-body { padding: 22px; }
-
-        /* TABLE */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--muted);
-            font-weight: 600;
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-            background: #f8fafc;
-            text-align: left;
-        }
-
-        .data-table td {
-            padding: 12px 14px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover td { background: #f8fafc; }
-
-        /* BADGES */
-        .badge {
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-hot { background: #fef2f2; color: #ef4444; }
-        .badge-warm { background: #fffbeb; color: #f59e0b; }
-        .badge-cold { background: #eff6ff; color: #3b82f6; }
-        .badge-new { background: #f0fdf4; color: #22c55e; }
-        .badge-assigned { background: #eff6ff; color: #3b7ef6; }
-        .badge-unassigned { background: #f8fafc; color: #94a3b8; }
-
-        /* TL CARD */
-        .tl-card {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            transition: all 0.2s;
-        }
-
-        .tl-card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 4px 15px rgba(59, 126, 246, 0.1);
-        }
-
-        .tl-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .tl-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .tl-meta {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .tl-stat {
-            text-align: center;
-        }
-
-        .tl-stat-val {
-            font-family: 'Syne', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .tl-stat-lbl {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        /* BUTTONS */
-        .btn-primary-sm {
-            background: var(--accent);
-            border: none;
-            border-radius: 7px;
-            padding: 6px 14px;
-            color: white;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .btn-primary-sm:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-
-        .btn-danger-sm {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 7px;
-            padding: 6px 14px;
-            color: #ef4444;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .btn-danger-sm:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        /* SELECT */
-        .form-select-sm {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 13px;
-            color: var(--text);
-            background: white;
-            font-family: 'DM Sans', sans-serif;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .form-select-sm:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 126, 246, 0.1);
-        }
-
-        /* SEARCH */
-        .search-wrap {
-            position: relative;
-        }
-
-        .search-wrap i {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .search-input {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 7px 12px 7px 32px;
-            font-size: 13px;
-            color: var(--text);
-            background: white;
-            font-family: 'DM Sans', sans-serif;
-            outline: none;
-            width: 220px;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 126, 246, 0.1);
-        }
-
-        .progress-bar-wrap {
-            background: #e2e8f0;
-            border-radius: 4px;
-            height: 6px;
-            overflow: hidden;
-            min-width: 80px;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            background: linear-gradient(90deg, var(--accent), var(--accent2));
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--muted);
-        }
-
-        .empty-state i {
-            font-size: 36px;
-            margin-bottom: 12px;
-            opacity: 0.4;
-        }
+        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .table-responsive { scrollbar-width: thin; }
+        /* Make checkboxes slightly larger for touch */
+        .form-check-input { width: 1.25em; height: 1.25em; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-    <div class="sidebar-brand">
-        <div class="brand-icon"><i class="bi bi-houses-fill"></i></div>
-        <div class="brand-text">Buy<span>Breeze</span></div>
-    </div>
-    <div class="sidebar-role">Manager Panel</div>
-    <div class="sidebar-nav">
-        <div class="nav-label">Overview</div>
-        <a href="#dashboard" class="nav-item active">
-            <i class="bi bi-grid-1x2"></i> Dashboard
-        </a>
-        <div class="nav-label">Lead Management</div>
-        <a href="#assign" class="nav-item">
-            <i class="bi bi-arrow-left-right"></i> Assign Leads
-        </a>
-        <a href="#unassigned" class="nav-item">
-            <i class="bi bi-inbox"></i> Unassigned Leads
-        </a>
-        <div class="nav-label">Team</div>
-        <a href="#team" class="nav-item">
-            <i class="bi bi-people"></i> Team Leaders
-        </a>
-    </div>
-    <div class="sidebar-footer">
-        <div class="user-info">
-            <div class="user-avatar">{{ request.user.first_name.0 }}{{ request.user.last_name.0 }}</div>
-            <div>
-                <div class="user-name">{{ request.user.get_full_name }}</div>
-                <div class="user-role">Branch Manager</div>
+    <!-- NAVBAR (TOP) -->
+    <nav class="navbar navbar-expand bg-white border-bottom shadow-sm sticky-top px-2 px-md-4 py-2">
+        <div class="container-fluid">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2" href="#">
+                <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <span class="d-none d-sm-inline">Manager Dashboard</span>
+            </a>
+
+            <!-- Right Actions -->
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <!-- Notifications -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link text-dark position-relative p-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell fs-5"></i>
+                        <span class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" style="width: 300px;">
+                        <h6 class="dropdown-header text-dark fw-bold border-bottom pb-2">Notifications</h6>
+                        <div class="px-0 py-1" style="max-height: 300px; overflow-y: auto;">
+                            <a class="dropdown-item py-2 border-bottom" href="#">
+                                <div class="small fw-semibold text-dark">New leads assigned</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">10 mins ago</div>
+                            </a>
+                            <a class="dropdown-item py-2 border-bottom" href="#">
+                                <div class="small fw-semibold text-dark">TL Alex updated status</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">1 hour ago</div>
+                            </a>
+                            <a class="dropdown-item py-2" href="#">
+                                <div class="small fw-semibold text-dark">Weekly report ready</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">2 hours ago</div>
+                            </a>
+                        </div>
+                        <a href="#" class="dropdown-item text-center text-primary fw-medium border-top pt-2 small">View All</a>
+                    </div>
+                </li>
+
+                <!-- Profile -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center gap-2 p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 36px; height: 36px;">
+                            {{ user.username|make_list|first|upper|default:"M" }}
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                        <li class="px-3 py-2 border-bottom">
+                            <span class="d-block fw-bold text-dark">{{ user.username|default:"Manager Name" }}</span>
+                            <span class="d-block text-muted small">manager@crm.com</span>
+                        </li>
+                        <li><a class="dropdown-item py-2 mt-1" href="#"><i class="bi bi-person me-2 text-secondary"></i>Profile</a></li>
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2 text-secondary"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+
+        <!-- SECTION 1: KPI CARDS -->
+        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+            <!-- Total Leads -->
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Total Leads</div>
+                    <h2 class="display-6 fw-bold text-dark mb-0">{{ total_leads|default:"0" }}</h2>
+                </div>
+            </div>
+            <!-- Hot Leads -->
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Hot Leads</div>
+                    <h2 class="display-6 fw-bold text-danger mb-0">{{ hot_leads|default:"0" }}</h2>
+                </div>
+            </div>
+            <!-- New Leads -->
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">New Leads</div>
+                    <h2 class="display-6 fw-bold text-primary mb-0">{{ new_leads|default:"0" }}</h2>
+                </div>
+            </div>
+            <!-- Closed Leads -->
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Closed Leads</div>
+                    <h2 class="display-6 fw-bold text-success mb-0">{{ closed_leads|default:"0" }}</h2>
+                </div>
             </div>
         </div>
-        <a href="{% url 'logout_view' %}" class="btn-logout">
-            <i class="bi bi-box-arrow-left"></i> Sign Out
-        </a>
-    </div>
-</div>
 
-<!-- MAIN -->
-<div class="main">
-    <div class="topbar">
-        <div>
-            <div class="page-title">Manager Dashboard</div>
-            <div class="page-subtitle">BuyBreeze — Real Estate CRM</div>
+        <!-- SECTION 2: LEADS (MAIN WORK AREA) -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            
+            <!-- Header & Bulk Assign Controls -->
+            <div class="card-header bg-white border-bottom p-3 p-md-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-list-task text-primary"></i> Your Leads
+                </h5>
+                
+                <!-- Bulk Assign Panel -->
+                <div class="d-flex flex-column flex-sm-row gap-2 bg-light p-2 rounded-3 w-100" style="max-width: 500px;">
+                    <select id="tlSelect" class="form-select border-0 shadow-none fw-medium text-dark py-2">
+                        <option value="">Select Team Leader...</option>
+                        {% for tl in team_leaders %}
+                            <option value="{{ tl.id }}">{{ tl.user.username }}</option>
+                        {% endfor %}
+                    </select>
+                    <button id="btnAssign" class="btn btn-primary fw-bold px-4 py-2 text-nowrap" disabled>
+                        Assign to TL
+                    </button>
+                </div>
+            </div>
+
+            <!-- Leads Table -->
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-nowrap">
+                        <thead class="table-light text-secondary">
+                            <tr>
+                                <th scope="col" class="py-3 ps-4" style="width: 40px;">
+                                    <input class="form-check-input" type="checkbox" id="selectAll">
+                                </th>
+                                <th scope="col" class="py-3">Name</th>
+                                <th scope="col" class="py-3">Phone</th>
+                                <th scope="col" class="py-3">Source</th>
+                                <th scope="col" class="py-3">Campaign</th>
+                                <th scope="col" class="py-3">Temp</th>
+                                <th scope="col" class="py-3">Stage</th>
+                                <th scope="col" class="py-3 pe-4">Assigned TL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lead in leads %}
+                            <tr>
+                                <td class="ps-4">
+                                    <input class="form-check-input lead-checkbox" type="checkbox" value="{{ lead.id }}">
+                                </td>
+                                <td class="fw-bold text-dark">{{ lead.name }}</td>
+                                <td class="text-secondary">{{ lead.phone }}</td>
+                                <td class="text-secondary">{{ lead.source }}</td>
+                                <td class="text-secondary">{{ lead.campaign_name|default:"-" }}</td>
+                                <td>
+                                    {% if lead.temperature|lower == 'hot' %}
+                                        <span class="badge bg-danger rounded-pill px-3 py-2 fw-medium">Hot</span>
+                                    {% elif lead.temperature|lower == 'warm' %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-medium">Warm</span>
+                                    {% else %}
+                                        <span class="badge bg-info text-dark rounded-pill px-3 py-2 fw-medium">Cold</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">{{ lead.stage }}</span>
+                                </td>
+                                <td class="pe-4">
+                                    {% if lead.assigned_tl %}
+                                        <span class="d-inline-flex align-items-center gap-2">
+                                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
+                                                {{ lead.assigned_tl.user.username|make_list|first|upper }}
+                                            </div>
+                                            <span class="fw-medium text-dark small">{{ lead.assigned_tl.user.username }}</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted small fst-italic">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                    <span class="fw-medium text-dark">No leads available</span>
+                                    <p class="small mb-0 mt-1">You currently have no leads to manage.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="topbar-right">
-            <span class="badge-role"><i class="bi bi-person-workspace me-1"></i> Manager</span>
+
+        <!-- SECTION 3: TRACK TEAM LEADERS -->
+        <div class="mb-3 d-flex align-items-center gap-2">
+            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill text-primary"></i> My Team Leaders</h5>
         </div>
-    </div>
-
-    <div class="content">
-
-        <!-- STAT CARDS -->
-        <div class="row g-3 mb-4" id="dashboard">
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#eff6ff; color:#3b7ef6;">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <div class="stat-value">{{ total_tls }}</div>
-                    <div class="stat-label">Team Leaders</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#f0fdf4; color:#22c55e;">
-                        <i class="bi bi-person-lines-fill"></i>
-                    </div>
-                    <div class="stat-value">{{ total_leads }}</div>
-                    <div class="stat-label">Total Leads</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#fffbeb; color:#f59e0b;">
-                        <i class="bi bi-fire"></i>
-                    </div>
-                    <div class="stat-value">{{ assigned_leads }}</div>
-                    <div class="stat-label">Assigned Leads</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:#fef2f2; color:#ef4444;">
-                        <i class="bi bi-inbox"></i>
-                    </div>
-                    <div class="stat-value">{{ unassigned_leads }}</div>
-                    <div class="stat-label">Unassigned Leads</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TEAM LEADERS OVERVIEW -->
-        <div class="section-card" id="team">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="bi bi-people-fill"></i> Team Leaders Overview
-                </div>
-            </div>
-            <div class="section-body">
-                {% if team_leaders %}
-                <div class="row g-3">
-                    {% for tl in team_leaders %}
-                    <div class="col-md-4">
-                        <div class="tl-card">
-                            <div class="d-flex align-items-center gap-3 mb-3">
-                                <div class="tl-avatar">
-                                    {{ tl.user.first_name.0 }}{{ tl.user.last_name.0 }}
-                                </div>
-                                <div>
-                                    <div class="tl-name">{{ tl.user.get_full_name }}</div>
-                                    <div class="tl-meta">{{ tl.branch.name|default:"No Branch" }}</div>
-                                </div>
+        
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+            {% for tl in team_leaders %}
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <!-- TL Header -->
+                        <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3">
+                            <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center fs-4 fw-bold text-secondary" style="width: 48px; height: 48px;">
+                                {{ tl.name|make_list|first|upper }}
                             </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <div class="tl-stat">
-                                    <div class="tl-stat-val">{{ tl.assigned_leads_count }}</div>
-                                    <div class="tl-stat-lbl">Leads</div>
-                                </div>
-                                <div class="tl-stat">
-                                    <div class="tl-stat-val">{{ tl.hot_leads_count }}</div>
-                                    <div class="tl-stat-lbl">Hot</div>
-                                </div>
-                                <div class="tl-stat">
-                                    <div class="tl-stat-val">{{ tl.closed_leads_count }}</div>
-                                    <div class="tl-stat-lbl">Closed</div>
-                                </div>
-                            </div>
-                            <div class="progress-bar-wrap">
-                                <div class="progress-bar-fill" style="width: {% if total_leads > 0 %}{% widthratio tl.assigned_leads_count total_leads 100 %}{% else %}0{% endif %}%"></div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0">{{ tl.user.username }}</h6>
+                                <span class="badge bg-light text-secondary border fw-normal mt-1">My Team Leader</span>
                             </div>
                         </div>
+                        
+                        <!-- TL Stats -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Total Leads</span>
+                            <span class="fw-bold text-dark">{{ tl.total_leads|default:"0" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">Hot Leads</span>
+                            <span class="fw-bold text-danger">{{ tl.hot_leads|default:"0" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="text-muted small">New Leads</span>
+                            <span class="fw-bold text-primary">{{ tl.new_leads|default:"0" }}</span>
+                        </div>
+                        
+                        <!-- Action -->
+                        <a href="/tl_performance/{{ tl.id }}" class="btn btn-light border text-dark fw-semibold w-100 rounded-pill py-2 text-nowrap">
+                            View Performance <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
                     </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <i class="bi bi-people d-block"></i>
-                    No team leaders found.
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- ASSIGN LEADS -->
-        <div class="section-card" id="assign">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="bi bi-arrow-left-right"></i> Assign Leads to Team Leaders
-                </div>
-                <div class="d-flex gap-2">
-                    <div class="search-wrap">
-                        <i class="bi bi-search"></i>
-                        <input type="text" class="search-input" id="searchLeads" placeholder="Search leads..." oninput="filterLeads()">
-                    </div>
-                    <select class="form-select-sm" id="filterStatus" onchange="filterLeads()">
-                        <option value="">All Leads</option>
-                        <option value="unassigned">Unassigned Only</option>
-                        <option value="assigned">Assigned Only</option>
-                    </select>
                 </div>
             </div>
-            <div class="section-body p-0">
-                <table class="data-table" id="leadsTable">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Lead Name</th>
-                            <th>Phone</th>
-                            <th>Temperature</th>
-                            <th>Stage</th>
-                            <th>Currently Assigned</th>
-                            <th>Assign To TL</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lead in leads %}
-                        <tr data-assigned="{{ lead.assigned_to|yesno:'assigned,unassigned' }}">
-                            <td class="text-muted">{{ forloop.counter }}</td>
-                            <td>
-                                <div style="font-weight:500;">{{ lead.name }}</div>
-                                <div style="font-size:12px; color:var(--muted);">{{ lead.source }}</div>
-                            </td>
-                            <td>{{ lead.phone }}</td>
-                            <td>
-                                <span class="badge badge-{{ lead.temperature }}">{{ lead.temperature|capfirst }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-new">{{ lead.stage|capfirst }}</span>
-                            </td>
-                            <td>
-                                {% if lead.assigned_to %}
-                                    <span class="badge badge-assigned">{{ lead.assigned_to.user.get_full_name }}</span>
-                                {% else %}
-                                    <span class="badge badge-unassigned">Unassigned</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <form method="POST" action="{% url 'assign_lead' lead.id %}" class="d-inline">
-                                    {% csrf_token %}
-                                    <select name="tl_id" class="form-select-sm">
-                                        <option value="">— Select TL —</option>
-                                        {% for tl in team_leaders %}
-                                        <option value="{{ tl.id }}" {% if lead.assigned_to == tl %}selected{% endif %}>
-                                            {{ tl.user.get_full_name }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
-                            </td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <form method="POST" action="{% url 'assign_lead' lead.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="tl_id" class="tl-id-ref" value="">
-                                        <button type="submit" class="btn-primary-sm" onclick="syncTlId(this)">
-                                            Assign
-                                        </button>
-                                    </form>
-                                    {% if lead.assigned_to %}
-                                    <form method="POST" action="{% url 'unassign_lead' lead.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn-danger-sm">Unassign</button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8">
-                                <div class="empty-state">
-                                    <i class="bi bi-inbox d-block"></i>
-                                    No leads found.
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            {% empty %}
+            <div class="col-12">
+                <div class="text-center text-muted py-5 bg-white shadow-sm rounded-4 border-0">
+                    <p class="mb-0">No Team Leaders found in your hierarchy.</p>
+                </div>
             </div>
+            {% endfor %}
         </div>
 
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Sync the TL select value to the hidden input before assign submit
-    function syncTlId(btn) {
-        const row = btn.closest('tr');
-        const selectVal = row.querySelector('select[name="tl_id"]').value;
-        const hiddenInput = btn.closest('form').querySelector('.tl-id-ref');
-        if (hiddenInput) hiddenInput.value = selectVal;
-        if (!selectVal) {
-            alert('Please select a Team Leader first.');
-            event.preventDefault();
+    <!-- Bootstrap Bundle with Popper (Required for Dropdowns) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- UI Logic JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.lead-checkbox');
+            const assignBtn = document.getElementById('btnAssign');
+            const tlSelect = document.getElementById('tlSelect');
+
+            // Evaluate state to enable/disable button
+            function checkState() {
+                const checkedCount = document.querySelectorAll('.lead-checkbox:checked').length;
+                const hasTlSelected = tlSelect.value.trim() !== '';
+                assignBtn.disabled = !(checkedCount > 0 && hasTlSelected);
+            }
+
+            // Select All Toggle
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+                    checkState();
+                });
+            }
+
+            // Individual Checkbox Toggle
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const allChecked = Array.from(checkboxes).every(c => c.checked);
+                    const someChecked = Array.from(checkboxes).some(c => c.checked);
+                    
+                    selectAll.checked = allChecked;
+                    selectAll.indeterminate = someChecked && !allChecked;
+                    
+                    checkState();
+                });
+            });
+
+            // TL Dropdown Change
+            if (tlSelect) {
+                tlSelect.addEventListener('change', checkState);
+            }
+
+            // Simple UI confirmation (Form submission logic handled by Django later)
+            if (assignBtn) {
+                assignBtn.addEventListener('click', function(e) {
+                    const count = document.querySelectorAll('.lead-checkbox:checked').length;
+                    const tlName = tlSelect.options[tlSelect.selectedIndex].text;
+                    
+                    if(!confirm(`Assign ${count} lead(s) to ${tlName}?`)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+function getCookie(name) {
+    let cookieValue = null;
+    document.cookie.split(';').forEach(cookie => {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
         }
-    }
-
-    // Filter leads table
-    function filterLeads() {
-        const search = document.getElementById('searchLeads').value.toLowerCase();
-        const status = document.getElementById('filterStatus').value;
-        const rows = document.querySelectorAll('#leadsTable tbody tr');
-
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            const assigned = row.dataset.assigned;
-            const matchSearch = text.includes(search);
-            const matchStatus = !status || assigned === status;
-            row.style.display = matchSearch && matchStatus ? '' : 'none';
-        });
-    }
-
-    // Sidebar active nav
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-        });
     });
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const btn = document.getElementById('btnAssign');
+    const tl = document.getElementById('tlSelect');
+    const checkboxes = document.querySelectorAll('.lead-checkbox');
+    const selectAll = document.getElementById('selectAll');
+
+    function getSelected() {
+        return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
+    }
+
+    function update() {
+        btn.disabled = !(getSelected().length && tl.value);
+    }
+
+    // select all
+    selectAll?.addEventListener('change', e => {
+        checkboxes.forEach(cb => cb.checked = e.target.checked);
+        update();
+    });
+
+    checkboxes.forEach(cb => cb.addEventListener('change', update));
+    tl.addEventListener('change', update);
+
+    btn.addEventListener('click', async () => {
+
+        const selected = getSelected();
+
+        if (!confirm(`Assign ${selected.length} lead(s)?`)) return;
+
+        btn.disabled = true;
+        btn.innerText = "Assigning...";
+
+        try {
+            const res = await fetch('/assign-to-tl/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    lead_ids: selected,
+                    tl_id: tl.value
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message);
+                btn.disabled = false;
+                btn.innerText = "Assign";
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Error occurred");
+            btn.disabled = false;
+            btn.innerText = "Assign";
+        }
+    });
+
+});
 </script>
 </body>
 </html>

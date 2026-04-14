@@ -1,0 +1,121 @@
+{% extends 'dash/base.html' %}
+{% block page_title %}Manager Perfomance{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1600px;">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark mb-1">
+            <span class="text-muted fw-normal fs-4">Manager / </span>{{ manager.user.username }}
+        </h3>
+        <p class="text-secondary small mb-0">Performance overview and lead tracking</p>
+    </div>
+
+    <!-- KPI -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
+        <div class="col"><div class="card p-4 text-center"><h3>{{ total_leads }}</h3>Total</div></div>
+        <div class="col"><div class="card p-4 text-center text-danger"><h3>{{ hot_leads }}</h3>Hot</div></div>
+        <div class="col"><div class="card p-4 text-center text-primary"><h3>{{ new_leads }}</h3>New</div></div>
+        <div class="col"><div class="card p-4 text-center text-success"><h3>{{ closed_leads }}</h3>Closed</div></div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Leads Under Manager</h5>
+        </div>
+
+        <div class="card-body table-responsive" style="max-height:600px;">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Lead</th>
+                        <th>Phone</th>
+                        <th>Source</th>
+                        <th>Campaign</th>
+                        <th>Manager</th>
+                        <th>Team Leader</th>
+                        <th>Employee</th>
+                        <th>Stage</th>
+                        <th>Temp</th>
+                        <th class="text-end">Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td class="fw-bold">{{ lead.name }}</td>
+                    <td>{{ lead.phone|default:"-" }}</td>
+                    <td>{{ lead.source|default:"-" }}</td>
+
+                    <!-- ✅ FIXED CAMPAIGN -->
+                    <td>{{ lead.campaign_name|default:"-" }}</td>
+
+                    <!-- ✅ CORRECT HIERARCHY -->
+                    <td>
+                        {% if lead.assigned_to.role == 'manager' %}
+                            {{ lead.assigned_to.user.username }}
+                        {% elif lead.assigned_to.reports_to and lead.assigned_to.reports_to.reports_to %}
+                            {{ lead.assigned_to.reports_to.reports_to.user.username }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if lead.assigned_to.role == 'tl' %}
+                            {{ lead.assigned_to.user.username }}
+                        {% elif lead.assigned_to.role == 'employee' and lead.assigned_to.reports_to %}
+                            {{ lead.assigned_to.reports_to.user.username }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if lead.assigned_to.role == 'employee' %}
+                            {{ lead.assigned_to.user.username }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <!-- STAGE -->
+                    <td>
+                        <span class="badge bg-dark border">
+                            {{ lead.stage }}
+                        </span>
+                    </td>
+
+                    <!-- TEMPERATURE -->
+                    <td>
+                        {% if lead.temperature == 'hot' %}
+                            <span class="badge bg-danger">Hot</span>
+                        {% elif lead.temperature == 'warm' %}
+                            <span class="badge bg-warning text-dark">Warm</span>
+                        {% else %}
+                            <span class="badge bg-info text-dark">Cold</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-end small">
+                        {{ lead.created_at|date:"M d, Y" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        No leads found
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

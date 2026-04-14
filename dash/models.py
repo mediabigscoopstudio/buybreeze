@@ -22,27 +22,34 @@ class Branch(models.Model):
     def __str__(self):
         return self.name
 
-
 # ============================================================
 # USER PROFILE (extends Django User)
-# ============================================================
-ROLE_CHOICES = [
-    ('superadmin', 'Super Admin'),
-    ('manager', 'Branch Manager'),
-    ('tl', 'Team Leader'),
-    ('member', 'Call Team Member'),
-    ('hr', 'HR Panel'),
-    ('marketing', 'Marketing Admin'),
-]
+# ============================================================python manage.py dbshell
 
 class UserProfile(models.Model):
-    user         = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    role         = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    branch       = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('manager', 'Manager'),
+        ('tl', 'Team Leader'),
+        ('employee', 'Employee'),
+    ]
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     phone        = models.CharField(max_length=20, blank=True, null=True)
     profile_pic  = models.ImageField(upload_to='profiles/', blank=True, null=True)
-    reports_to   = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
-                                     related_name='team_members')
+    reports_to = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='team_members'
+    )
     status       = models.CharField(max_length=20, default='Enabled')
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
@@ -50,122 +57,141 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.get_full_name()} ({self.role})"
 
-
 # ============================================================
 # LEAD
 # ============================================================
+
 SOURCE_CHOICES = [
+    ('excel', 'Excel'),
     ('meta', 'Meta Ads'),
     ('google', 'Google Ads'),
-    ('website', 'Website Form'),
-    ('social', 'Social Media (Organic)'),
-    ('campaign', 'Campaign'),
-    ('referral', 'Referral'),
-    ('walkin', 'Walk-in'),
-    ('whatsapp', 'WhatsApp Inbound'),
-    ('other', 'Other'),
 ]
 
 TEMPERATURE_CHOICES = [
-    ('hot', 'Hot'),
-    ('warm', 'Warm'),
     ('cold', 'Cold'),
+    ('warm', 'Warm'),
+    ('hot', 'Hot'),
 ]
 
 STAGE_CHOICES = [
     ('new', 'New'),
     ('contacted', 'Contacted'),
-    ('interested', 'Interested'),
-    ('site_visit', 'Site Visit'),
-    ('negotiation', 'Negotiation'),
+    ('qualified', 'Qualified'),
     ('closed', 'Closed'),
-    ('lost', 'Lost'),
 ]
 
 PROPERTY_TYPE_CHOICES = [
     ('apartment', 'Apartment'),
     ('villa', 'Villa'),
     ('plot', 'Plot'),
-    ('commercial', 'Commercial'),
-    ('studio', 'Studio'),
 ]
 
 BHK_CHOICES = [
     ('1bhk', '1 BHK'),
     ('2bhk', '2 BHK'),
     ('3bhk', '3 BHK'),
-    ('4bhk+', '4 BHK+'),
+    ('4bhk+', '4+ BHK'),
 ]
 
 PURPOSE_CHOICES = [
     ('investment', 'Investment'),
-    ('selfuse', 'Self Use'),
-    ('rental', 'Rental'),
+    ('self_use', 'Self Use'),
 ]
 
 TIMELINE_CHOICES = [
     ('immediate', 'Immediate'),
-    ('3months', 'Within 3 Months'),
-    ('6months', 'Within 6 Months'),
-    ('1year', '1 Year+'),
+    ('3_months', 'Within 3 Months'),
+    ('6_months', 'Within 6 Months'),
+    ('later', 'Later'),
 ]
 
 READINESS_CHOICES = [
-    ('ready', 'Ready to Move'),
-    ('underconstruction', 'Under Construction'),
+    ('just_looking', 'Just Looking'),
+    ('interested', 'Interested'),
+    ('ready', 'Ready to Buy'),
 ]
 
 class Lead(models.Model):
     # Basic Info
-    name             = models.CharField(max_length=255)
-    phone            = models.CharField(max_length=20)
-    email            = models.EmailField(blank=True, null=True)
-    location         = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField(blank=True, null=True)
+    location = models.CharField(max_length=255, blank=True, null=True)
 
-    # Source
-    source           = models.CharField(max_length=20, choices=SOURCE_CHOICES)
-    campaign_name    = models.CharField(max_length=255, blank=True, null=True)
-    ad_set           = models.CharField(max_length=255, blank=True, null=True)
-    ad_creative      = models.CharField(max_length=255, blank=True, null=True)
+    # Source & Ads Data
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES)
+    campaign_name = models.CharField(max_length=255, blank=True, null=True)
+    ad_set = models.CharField(max_length=255, blank=True, null=True)
+    ad_creative = models.CharField(max_length=255, blank=True, null=True)
+    gclid = models.CharField(max_length=255, blank=True, null=True)  # Google Ads tracking
     landing_page_url = models.URLField(blank=True, null=True)
 
     # Property Interest
-    property_type    = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, null=True)
-    budget_min       = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    budget_max       = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    property_location= models.CharField(max_length=255, blank=True, null=True)
-    bhk_preference   = models.CharField(max_length=10, choices=BHK_CHOICES, blank=True, null=True)
-    purpose          = models.CharField(max_length=20, choices=PURPOSE_CHOICES, blank=True, null=True)
-    timeline         = models.CharField(max_length=20, choices=TIMELINE_CHOICES, blank=True, null=True)
-    readiness        = models.CharField(max_length=20, choices=READINESS_CHOICES, blank=True, null=True)
+    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, null=True)
+    budget_min = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    budget_max = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    property_location = models.CharField(max_length=255, blank=True, null=True)
+    bhk_preference = models.CharField(max_length=10, choices=BHK_CHOICES, blank=True, null=True)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, blank=True, null=True)
+    timeline = models.CharField(max_length=20, choices=TIMELINE_CHOICES, blank=True, null=True)
+    readiness = models.CharField(max_length=20, choices=READINESS_CHOICES, blank=True, null=True)
 
     # Lead Status
-    temperature      = models.CharField(max_length=10, choices=TEMPERATURE_CHOICES, default='cold')
-    stage            = models.CharField(max_length=20, choices=STAGE_CHOICES, default='new')
+    temperature = models.CharField(max_length=10, choices=TEMPERATURE_CHOICES, default='cold')
+    stage = models.CharField(max_length=20, choices=STAGE_CHOICES, default='new')
 
-    # Assignment
-    assigned_to      = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
-                                         related_name='assigned_leads')
-    branch           = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
-    # Assignment chain
-    assigned_to      = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
-                                     related_name='assigned_leads')
-    # ADD THESE TWO NEW FIELDS:
-    assigned_to_manager = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name='manager_leads')
-    assigned_to_tl      = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
-                                        related_name='tl_leads')
+    # Assignment (ONLY ONE FIELD)
+    assigned_to = models.ForeignKey(
+        UserProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_leads'
+    )
+
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
     # Meta
-    notes            = models.TextField(blank=True, null=True)
-    status           = models.CharField(max_length=20, default='Enabled')
-    created_at       = models.DateTimeField(auto_now_add=True)
-    updated_at       = models.DateTimeField(auto_now=True)
+    notes = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, default='Enabled')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.name} — {self.phone}"
 
 
+# ----------------------------
+# ASSIGNMENT HISTORY (TRACKING)
+# ----------------------------
+
+class LeadAssignmentHistory(models.Model):
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE)
+
+    assigned_from = models.ForeignKey(
+        UserProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='assigned_from_history'
+    )
+
+    assigned_to = models.ForeignKey(
+        UserProfile,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='assigned_to_history'
+    )
+
+    assigned_by_role = models.CharField(max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.lead.name} assigned to {self.assigned_to}"
 # ============================================================
 # CALL LOG
 # ============================================================

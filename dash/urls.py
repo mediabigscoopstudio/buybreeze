@@ -1,9 +1,12 @@
 from django.urls import path
 from dash import views
+from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    # Admin 
+    path('django-admin/', admin.site.urls),
     # Auth
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),
@@ -52,6 +55,8 @@ urlpatterns = [
     # Leads
     path('leads', views.leads, name='leads'),
     path('add_lead', views.add_lead, name='add_lead'),
+    path('assign-leads/', views.bulk_assign_leads, name='bulk_assign_leads'),
+    path('manager_performance/<int:id>/', views.manager_performance, name='manager_performance'),
     path('edit_lead/<int:id>', views.edit_lead, name='edit_lead'),
     path('delete_lead/<int:id>', views.delete_lead, name='delete_lead'),
     path('enable_lead/<int:id>', views.enable_lead, name='enable_lead'),
