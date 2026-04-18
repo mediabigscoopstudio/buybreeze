@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard | CRM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .table-responsive { scrollbar-width: thin; }
+        .timeline-item { border-left: 2px solid #e9ecef; padding-left: 1.5rem; position: relative; margin-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -0.4rem; top: 0; width: 12px; height: 12px; border-radius: 50%; background-color: #0d6efd; border: 2px solid #fff; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand bg-white border-bottom shadow-sm sticky-top px-2 px-md-4 py-2">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2" href="#">
+                <div class="bg-success text-white rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-person-workspace"></i>
+                </div>
+                <span class="d-none d-sm-inline">Employee Dashboard</span>
+            </a>
+
+            <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <li class="nav-item dropdown">
+                    <a class="nav-link text-dark position-relative p-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell fs-5"></i>
+                        <span class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" style="width: 300px;">
+                        <h6 class="dropdown-header text-dark fw-bold border-bottom pb-2">Notifications</h6>
+                        <div class="px-0 py-1" style="max-height: 300px; overflow-y: auto;">
+                            <a class="dropdown-item py-2 border-bottom" href="#">
+                                <div class="small fw-semibold text-dark">New lead assigned to you</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">10 mins ago</div>
+                            </a>
+                            <a class="dropdown-item py-2" href="#">
+                                <div class="small fw-semibold text-dark">Follow-up reminder</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">1 hour ago</div>
+                            </a>
+                        </div>
+                        <a href="#" class="dropdown-item text-center text-primary fw-medium border-top pt-2 small">View All</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link d-flex align-items-center gap-2 p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 36px; height: 36px;">
+                            {{ user.username|make_list|first|upper|default:"E" }}
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                        <li class="px-3 py-2 border-bottom">
+                            <span class="d-block fw-bold text-dark">{{ user.username|default:"Employee Name" }}</span>
+                            <span class="d-block text-muted small">{{ user.email|default:"employee@crm.com" }}</span>
+                        </li>
+                        <li><a class="dropdown-item py-2 mt-1" href="#"><i class="bi bi-person me-2 text-secondary"></i>Profile</a></li>
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2 text-secondary"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-4">
+            <span class="text-muted small me-2"><i class="bi bi-geo-alt-fill text-primary"></i> Location Tracking Active</span>
+            <button id="punchInBtn" class="btn btn-success px-4 shadow-sm fw-bold" onclick="handlePunch('punch_in')">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Punch In
+            </button>
+            <button id="punchOutBtn" class="btn btn-danger px-4 shadow-sm fw-bold" onclick="handlePunch('punch_out')">
+                <i class="bi bi-box-arrow-left me-1"></i> Punch Out
+            </button>
+        </div>
+
+        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">My Total Leads</div>
+                    <h2 class="display-6 fw-bold text-dark mb-0">{{ total_leads|default:"0" }}</h2>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Hot Leads</div>
+                    <h2 class="display-6 fw-bold text-danger mb-0">{{ hot_leads|default:"0" }}</h2>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Pending Follow-ups</div>
+                    <h2 class="display-6 fw-bold text-warning mb-0">{{ pending_followups|default:"0" }}</h2>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
+                    <div class="text-muted small fw-semibold text-uppercase mb-1">Closed Leads</div>
+                    <h2 class="display-6 fw-bold text-success mb-0">{{ closed_leads|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom p-3 p-md-4 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                    <i class="bi bi-person-lines-fill text-success"></i> My Assigned Leads
+                </h5>
+                <div class="input-group" style="max-width: 250px;">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control border-start-0 bg-light" placeholder="Search leads...">
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-nowrap">
+                        <thead class="table-light text-secondary">
+                            <tr>
+                                <th scope="col" class="py-3 ps-4">Name</th>
+                                <th scope="col" class="py-3">Phone</th>
+                                <th scope="col" class="py-3">Source</th>
+                                <th scope="col" class="py-3">Campaign</th>
+                                <th scope="col" class="py-3">Temp</th>
+                                <th scope="col" class="py-3">Stage</th>
+                                <th scope="col" class="py-3 pe-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lead in assigned_leads %}
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">{{ lead.name }}</td>
+                                <td class="text-secondary">{{ lead.phone }}</td>
+                                <td class="text-secondary">{{ lead.source }}</td>
+                                <td class="text-secondary">{{ lead.campaign_name|default:"-" }}</td>
+                                <td>
+                                    {% if lead.temperature|lower == 'hot' %}
+                                        <span class="badge bg-danger rounded-pill px-3 py-2 fw-medium">Hot</span>
+                                    {% elif lead.temperature|lower == 'warm' %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-medium">Warm</span>
+                                    {% else %}
+                                        <span class="badge bg-info text-dark rounded-pill px-3 py-2 fw-medium">Cold</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">{{ lead.stage }}</span>
+                                </td>
+                                <td class="pe-4 text-center">
+                                    <button class="btn btn-sm btn-primary fw-medium px-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#manageLeadModal" onclick="populateModal('{{ lead.id }}', '{{ lead.name }}', '{{ lead.phone }}')">
+                                        <i class="bi bi-journal-text me-1"></i> Manage
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                    <span class="fw-medium text-dark">No leads assigned</span>
+                                    <p class="small mb-0 mt-1">You currently have no leads to work on.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="manageLeadModal" tabindex="-1" aria-labelledby="manageLeadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                
+                <div class="modal-header border-bottom px-4 py-3 bg-light rounded-top-4">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-1" id="manageLeadModalLabel">Manage Lead: <span id="modalLeadName" class="text-primary">Loading...</span></h5>
+                        <div class="text-muted small"><i class="bi bi-telephone-fill me-1"></i> <span id="modalLeadPhone">...</span></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <ul class="nav nav-tabs px-4 pt-3 border-bottom-0 bg-light" id="leadTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-semibold text-dark" id="wrapup-tab" data-bs-toggle="tab" data-bs-target="#wrapup" type="button" role="tab"><i class="bi bi-telephone-outbound me-1"></i> Call Wrap-up</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold text-dark" id="followup-tab" data-bs-toggle="tab" data-bs-target="#followup" type="button" role="tab"><i class="bi bi-calendar-event me-1"></i> Follow-up</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-semibold text-dark" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab"><i class="bi bi-clock-history me-1"></i> History Log</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content p-4" id="leadTabsContent">
+                        
+                        <div class="tab-pane fade show active" id="wrapup" role="tabpanel">
+                            <form id="wrapUpForm">
+                                {% csrf_token %}
+                                <input type="hidden" id="wrapupLeadId" name="lead_id">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-secondary small">Call Outcome</label>
+                                        <select class="form-select border-light-subtle shadow-none" name="call_outcome" required>
+                                            <option value="" disabled selected>Select Outcome...</option>
+                                            <option value="Connected">Connected - Positive</option>
+                                            <option value="Not Interested">Connected - Not Interested</option>
+                                            <option value="No Answer">No Answer / Ringing</option>
+                                            <option value="Switched Off">Switched Off / Unreachable</option>
+                                            <option value="Busy">Busy / Call Later</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-secondary small">Update Lead Stage</label>
+                                        <select class="form-select border-light-subtle shadow-none" name="lead_stage">
+                                            <option value="New">New</option>
+                                            <option value="In Progress">In Progress</option>
+                                            <option value="Negotiation">Negotiation</option>
+                                            <option value="Closed Won">Closed - Won</option>
+                                            <option value="Closed Lost">Closed - Lost</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-medium text-secondary small">Call Notes / Remarks</label>
+                                    <textarea class="form-control border-light-subtle shadow-none" name="call_notes" rows="4" placeholder="Summarize the conversation here..." required></textarea>
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary px-4 rounded-pill">Save Call Log</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="followup" role="tabpanel">
+                            <form id="followUpForm">
+                                {% csrf_token %}
+                                <input type="hidden" id="followupLeadId" name="lead_id">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-secondary small">Next Action Type</label>
+                                        <select class="form-select border-light-subtle shadow-none" name="action_type" required>
+                                            <option value="Call">Phone Call</option>
+                                            <option value="Email">Send Email</option>
+                                            <option value="WhatsApp">WhatsApp Message</option>
+                                            <option value="Meeting">In-person/Virtual Meeting</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium text-secondary small">Schedule Date & Time</label>
+                                        <input type="datetime-local" class="form-control border-light-subtle shadow-none" name="schedule_time" required>
+                                    </div>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label fw-medium text-secondary small">Agenda / Reminder Notes</label>
+                                    <input type="text" class="form-control border-light-subtle shadow-none" name="agenda" placeholder="e.g., Discuss pricing package...">
+                                </div>
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-warning text-dark fw-medium px-4 rounded-pill">Schedule Follow-up</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade" id="history" role="tabpanel">
+                            <div class="p-2" style="max-height: 300px; overflow-y: auto;">
+                                <div class="timeline-item">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold text-dark text-sm">Call Connected - Positive</span>
+                                        <span class="text-muted small">Today, 10:30 AM</span>
+                                    </div>
+                                    <p class="mb-0 text-secondary small">Client requested a demo link. Sent via email. Will follow up tomorrow.</p>
+                                    <span class="badge bg-light text-dark border mt-2">Logged by: You</span>
+                                </div>
+
+                                <div class="timeline-item">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold text-dark text-sm">Stage Changed to 'In Progress'</span>
+                                        <span class="text-muted small">Yesterday, 04:15 PM</span>
+                                    </div>
+                                    <p class="mb-0 text-secondary small">System automatic update upon lead assignment.</p>
+                                </div>
+                                
+                                <div class="timeline-item border-left-0 pb-0">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold text-dark text-sm">Lead Created</span>
+                                        <span class="text-muted small">12 Oct 2023, 09:00 AM</span>
+                                    </div>
+                                    <p class="mb-0 text-secondary small">Imported from Facebook Campaign.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Dynamically set modal headers and hidden inputs based on selected lead
+        function populateModal(leadId, leadName, leadPhone) {
+            document.getElementById('modalLeadName').textContent = leadName;
+            document.getElementById('modalLeadPhone').textContent = leadPhone;
+            document.getElementById('wrapupLeadId').value = leadId;
+            document.getElementById('followupLeadId').value = leadId;
+            
+            // Here you could also trigger a fetch() to load the specific Lead History via AJAX
+            // fetch(`/api/lead-history/${leadId}/`).then(res => res.json()).then(data => {...});
+        }
+
+        // Example intercept form submissions for async saving (Django backend logic)
+        document.getElementById('wrapUpForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Saving...";
+            submitBtn.disabled = true;
+
+            // Simulate AJAX request
+            setTimeout(() => {
+                alert("Call logged successfully!");
+                submitBtn.innerText = "Save Call Log";
+                submitBtn.disabled = false;
+                this.reset();
+            }, 800);
+        });
+
+        document.getElementById('followUpForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerText = "Scheduling...";
+            submitBtn.disabled = true;
+
+            // Simulate AJAX request
+            setTimeout(() => {
+                alert("Follow-up scheduled!");
+                submitBtn.innerText = "Schedule Follow-up";
+                submitBtn.disabled = false;
+                this.reset();
+            }, 800);
+        });
+    </script>
+    <script>
+    // Helper to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function handlePunch(actionType) {
+        // 1. Check if browser supports geolocation
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+
+        // Optional: Show a loading state on the button
+        const btn = actionType === 'punch_in' ? document.getElementById('punchInBtn') : document.getElementById('punchOutBtn');
+        const originalText = btn.innerHTML; // changed to innerHTML to preserve the icon
+        btn.innerText = "Verifying Location...";
+        btn.disabled = true;
+
+        // 2. Get the location
+        navigator.geolocation.getCurrentPosition(
+            // Success callback
+            async function(position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                // 3. Send to Django Backend
+                try {
+                    const response = await fetch('/api/process-punch/', { // MAKE SURE THIS URL MATCHES urls.py EXACTLY
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            action: actionType,
+                            latitude: latitude,
+                            longitude: longitude
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        alert(data.message); // Success!
+                        location.reload(); // Reloads the page so they know it worked
+                    } else {
+                        alert("Access Denied: " + data.message); // Out of bounds
+                    }
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("Something went wrong with the server.");
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            },
+            // Error callback
+            function(error) {
+                alert("Unable to retrieve your location. Please allow location access in your browser settings to punch in.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            },
+            // Options for high accuracy
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    }
+    </script>
+</body>
+</html>

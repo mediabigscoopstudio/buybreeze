@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     # Core Apps
     'dash',
     'hrpanel',
+    'employee',
     
     # Third-party
     'django_hosts',
