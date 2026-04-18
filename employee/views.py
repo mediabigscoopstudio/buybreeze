@@ -75,11 +75,11 @@ def index(request):
 @login_required
 @require_POST
 def process_punch(request):
+    user_profile = request.user.userprofile
+    COMPANY_LAT = user_profile.branch.gps_lat
+    COMPANY_LON = user_profile.branch.gps_lng
+    ALLOWED_RADIUS_METERS = user_profile.branch.gps_radius
     try:
-        user_profile = request.user.userprofile
-        COMPANY_LAT = user_profile.branch.gps_lat
-        COMPANY_LON = user_profile.branch.gps_lng
-        ALLOWED_RADIUS_METERS = user_profile.branch.gps_radius
         data = json.loads(request.body)
         action = data.get('action') 
         emp_lat = float(data.get('latitude'))
