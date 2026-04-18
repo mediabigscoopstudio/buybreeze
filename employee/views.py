@@ -14,12 +14,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
-
-# Define your company coordinates
-COMPANY_LAT = 20.362881
-COMPANY_LON = 85.832605
-ALLOWED_RADIUS_METERS = 100
-
 def get_distance(lat1, lon1, lat2, lon2):
     R = 6371.0 # Radius of the Earth in km
     lat1_rad = math.radians(lat1)
@@ -82,6 +76,10 @@ def index(request):
 @require_POST
 def process_punch(request):
     try:
+        user_profile = request.user.userprofile
+        COMPANY_LAT = user_profile.branch.gps_lat
+        COMPANY_LON = user_profile.branch.gps_lng
+        ALLOWED_RADIUS_METERS = user_profile.branch.gps_radius
         data = json.loads(request.body)
         action = data.get('action') 
         emp_lat = float(data.get('latitude'))
