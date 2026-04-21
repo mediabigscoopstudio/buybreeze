@@ -16,3 +16,22 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.employee.username} - {self.date}"
+    
+class LocationPing(models.Model):
+    # This links directly to Django's built-in User model so we can use the username
+    employee = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    # Decimal fields are best for GPS coordinates (gives us accuracy to about 11 centimeters!)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    
+    # Automatically saves the exact date and time the ping was received
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Orders the database so the newest pings always show up first
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        # This is what you will see in the Django Admin panel
+        return f"{self.employee.username} | {self.timestamp.strftime('%I:%M %p')}"    

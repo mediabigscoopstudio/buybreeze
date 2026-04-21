@@ -90,7 +90,7 @@ urlpatterns = [
 
     # Reports
     path('apr-report/', views.apr_report, name='dash_apr_report'),
-
+    path('api/route/<str:username>/<str:date_str>/', views.get_employee_route, name='get_route'),
     # Settings
     path('settings', views.settings_view, name='settings'),
 

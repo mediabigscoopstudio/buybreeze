@@ -1,5 +1,5 @@
-{% extends 'dash/base.html' %} 
-
+{% extends 'dash/base.html' %}
+ 
 {% block content %}
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -22,7 +22,7 @@
                         <th class="text-center">New Leads</th>
                         <th class="text-center">Closed</th>
                         <th class="text-center">Avg Call Time</th>
-                    </tr>
+                        <th class="text-end pe-4">Action</th> </tr>
                 </thead>
                 <tbody>
                     {% for row in report_data %}
@@ -46,15 +46,88 @@
                         <td class="text-center text-primary fw-semibold">{{ row.new_leads }}</td>
                         <td class="text-center text-success fw-semibold">{{ row.closed_contacts }}</td>
                         <td class="text-center font-monospace">{{ row.avg_call_time }}</td>
+                        
+                        <td class="text-end pe-4">
+                            <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date|date:'Y-m-d' }}')" 
+                                    class="btn btn-sm btn-primary fw-medium rounded-pill px-3 shadow-sm"
+                                    data-bs-toggle="modal" data-bs-target="#mapModal">
+                                <i class="bi bi-geo-alt-fill me-1"></i> Track Route
+                            </button>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">No data available.</td>
-                    </tr>
+                        <td colspan="8" class="text-center py-4 text-muted">No data available.</td> </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="mapModalLabel">Field Route: <span id="mapEmpName" class="text-primary"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div id="routeMap" style="height: 450px; width: 100%; border-radius: 12px; background: #e9ecef; z-index: 1;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    let map = null;
+    let polyline = null;
+
+    function viewRoute(username, dateStr) {
+        document.getElementById('mapEmpName').innerText = username;
+
+        // Fetch the GPS pings using the Username
+        fetch(`/api/route/${username}/${dateStr}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    drawMap(data.route);
+                } else {
+                    alert('Could not load route data.');
+                }
+            });
+    }
+
+    function drawMap(routePoints) {
+        if (!map) {
+            map = L.map('routeMap');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+        }
+
+        if (polyline) { map.removeLayer(polyline); }
+        
+        if (routePoints.length === 0) {
+            alert("No location data found for this employee today.");
+            return;
+        }
+
+        const latlngs = routePoints.map(point => [point.lat, point.lng]);
+        polyline = L.polyline(latlngs, {color: 'red', weight: 4}).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+
+        L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
+        if (latlngs.length > 1) {
+            const lastIdx = latlngs.length - 1;
+            L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
+        }
+
+        setTimeout(() => { map.invalidateSize(); }, 250);
+    }
+</script>
 {% endblock %}

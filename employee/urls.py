@@ -10,6 +10,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login_view'),
     path('logout/', views.logout_view, name='logout_view'),
     path('api/process-punch/', views.process_punch, name='process_punch'),
+    path('api/save-location/', views.save_location_ping, name='save_location'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

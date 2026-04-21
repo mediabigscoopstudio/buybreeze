@@ -131,7 +131,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for lead in assigned_leads %}
+                            {% for lead in leads %}
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">{{ lead.name }}</td>
                                 <td class="text-secondary">{{ lead.phone }}</td>
@@ -397,14 +397,22 @@
                     });
 
                     const data = await response.json();
-
                     if (response.ok) {
-                        alert(data.message); // Success!
-                        location.reload(); // Reloads the page so they know it worked
-                    } else {
-                        alert("Access Denied: " + data.message); // Out of bounds
-                    }
-                } catch (error) {
+                    alert(data.message); // Success!                        location.reload(); // Reloads the page so they know it worked
+                  // --- NEW RADAR TRIGGERS ---
+            if (actionType === 'punch_in') {
+                startLiveTracking();
+            } else if (actionType === 'punch_out') {
+                stopLiveTracking();
+            }
+            // --------------------------
+
+            // TEMPORARILY DISABLED so the radar has time to turn on!
+            // location.reload(); 
+            
+        } else {
+            alert("Access Denied: " + data.message); // Out of bounds
+        }
                     console.error("Error:", error);
                     alert("Something went wrong with the server.");
                 } finally {
@@ -423,5 +431,59 @@
         );
     }
     </script>
+    <script>
+    let trackingInterval;
+
+    // This function silently sends the coordinates to Django
+    function sendLocationToBackend(lat, lng) {
+        fetch('/api/save-location/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Safety lock so Django accepts it
+            },
+            body: JSON.stringify({
+                'latitude': lat,
+                'longitude': lng
+            })
+        })
+        .then(response => response.json())
+        .then(data => console.log("Radar Ping:", data))
+        .catch(error => console.error("Radar Error:", error));
+    }
+
+    // This function wakes up the phone's GPS
+    function pingLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    let lat = position.coords.latitude;
+                    let lng = position.coords.longitude;
+                    sendLocationToBackend(lat, lng);
+                },
+                function(error) {
+                    console.warn("User denied GPS or lost signal: ", error.message);
+                },
+                { enableHighAccuracy: true } // Forces GPS chip instead of just cell towers
+            );
+        }
+    }
+
+    // START TRACKING
+    function startLiveTracking() {
+        console.log("Live tracking activated!");
+        pingLocation(); // Do it instantly the first time
+        
+        // Then do it every 30 minutes (30 mins * 60 seconds * 1000 milliseconds)
+        const THIRTY_MINUTES = 30 * 60 * 1000;
+        trackingInterval = setInterval(pingLocation, THIRTY_MINUTES);
+    }
+
+    // STOP TRACKING
+    function stopLiveTracking() {
+        clearInterval(trackingInterval);
+        console.log("Live tracking stopped!");
+    }
+</script>
 </body>
 </html>

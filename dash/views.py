@@ -16,6 +16,9 @@ from .models import (
 )
 from django.contrib.admin.views.decorators import staff_member_required
 from django.apps import apps  # <--- Add this at the very top of your file with your other imports!
+from django.http import JsonResponse
+from employee.models import LocationPing # <-- Make sure this is imported at the top!
+from datetime import datetime
 
 # ============================================================
 # AUTH GUARD
@@ -1275,3 +1278,28 @@ def apr_report(request):
         })
 
     return render(request, 'dash/apr_report.html', {'report_data': report_data})
+
+@staff_member_required
+def get_employee_route(request, username, date_str):
+    try:
+        # Convert date string to real date
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        
+        # Grab all pings for this EXACT username on this specific day
+        pings = LocationPing.objects.filter(
+            employee__username=username,
+            timestamp__date=target_date
+        ).order_by('timestamp')
+
+        # Package the coordinates for the map
+        route_data = []
+        for p in pings:
+            route_data.append({
+                'lat': float(p.latitude), 
+                'lng': float(p.longitude), 
+                'time': p.timestamp.strftime('%I:%M %p')
+            })
+            
+        return JsonResponse({'status': 'success', 'route': route_data})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

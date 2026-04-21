@@ -13,6 +13,9 @@ from .models import Attendance
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+import json
+from django.http import JsonResponse
+from .models import LocationPing # Make sure LocationPing is imported at the top!
 
 def get_distance(lat1, lon1, lat2, lon2):
     R = 6371.0 # Radius of the Earth in km
@@ -137,3 +140,22 @@ def process_punch(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     
+def save_location_ping(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        try:
+            # Catch the data sent from our Javascript
+            data = json.loads(request.body)
+            lat = data.get('latitude')
+            lng = data.get('longitude')
+            
+            # Save it to our new Database table!
+            LocationPing.objects.create(
+                employee=request.user,
+                latitude=lat,
+                longitude=lng
+            )
+            return JsonResponse({'status': 'success', 'message': 'Ping saved!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
