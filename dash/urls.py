@@ -88,6 +88,9 @@ urlpatterns = [
     path('enable_followup/<int:id>', views.enable_followup, name='enable_followup'),
     path('disable_followup/<int:id>', views.disable_followup, name='disable_followup'),
 
+    # Reports
+    path('apr-report/', views.apr_report, name='dash_apr_report'),
+
     # Settings
     path('settings', views.settings_view, name='settings'),
 

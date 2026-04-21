@@ -351,6 +351,9 @@
     <a href="{% url 'hr_panel' %}" class="{% if 'hr' in request.resolver_match.url_name or 'attendance' in request.resolver_match.url_name or 'leave' in request.resolver_match.url_name or 'payroll' in request.resolver_match.url_name %}active{% endif %}">
   <i class="bi bi-person-badge-fill"></i> HR Panel
 </a>
+<a href="{% url 'dash_apr_report' %}" class="{% if request.resolver_match.url_name == 'dash_apr_report' %}active{% endif %}">
+    <i class="bi bi-bar-chart-line-fill"></i> APR Report
+</a>
 
     <div class="sidebar-section">System</div>
     <a href="{% url 'settings' %}" class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">

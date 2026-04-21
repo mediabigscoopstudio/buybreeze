@@ -1,0 +1,60 @@
+{% extends 'dash/base.html' %} 
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Agent Performance Report (APR)</h3>
+            <p class="text-muted small mb-0">Daily overview of employee attendance and CRM metrics.</p>
+        </div>
+        <button class="btn btn-dark shadow-sm"><i class="bi bi-download"></i> Export CSV</button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-secondary">
+                    <tr>
+                        <th>Date</th>
+                        <th>Employee</th>
+                        <th>Punch In</th>
+                        <th>Punch Out</th>
+                        <th class="text-center">New Leads</th>
+                        <th class="text-center">Closed</th>
+                        <th class="text-center">Avg Call Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report_data %}
+                    <tr>
+                        <td class="fw-medium">{{ row.date|date:"d M Y" }}</td>
+                        <td class="fw-bold text-dark">{{ row.employee_name }}</td>
+                        <td>
+                            {% if row.punch_in %}
+                                <span class="badge bg-success bg-opacity-10 text-success">{{ row.punch_in|time:"h:i A" }}</span>
+                            {% else %}
+                                <span class="text-muted small">Missing</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.punch_out %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger">{{ row.punch_out|time:"h:i A" }}</span>
+                            {% else %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">Active</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center text-primary fw-semibold">{{ row.new_leads }}</td>
+                        <td class="text-center text-success fw-semibold">{{ row.closed_contacts }}</td>
+                        <td class="text-center font-monospace">{{ row.avg_call_time }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
