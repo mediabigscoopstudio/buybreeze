@@ -19,6 +19,7 @@ from django.apps import apps  # <--- Add this at the very top of your file with 
 from django.http import JsonResponse
 from employee.models import LocationPing # <-- Make sure this is imported at the top!
 from datetime import datetime
+from django.shortcuts import get_object_or_404
 
 # ============================================================
 # AUTH GUARD
@@ -1254,30 +1255,61 @@ def employee_detail(request, id):
 
 @staff_member_required
 def apr_report(request):
-    # 1. THE BULLETPROOF FIX: Force Django to grab the exact 'employee' table, 
-    # completely ignoring any other imports in this file.
-    RealAttendanceModel = apps.get_model('employee', 'Attendance')
+    # 1. SUPER ADMIN: Keep your exact same code!
+    if request.user.is_superuser:
+        from django.apps import apps 
+        RealAttendanceModel = apps.get_model('employee', 'Attendance')
+        
+        # Fetch the records
+        attendances = RealAttendanceModel.objects.select_related('employee').all().order_by('-date')
+        
+        report_data = []
+        for att in attendances:
+            report_data.append({
+                'employee_name': att.employee.username,
+                'date': att.date,
+                'punch_in': att.punch_in_time,
+                'punch_out': att.punch_out_time,
+                'new_leads': 12,
+                'closed_contacts': 3,
+                'avg_call_time': "4m 30s",
+            })
+            
+        return render(request, 'dash/apr_report.html', {'report_data': report_data})
     
-    # 2. Fetch the records using the guaranteed correct model
-    attendances = RealAttendanceModel.objects.select_related('employee').all().order_by('-date')
-    
-    # (Optional Debug) Let's see if it catches them now!
-    print("🚨 --- DEBUG TRACKER --- 🚨")
-    print(f"I found exactly {attendances.count()} records for the grid!")
-    
-    report_data = []
-    for att in attendances:
-        report_data.append({
-            'employee_name': att.employee.username,
-            'date': att.date,
-            'punch_in': att.punch_in_time,
-            'punch_out': att.punch_out_time,
-            'new_leads': 12,
-            'closed_contacts': 3,
-            'avg_call_time': "4m 30s",
-        })
-
-    return render(request, 'dash/apr_report.html', {'report_data': report_data})
+    # 2. HR & MANAGER: The New Directory View
+    else:
+        from django.contrib.auth.models import User
+        
+        # Grab all regular employees. 
+        # Using select_related makes the database query lightning fast!
+        employees = User.objects.filter(is_superuser=False).select_related(
+            'userprofile', 
+            'userprofile__branch', 
+            'userprofile__reports_to', 
+            'userprofile__reports_to__user'
+        )
+        
+        directory_data = []
+        for emp in employees:
+            # We safely check if they have a UserProfile built
+            if hasattr(emp, 'userprofile'):
+                # Grab the Branch name
+                branch_name = emp.userprofile.branch.name if emp.userprofile.branch else "N/A"
+                
+                # Grab the Team Leader's username (following the reports_to -> user link)
+                tl_name = emp.userprofile.reports_to.user.username if emp.userprofile.reports_to else "N/A"
+            else:
+                branch_name = "N/A"
+                tl_name = "N/A"
+            
+            directory_data.append({
+                'username': emp.username,
+                'branch': branch_name,
+                'team_leader': tl_name,
+            })
+            
+        return render(request, 'dash/apr_directory.html', {'directory_data': directory_data})
 
 @staff_member_required
 def get_employee_route(request, username, date_str):
@@ -1303,3 +1335,32 @@ def get_employee_route(request, username, date_str):
         return JsonResponse({'status': 'success', 'route': route_data})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+@staff_member_required
+def individual_apr_report(request, username):
+    # Get the specific employee
+    employee = get_object_or_404(User, username=username)
+    
+    # Grab the attendance model securely
+    from django.apps import apps 
+    RealAttendanceModel = apps.get_model('employee', 'Attendance')
+    
+    # Fetch records ONLY for this employee!
+    attendances = RealAttendanceModel.objects.filter(employee=employee).order_by('-date')
+    
+    report_data = []
+    for att in attendances:
+        report_data.append({
+            'employee_name': att.employee.username,
+            'date': att.date,
+            'punch_in': att.punch_in_time,
+            'punch_out': att.punch_out_time,
+            'new_leads': 12,
+            'closed_contacts': 3,
+            'avg_call_time': "4m 30s",
+        })
+        
+    return render(request, 'dash/individual_apr_report.html', {
+        'report_data': report_data,
+        'target_employee': employee
+    })    

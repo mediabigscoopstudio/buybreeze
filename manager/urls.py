@@ -2,6 +2,8 @@ from django.urls import path
 from manager import views
 from django.conf import settings
 from django.conf.urls.static import static
+from dash.views import apr_report
+from dash.views import apr_report, individual_apr_report
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -10,4 +12,6 @@ urlpatterns = [
     path('assign-to-tl/', views.assign_to_tl, name='assign_to_tl'),
     path('unassign_lead/<int:lead_id>/', views.unassign_lead, name='unassign_lead'),
     path('tl_performance/<int:id>/', views.tl_performance, name='tl_performance'),
+    path('apr-report/', apr_report, name='manager_apr_report'),
+    path('apr-report/<str:username>/', individual_apr_report, name='individual_apr_report'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

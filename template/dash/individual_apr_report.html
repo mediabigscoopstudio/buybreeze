@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ target_employee.username }} - APR Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style> body { background-color: #f8f9fa; } </style>
+</head>
+<body>
+
+    <nav class="navbar bg-white border-bottom shadow-sm px-4 py-3 mb-4 sticky-top">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h4 fw-bold text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-person-lines-fill text-primary"></i>
+                Performance Profile: <span class="text-primary ms-1">{{ target_employee.username }}</span>
+            </span>
+            <button onclick="history.back()" class="btn btn-outline-dark rounded-pill px-4 shadow-sm fw-medium">
+                <i class="bi bi-arrow-left me-2"></i> Back to Directory
+            </button>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 pb-5" style="max-width: 1400px;">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary">
+                        <tr>
+                            <th class="ps-4 py-3">Date</th>
+                            <th class="py-3">Employee</th>
+                            <th class="py-3">Punch In</th>
+                            <th class="py-3">Punch Out</th>
+                            <th class="text-center py-3">New Leads</th>
+                            <th class="text-center py-3">Closed</th>
+                            <th class="text-center py-3">Avg Call Time</th>
+                            <th class="text-end pe-4 py-3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in report_data %}
+                        <tr>
+                            <td class="fw-medium ps-4">{{ row.date|date:"d M Y" }}</td>
+                            <td class="fw-bold text-dark">{{ row.employee_name }}</td>
+                            <td>
+                                {% if row.punch_in %}
+                                    <span class="badge bg-success bg-opacity-10 text-success">{{ row.punch_in|time:"h:i A" }}</span>
+                                {% else %}
+                                    <span class="text-muted small">Missing</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if row.punch_out %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger">{{ row.punch_out|time:"h:i A" }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">Active</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center text-primary fw-semibold">{{ row.new_leads }}</td>
+                            <td class="text-center text-success fw-semibold">{{ row.closed_contacts }}</td>
+                            <td class="text-center font-monospace">{{ row.avg_call_time }}</td>
+                            
+                            <td class="text-end pe-4">
+                                <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date|date:'Y-m-d' }}')" 
+                                        class="btn btn-sm btn-primary fw-medium rounded-pill px-3 shadow-sm"
+                                        data-bs-toggle="modal" data-bs-target="#mapModal">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> Track Route
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">No attendance data found for this employee.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark">Field Route: <span id="mapEmpName" class="text-primary"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="routeMap" style="height: 450px; width: 100%; border-radius: 12px; background: #e9ecef; z-index: 1;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let map = null;
+        let polyline = null;
+
+        function viewRoute(username, dateStr) {
+            document.getElementById('mapEmpName').innerText = username;
+
+            fetch(`/api/route/${username}/${dateStr}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        drawMap(data.route);
+                    } else {
+                        alert('Could not load route data.');
+                    }
+                })
+                .catch(err => {
+                    console.error("Map fetch error:", err);
+                    alert("Error reaching the route API.");
+                });
+        }
+
+        function drawMap(routePoints) {
+            if (!map) {
+                map = L.map('routeMap');
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+            }
+
+            if (polyline) { map.removeLayer(polyline); }
+            
+            if (routePoints.length === 0) {
+                alert("No location data found for this employee today.");
+                return;
+            }
+
+            const latlngs = routePoints.map(point => [point.lat, point.lng]);
+            polyline = L.polyline(latlngs, {color: 'red', weight: 4}).addTo(map);
+
+            map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+
+            L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
+            if (latlngs.length > 1) {
+                const lastIdx = latlngs.length - 1;
+                L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
+            }
+
+            setTimeout(() => { map.invalidateSize(); }, 250);
+        }
+    </script>
+</body>
+</html>
