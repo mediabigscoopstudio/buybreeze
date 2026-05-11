@@ -3,86 +3,208 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CoreCRM — Login</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <title>BuyBuzz Infra — Access</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
   <style>
+    :root {
+      --bg-neutral: #f7f3f0;
+      --gold-primary: #D4AF37;
+      --obsidian: #1A1A1A;
+      --silver-border: #E5E5E5;
+      --text-main: #2E2E2E;
+      --text-muted: #6B6B6B;
+    }
+
     body {
       min-height: 100vh;
-      background: #0f172a;
+      margin: 0;
+      background: var(--bg-neutral);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
     }
-    .login-box {
-      background: #fff;
-      border-radius: 14px;
-      padding: 40px 36px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    .brand { margin-bottom: 28px; }
-    .brand h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
-    .brand p { font-size: 0.8rem; color: #64748b; margin: 4px 0 0; text-transform: uppercase; letter-spacing: 1px; }
-    .form-label { font-size: 0.82rem; font-weight: 600; color: #1e293b; margin-bottom: 5px; }
-    .form-control {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 10px 13px;
-      font-size: 0.88rem;
-      color: #1e293b;
-    }
-    .form-control:focus {
-      border-color: #1a56db;
-      box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-    }
-    .btn-login {
-      background: #1a56db;
-      color: #fff;
+
+    /* Bento Box Architecture */
+    .bento-card {
+      background: #FFFFFF;
+      border-radius: 24px;
       border: none;
-      border-radius: 8px;
-      padding: 11px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      padding: 48px 40px;
       width: 100%;
-      margin-top: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-sizing: border-box;
     }
-    .btn-login:hover { background: #1344b5; }
-    .alert { font-size: 0.82rem; border-radius: 8px; }
-    .divider { font-size: 0.7rem; color: #94a3b8; text-align: center; margin: 20px 0 0; }
+
+    /* Typography */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .brand-header h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--obsidian);
+      margin: 0 0 8px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-header p {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* Form Elements */
+    .input-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.25rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid var(--silver-border);
+      border-radius: 12px; /* Soft radius for inputs within the bento card */
+      padding: 14px 16px 14px 48px; /* Padding left for Phosphor icon */
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .form-control:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+    }
+
+    /* Buttons & Badges */
+    .btn-primary {
+      background: var(--gold-primary);
+      color: var(--obsidian);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      border: none;
+      border-radius: 50px; /* Pill shape */
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    /* Django Messages Alert */
+    .alert-danger {
+      background: #FFF5F5;
+      border: 1px solid #FFE0E0;
+      color: #D32F2F;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .divider {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 32px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
-  <div class="login-box">
-    <div class="brand">
-      <h1>CoreCRM</h1>
-      <p>Super Admin Portal</p>
+
+  <div class="bento-card">
+    <div class="brand-header">
+      <h1>BuyBuzz Infra</h1>
+      <p>System Access</p>
     </div>
 
     {% if messages %}
       {% for message in messages %}
-        <div class="alert alert-danger">{{ message }}</div>
+        <div class="alert-danger">
+          <i class="ph-fill ph-warning-circle" style="font-size: 1.25rem;"></i>
+          <span>{{ message }}</span>
+        </div>
       {% endfor %}
     {% endif %}
 
     <form method="POST" action="{% url 'login_view' %}">
       {% csrf_token %}
-      <div class="mb-3">
+      
+      <div class="input-group">
         <label class="form-label">Username</label>
-        <input type="text" name="username" class="form-control" placeholder="Enter username" required autofocus>
+        <div class="input-wrapper">
+          <i class="ph ph-user"></i>
+          <input type="text" name="username" class="form-control" placeholder="Enter your username" required autofocus>
+        </div>
       </div>
-      <div class="mb-4">
+
+      <div class="input-group">
         <label class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        <div class="input-wrapper">
+          <i class="ph ph-lock-key"></i>
+          <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+        </div>
       </div>
-      <button type="submit" class="btn-login">Sign In</button>
+
+      <button type="submit" class="btn-primary">Sign In</button>
     </form>
 
-    <div class="divider">CoreCRM · Real Estate CRM · BigScoop Studio</div>
+    <div class="divider">BuyBuzz Infra · Enterprise CRM Hub</div>
   </div>
+
 </body>
 </html>

@@ -1,205 +1,249 @@
 {% extends 'dash/base.html' %}
-{% block page_title %}Dashboard{% endblock %}
+{% block style %}
+<style>
+  /* Custom Bento Styles specific to dashboard */
+  .stat-bento {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    padding: 2rem 1rem;
+    height: 100%;
+    transition: transform 0.2s ease;
+  }
+  .stat-bento:hover { transform: translateY(-4px); }
+  
+  .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+  
+  .stat-val { font-size: 1.75rem; font-weight: 800; font-family: var(--font-heading); color: var(--bb-obsidian); line-height: 1; }
+  .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--bb-text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Luxury Colored Icons */
+  .icon-blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+  .icon-gold { background: var(--bb-gold-light); color: var(--bb-gold); }
+  .icon-green { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+  .icon-purple { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
+  .icon-orange { background: rgba(234, 88, 12, 0.1); color: #ea580c; }
+  .icon-teal { background: rgba(13, 148, 136, 0.1); color: #0d9488; }
+
+  /* Specific Card Highlights */
+  .gold-card { background: var(--bb-gold); color: var(--bb-obsidian); }
+  .gold-card .stat-val { color: var(--bb-obsidian); }
+  .gold-card .stat-label { color: rgba(26, 26, 26, 0.8); }
+  .gold-card .stat-icon-wrapper { background: rgba(255,255,255,0.3); color: var(--bb-obsidian); }
+
+  .bento-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .bento-header h6 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4 pb-2">
-  <div>
-    <h2 class="mb-0">Overview</h2>
-    <p class="mb-0" style="color: #6B6B6B;">Cross-branch overview — all data</p>
-  </div>
+<div class="mb-4">
+  <h4 class="h-font" style="font-size: 1.2rem;">Overview</h4>
+  <p style="color: var(--bb-text-muted); font-size: 0.9rem; margin:0;">Cross-branch performance matrix</p>
 </div>
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card d-flex flex-column justify-content-center align-items-center text-center p-3 h-100">
-      <div style="width: 45px; height: 45px; border-radius: var(--radius-pill); background: var(--bb-bg); color: var(--bb-obsidian); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-        <i class="ph-fill ph-users-three" style="font-size: 1.5rem;"></i>
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-blue">
+        <i class="ph-fill ph-users"></i>
       </div>
-      <h3 class="mb-0">{{ total_leads }}</h3>
-      <span style="font-size: 0.75rem; color: #6B6B6B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; mt-1">Total Leads</span>
+      <div>
+        <div class="stat-val">{{ total_leads }}</div>
+        <div class="stat-label">Total Leads</div>
+      </div>
     </div>
   </div>
-
+  
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card d-flex flex-column justify-content-center align-items-center text-center p-3 h-100" style="background: var(--bb-gold); color: var(--bb-white);">
-      <div style="width: 45px; height: 45px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.2); color: var(--bb-white); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-        <i class="ph-fill ph-fire" style="font-size: 1.5rem;"></i>
+    <div class="bento-card stat-bento gold-card">
+      <div class="stat-icon-wrapper">
+        <i class="ph-fill ph-fire"></i>
       </div>
-      <h3 class="mb-0" style="color: var(--bb-white);">{{ hot_leads }}</h3>
-      <span style="font-size: 0.75rem; color: var(--bb-white); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; mt-1">Hot Leads</span>
+      <div>
+        <div class="stat-val">{{ hot_leads }}</div>
+        <div class="stat-label">Hot Leads</div>
+      </div>
     </div>
   </div>
-
+  
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card d-flex flex-column justify-content-center align-items-center text-center p-3 h-100">
-      <div style="width: 45px; height: 45px; border-radius: var(--radius-pill); background: #e0f8e9; color: var(--success); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-        <i class="ph-fill ph-phone-call" style="font-size: 1.5rem;"></i>
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-green">
+        <i class="ph-fill ph-phone-call"></i>
       </div>
-      <h3 class="mb-0">{{ total_calls }}</h3>
-      <span style="font-size: 0.75rem; color: #6B6B6B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; mt-1">Total Calls</span>
+      <div>
+        <div class="stat-val">{{ total_calls }}</div>
+        <div class="stat-label">Total Calls</div>
+      </div>
     </div>
   </div>
-
+  
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card d-flex flex-column justify-content-center align-items-center text-center p-3 h-100" style="background: var(--bb-obsidian); color: var(--bb-white);">
-      <div style="width: 45px; height: 45px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.1); color: var(--bb-silver); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-        <i class="ph-fill ph-buildings" style="font-size: 1.5rem;"></i>
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-purple">
+        <i class="ph-fill ph-buildings"></i>
       </div>
-      <h3 class="mb-0" style="color: var(--bb-white);">{{ total_branches }}</h3>
-      <span style="font-size: 0.75rem; color: var(--bb-silver); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; mt-1">Branches</span>
+      <div>
+        <div class="stat-val">{{ total_branches }}</div>
+        <div class="stat-label">Branches</div>
+      </div>
     </div>
   </div>
-
+  
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card d-flex flex-column justify-content-center align-items-center text-center p-3 h-100">
-      <div style="width: 45px; height: 45px; border-radius: var(--radius-pill); background: #fff4e5; color: var(--warm); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-        <i class="ph-fill ph-users" style="font-size: 1.5rem;"></i>
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-orange">
+        <i class="ph-fill ph-user-circle"></i>
       </div>
-      <h3 class="mb-0">{{ total_users }}</h3>
-      <span style="font-size: 0.75rem; color: #6B6B6B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; mt-1">Active Users</span>
+      <div>
+        <div class="stat-val">{{ total_users }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
     </div>
   </div>
-
+  
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card d-flex flex-column justify-content-center align-items-center text-center p-3 h-100">
-      <div style="width: 45px; height: 45px; border-radius: var(--radius-pill); background: #eff6ff; color: var(--cold); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
-        <i class="ph-fill ph-calendar-check" style="font-size: 1.5rem;"></i>
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-teal">
+        <i class="ph-fill ph-calendar-check"></i>
       </div>
-      <h3 class="mb-0">{{ pending_followups }}</h3>
-      <span style="font-size: 0.75rem; color: #6B6B6B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; mt-1">Pending F/U</span>
+      <div>
+        <div class="stat-val">{{ pending_followups }}</div>
+        <div class="stat-label">Pending F/U</div>
+      </div>
     </div>
   </div>
 </div>
 
 <div class="row g-4 mb-4">
-
-  <div class="col-xl-4 col-lg-5">
+  <div class="col-md-5">
     <div class="bento-card h-100">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="mb-0 d-flex align-items-center gap-2">
-          <i class="ph-fill ph-buildings" style="color: var(--bb-gold);"></i> Leads by Branch
-        </h5>
+      <div class="bento-header">
+        <h6><i class="ph-fill ph-buildings" style="color: var(--bb-gold);"></i> Leads by Branch</h6>
       </div>
-      
-      <div class="d-flex flex-column gap-3">
+      <div style="padding: 4px 0;">
         {% for b in branch_leads %}
-        <div class="d-flex align-items-center justify-content-between pb-3" style="border-bottom: 1px solid var(--bb-bg);">
-          <span style="font-size: 0.95rem; font-weight: 500;">{{ b.name }}</span>
-          <span class="badge" style="background: var(--bb-bg); color: var(--bb-obsidian); font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: var(--radius-pill);">{{ b.lead_count }}</span>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding: 14px 0; border-bottom: 1px solid var(--bb-silver);">
+          <span style="font-size:0.95rem; font-weight:500;">{{ b.name }}</span>
+          <span style="font-size:0.9rem; font-weight:700; background: var(--bb-bg); padding: 4px 12px; border-radius: var(--radius-pill);">{{ b.lead_count }}</span>
         </div>
         {% empty %}
-        <div class="text-center py-4" style="color: #6B6B6B;">
-          <i class="ph ph-buildings mb-2 d-block" style="font-size: 2rem; opacity: 0.5;"></i>
-          <p class="mb-0" style="font-size: 0.85rem;">No branches yet</p>
+        <div class="text-center py-4" style="color: var(--bb-text-muted);">
+            <i class="ph ph-buildings" style="font-size: 2rem;"></i>
+            <p class="mt-2">No branches yet</p>
         </div>
         {% endfor %}
       </div>
     </div>
   </div>
 
-  <div class="col-xl-8 col-lg-7">
+  <div class="col-md-7">
     <div class="bento-card h-100">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h5 class="mb-0 d-flex align-items-center gap-2">
-          <i class="ph-fill ph-calendar-check" style="color: var(--cold);"></i> Upcoming Follow-Ups (24h)
-        </h5>
-        <a href="{% url 'followups' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">View All</a>
+      <div class="bento-header">
+        <h6><i class="ph-fill ph-calendar-check text-success"></i> Upcoming Follow-Ups (24h)</h6>
+        <a href="{% url 'followups' %}" class="btn-gold" style="padding: 0.4rem 1rem; font-size: 0.8rem; text-decoration: none;">View All</a>
       </div>
-      
-      <div class="table-responsive">
-        <table class="table table-borderless align-middle mb-0">
-          <thead style="border-bottom: 2px solid var(--bb-bg);">
+      <div class="bento-table-wrapper">
+        <table class="bento-table">
+          <thead>
             <tr>
-              <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Lead</th>
-              <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Type</th>
-              <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Time</th>
-              <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Assigned</th>
+              <th>Lead</th>
+              <th>Type</th>
+              <th>Time</th>
+              <th>Assigned</th>
             </tr>
           </thead>
           <tbody>
             {% for f in upcoming_followups %}
-            <tr style="border-bottom: 1px solid var(--bb-bg);">
-              <td class="py-3 fw-semibold" style="color: var(--bb-obsidian);">{{ f.lead.name }}</td>
-              <td class="py-3">
-                <span class="badge" style="background: var(--bb-bg); color: var(--bb-text); border-radius: var(--radius-pill); font-weight: 500;">
-                  {{ f.get_followup_type_display }}
-                </span>
+            <tr>
+              <td style="font-weight:600;">{{ f.lead.name }}</td>
+              <td><span class="bento-badge" style="background: var(--bb-bg);">{{ f.get_followup_type_display }}</span></td>
+              <td style="color: var(--bb-text-muted);">{{ f.followup_at|date:"d M, g:i A" }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;"><i class="ph-fill ph-user"></i></div>
+                  {{ f.assigned_to.user.get_full_name|default:"—" }}
+                </div>
               </td>
-              <td class="py-3" style="font-size: 0.9rem;">{{ f.followup_at|date:"d M, g:i A" }}</td>
-              <td class="py-3" style="font-size: 0.9rem; color: #6B6B6B;">{{ f.assigned_to.user.get_full_name|default:"—" }}</td>
             </tr>
             {% empty %}
-            <tr>
-              <td colspan="4" class="text-center py-5" style="color: #6B6B6B;">
-                <p class="mb-0" style="font-size: 0.85rem;">No upcoming follow-ups in next 24 hours</p>
-              </td>
-            </tr>
+            <tr><td colspan="4" class="text-center py-4 text-muted">No upcoming follow-ups in next 24 hours</td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
   </div>
-
 </div>
 
-<div class="bento-card mb-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h5 class="mb-0 d-flex align-items-center gap-2">
-      <i class="ph-fill ph-users-three" style="color: var(--bb-obsidian);"></i> Recent Leads
-    </h5>
-    <a href="{% url 'leads' %}" class="btn btn-sm btn-outline-dark rounded-pill px-3">View Pipeline</a>
+<div class="bento-card">
+  <div class="bento-header">
+    <h6><i class="ph-fill ph-users-three" style="color: #2563eb;"></i> Recent Leads</h6>
+    <a href="{% url 'leads' %}" class="btn-gold" style="padding: 0.4rem 1rem; font-size: 0.8rem; text-decoration: none;">View Pipeline</a>
   </div>
-  
-  <div class="table-responsive">
-    <table class="table table-borderless align-middle mb-0">
-      <thead style="border-bottom: 2px solid var(--bb-bg);">
+  <div class="bento-table-wrapper">
+    <table class="bento-table">
+      <thead>
         <tr>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">#</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Name</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Phone</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Source</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Temp</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Stage</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Branch</th>
-          <th class="pb-3 text-uppercase" style="font-size: 0.75rem; color: #6B6B6B; letter-spacing: 0.5px;">Assigned</th>
+          <th>#</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Source</th>
+          <th>Temp</th>
+          <th>Stage</th>
+          <th>Branch</th>
+          <th>Assigned</th>
         </tr>
       </thead>
       <tbody>
         {% for lead in recent_leads %}
-        <tr style="border-bottom: 10px solid transparent;"> <td style="color: #6B6B6B; font-size: 0.85rem;">{{ forloop.counter }}</td>
+        <tr>
+          <td style="color: var(--bb-text-muted);">{{ forloop.counter }}</td>
           <td>
-            <a href="{% url 'view_lead' lead.id %}" style="font-weight: 600; color: var(--bb-obsidian); text-decoration: none;">
+            <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color: var(--bb-obsidian); text-decoration:none;">
               {{ lead.name }}
             </a>
           </td>
-          <td style="color: #6B6B6B; font-size: 0.9rem;">{{ lead.phone }}</td>
-          <td style="font-size: 0.9rem;">{{ lead.get_source_display }}</td>
+          <td style="color: var(--bb-text-muted);">{{ lead.phone }}</td>
+          <td>{{ lead.get_source_display }}</td>
           <td>
             {% if lead.temperature == 'hot' %}
-              <span class="badge" style="background: #fef2f2; color: var(--hot); border-radius: var(--radius-pill); padding: 0.4rem 0.8rem; font-weight: 600;">Hot</span>
+              <span class="bento-badge" style="background: #FFF5F5; color: #E53E3E;"><i class="ph-fill ph-fire"></i> Hot</span>
             {% elif lead.temperature == 'warm' %}
-              <span class="badge" style="background: #fffbeb; color: var(--warm); border-radius: var(--radius-pill); padding: 0.4rem 0.8rem; font-weight: 600;">Warm</span>
+              <span class="bento-badge" style="background: #FFFAF0; color: #DD6B20;">Warm</span>
             {% else %}
-              <span class="badge" style="background: #eff6ff; color: var(--cold); border-radius: var(--radius-pill); padding: 0.4rem 0.8rem; font-weight: 600;">Cold</span>
+              <span class="bento-badge" style="background: #EBF8FF; color: #3182CE;">Cold</span>
             {% endif %}
           </td>
-          <td>
-            <span class="badge" style="background: var(--bb-bg); color: var(--bb-text); border-radius: var(--radius-pill); padding: 0.4rem 0.8rem; font-weight: 500;">
-              {{ lead.get_stage_display }}
-            </span>
-          </td>
-          <td style="font-size: 0.9rem; color: #6B6B6B;">{{ lead.branch.name|default:"—" }}</td>
-          <td style="font-size: 0.9rem; color: #6B6B6B;">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
+          <td><span class="bento-badge" style="background: var(--bb-bg);">{{ lead.get_stage_display }}</span></td>
+          <td>{{ lead.branch.name|default:"—" }}</td>
+          <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="8" class="text-center py-5">
-            <div style="color: #6B6B6B;">
-              <i class="ph ph-users-three mb-2 d-block" style="font-size: 2rem; opacity: 0.5;"></i>
-              <p class="mb-0" style="font-size: 0.9rem;">No leads yet. <a href="{% url 'add_lead' %}" style="color: var(--bb-gold); text-decoration: none; font-weight: 600;">Add your first lead</a></p>
-            </div>
-          </td>
+            <td colspan="8" class="text-center py-5">
+                <i class="ph ph-users-three text-muted mb-2" style="font-size: 2rem;"></i>
+                <p class="mb-0 text-muted">No leads yet. <a href="{% url 'add_lead' %}" style="color: var(--bb-gold); font-weight: 600;">Add your first lead</a></p>
+            </td>
         </tr>
         {% endfor %}
       </tbody>

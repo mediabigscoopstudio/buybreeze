@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BuyBuzz CRM — Super Admin</title>
+  <title>BuyBuzz Infra — Super Admin</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   
@@ -18,7 +18,6 @@
        BUYBUZZ INFRA BRAND KIT & CSS VARS
        ========================================= */
     :root {
-      /* Color System */
       --bb-gold: #D4AF37;
       --bb-gold-light: rgba(212, 175, 55, 0.15);
       --bb-silver: #E5E5E5;
@@ -29,11 +28,9 @@
       --bb-text-muted: #6B6B6B;
       --bb-white: #FFFFFF;
 
-      /* Typography */
       --font-sans: 'Inter', apple-system, sans-serif;
       --font-heading: 'Plus Jakarta Sans', sans-serif;
 
-      /* Component Variables */
       --sidebar-w: 280px;
       --topbar-h: 80px;
       --radius-sm: 8px;
@@ -42,12 +39,6 @@
       --radius-pill: 50px;
       --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
       --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
-      
-      /* Status Colors mapped to luxury equivalents */
-      --hot: #e74c3c;
-      --warm: #f39c12;
-      --cold: #3498db;
-      --success: #2ecc71;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,6 +48,7 @@
         background: var(--bb-bg); 
         color: var(--bb-text); 
         -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
     }
 
     h1, h2, h3, h4, h5, h6, .h-font {
@@ -76,17 +68,13 @@
       top: 0; left: 0;
       display: flex;
       flex-direction: column;
-      z-index: 100;
+      z-index: 1000;
       overflow-y: auto;
       padding: 2rem 1.5rem;
-      transition: all 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .sidebar-brand {
-      margin-bottom: 2.5rem;
-      display: flex;
-      flex-direction: column;
-    }
+    .sidebar-brand { margin-bottom: 2.5rem; display: flex; flex-direction: column; }
     
     .sidebar-brand .brand-name {
       font-family: var(--font-heading);
@@ -98,10 +86,7 @@
       gap: 0.75rem;
     }
     
-    .sidebar-brand .brand-name i {
-        color: var(--bb-gold);
-        font-size: 1.8rem;
-    }
+    .sidebar-brand .brand-name i { color: var(--bb-gold); font-size: 1.8rem; }
 
     .sidebar-brand .brand-sub {
       font-size: 0.7rem;
@@ -123,9 +108,7 @@
       padding-left: 1rem;
     }
 
-    .sidebar nav {
-        flex-grow: 1;
-    }
+    .sidebar nav { flex-grow: 1; }
 
     .sidebar nav a {
       display: flex;
@@ -142,33 +125,24 @@
     }
     
     .sidebar nav a i { font-size: 1.25rem; }
-    
     .sidebar nav a:hover { background: var(--bb-obsidian-light); color: var(--bb-white); }
-    
     .sidebar nav a.active { 
         background: var(--bb-gold); 
         color: var(--bb-white); 
         box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
     }
 
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
+    /* Mobile Overlay */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
     }
-    
-    .sidebar-footer a {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      color: #A0A0A0;
-      text-decoration: none;
-      font-size: 0.9rem;
-      padding: 0.85rem 1.25rem;
-      border-radius: var(--radius-pill);
-      transition: all 0.2s ease;
-    }
-    .sidebar-footer a:hover { background: var(--bb-obsidian-light); color: var(--bb-white); }
 
     /* =========================================
        TOPBAR
@@ -181,11 +155,28 @@
       right: 0;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       padding: 0 3rem;
       z-index: 99;
-      gap: 12px;
-      background: transparent;
+      background: var(--bb-bg);
       backdrop-filter: blur(10px);
+      transition: left 0.3s ease;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.75rem;
+      color: var(--bb-obsidian);
+      cursor: pointer;
+      padding: 0;
     }
     
     .topbar .page-title {
@@ -193,11 +184,10 @@
       font-weight: 700;
       font-family: var(--font-heading);
       color: var(--bb-obsidian);
-      flex: 1;
       margin: 0;
     }
     
-    .topbar .admin-pill {
+    .admin-pill {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -206,25 +196,51 @@
       border-radius: var(--radius-pill);
       padding: 0.4rem 0.5rem 0.4rem 1.2rem;
       font-size: 0.85rem;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--bb-obsidian);
+      cursor: pointer;
+      transition: transform 0.2s ease;
     }
+
+    .admin-pill:hover { transform: translateY(-2px); }
     
-    .topbar .admin-pill .dot {
+    .admin-pill .dot {
       width: 8px; height: 8px;
-      background: var(--success);
+      background: #2ecc71;
       border-radius: 50%;
     }
     
-    .topbar .admin-pill .avatar-icon {
+    .admin-pill .avatar-icon {
         width: 32px; height: 32px;
-        background: var(--bb-obsidian-light);
+        background: var(--bb-obsidian);
         color: var(--bb-gold);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
     }
+
+    /* Dropdown Styling */
+    .dropdown-menu {
+      border-radius: var(--radius-md);
+      border: none;
+      box-shadow: var(--shadow-hover);
+      padding: 0.5rem;
+      min-width: 200px;
+    }
+    
+    .dropdown-item {
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .dropdown-item i { font-size: 1.1rem; }
+    .dropdown-item:hover { background: var(--bb-bg); }
 
     /* =========================================
        MAIN CONTENT
@@ -233,20 +249,11 @@
       margin-left: var(--sidebar-w);
       padding-top: var(--topbar-h);
       min-height: 100vh;
+      transition: margin-left 0.3s ease;
     }
     .content-area { padding: 2rem 3rem; }
 
-    /* Alerts / Django Messages Override */
-    .alert { 
-        font-size: 0.9rem; 
-        border-radius: var(--radius-md);
-        border: none;
-        box-shadow: var(--shadow-soft);
-    }
-    .alert-success { background-color: #e0f8e9; color: #12b76a; }
-    .alert-danger { background-color: #fef2f2; color: #dc2626; }
-
-    /* Exposing variables for index.html */
+    /* BENTO BOX UTILITIES (Used across pages) */
     .bento-card {
         background: var(--bb-white);
         border-radius: var(--radius-lg);
@@ -254,27 +261,60 @@
         box-shadow: var(--shadow-soft);
         border: none;
     }
-    
+
     .btn-gold {
         background-color: var(--bb-gold);
-        color: var(--bb-white);
+        color: var(--bb-obsidian);
         border-radius: var(--radius-pill);
         padding: 0.6rem 1.5rem;
-        font-weight: 600;
+        font-weight: 700;
+        font-family: var(--font-heading);
         border: none;
         transition: all 0.2s;
     }
     
-    .btn-gold:hover {
-        background-color: #c29d2b;
-        color: var(--bb-white);
+    .btn-gold:hover { opacity: 0.9; color: var(--bb-obsidian); transform: translateY(-2px); }
+
+    /* BENTO TABLES */
+    .bento-table-wrapper { overflow-x: auto; }
+    .bento-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .bento-table th {
+      color: var(--bb-text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      padding: 1rem;
+      border-bottom: 1px solid var(--bb-silver);
+    }
+    .bento-table td {
+      padding: 1.25rem 1rem;
+      vertical-align: middle;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f9f9f9;
+    }
+    .bento-table tr:last-child td { border-bottom: none; }
+
+    /* Badges */
+    .bento-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
 
-    /* RESPONSIVE */
+    /* RESPONSIVE DESIGN */
     @media (max-width: 992px) {
       .sidebar { transform: translateX(-100%); }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .sidebar-overlay.mobile-open { opacity: 1; visibility: visible; }
+      
       .main-content { margin-left: 0; }
-      .topbar { left: 0; padding: 0 1.5rem; background: var(--bb-bg); }
+      .topbar { left: 0; padding: 0 1.5rem; }
+      .mobile-toggle { display: block; }
       .content-area { padding: 1.5rem; }
     }
   </style>
@@ -285,10 +325,12 @@
 </head>
 <body>
 
-<aside class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <img src="/static/Logo/logo.webp" style="height: 120px; width: 80px;display: block; margin-left: 3rem;" alt="Buy Buzz Pvt Ltd">
-    <div class="brand-sub">Super Admin</div>
+    <div class="brand-name"><i class="ph-fill ph-buildings"></i> BuyBuzz</div>
+    <div class="brand-sub">Infra Admin</div>
   </div>
 
   <nav>
@@ -324,29 +366,45 @@
     <a href="{% url 'dash_apr_report' %}" class="{% if request.resolver_match.url_name == 'dash_apr_report' %}active{% endif %}">
       <i class="ph ph-chart-line-up"></i> APR Report
     </a>
-
-    <div class="sidebar-section">System</div>
-    <a href="{% url 'settings' %}" class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-gear"></i> Settings
-    </a>
   </nav>
-
-  <div class="sidebar-footer">
-    <a href="{% url 'logout_view' %}">
-      <i class="ph ph-sign-out"></i> Logout
-    </a>
-  </div>
 </aside>
 
 <div class="topbar">
-  <h2 class="page-title">{% block page_title %}CoreCRM Dashboard{% endblock %}</h2>
+  <div class="topbar-left">
+    <button class="mobile-toggle" id="mobileToggle">
+      <i class="ph ph-list"></i>
+    </button>
+    <h2 class="page-title">Welcome, {{ request.user.first_name|default:request.user.username }}!</h2>
+  </div>
   
-  <div class="admin-pill">
-    <span class="dot"></span>
-    {{ request.user.get_full_name|default:request.user.username }}
-    <div class="avatar-icon">
-        <i class="ph-fill ph-user"></i>
+  <div class="dropdown">
+    <div class="admin-pill" data-bs-toggle="dropdown" aria-expanded="false">
+      <span class="dot"></span>
+      {{ request.user.get_full_name|default:request.user.username }}
+      <div class="avatar-icon">
+          <i class="ph-fill ph-user"></i>
+      </div>
     </div>
+    
+    <ul class="dropdown-menu dropdown-menu-end mt-2">
+      <li><h6 class="dropdown-header">System Management</h6></li>
+      <li>
+        <a class="dropdown-item" href="#">
+          <i class="ph ph-user-circle"></i> Edit Profile
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{% url 'settings' %}">
+          <i class="ph ph-gear"></i> Settings
+        </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-danger" href="{% url 'logout_view' %}">
+          <i class="ph ph-sign-out"></i> Logout
+        </a>
+      </li>
+    </ul>
   </div>
 </div>
 
@@ -355,10 +413,10 @@
 
     {% if messages %}
       {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show mb-4 d-flex align-items-center gap-2" role="alert">
-          <i class="ph-fill {% if message.tags == 'error' %}ph-warning-circle{% else %}ph-check-circle{% endif %}" style="font-size: 1.2rem;"></i>
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="bento-card mb-4 d-flex align-items-center gap-3" style="padding: 1rem 1.5rem; background: {% if message.tags == 'error' %}#FFF5F5{% else %}#F0FFF4{% endif %}; border: 1px solid {% if message.tags == 'error' %}#FFE0E0{% else %}#C6F6D5{% endif %};">
+          <i class="ph-fill {% if message.tags == 'error' %}ph-warning-circle text-danger{% else %}ph-check-circle text-success{% endif %}" style="font-size: 1.5rem;"></i>
+          <span style="font-weight: 500; font-size: 0.95rem;">{{ message }}</span>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
       {% endfor %}
     {% endif %}
@@ -369,5 +427,19 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Mobile Sidebar Toggle Logic
+  const toggleBtn = document.getElementById('mobileToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function toggleMenu() {
+    sidebar.classList.toggle('mobile-open');
+    overlay.classList.toggle('mobile-open');
+  }
+
+  toggleBtn.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+</script>
 </body>
 </html>
