@@ -216,9 +216,18 @@
               <td>
                 <div class="d-flex align-items-center gap-2">
                   <div style="width: 24px; height: 24px; background: var(--p50); color: var(--p700); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700;">
-                    {{ f.assigned_to.user.first_name|default:f.assigned_to.user.username|slice:":1"|upper }}
+                    {% if f.assigned_to %}
+  {{ f.assigned_to.user.first_name|default:f.assigned_to.user.username|slice:":1"|upper }}
+{% else %}
+  U
+{% endif %}
                   </div>
-                  <span style="font-size: 0.8rem; color: var(--n600);">{{ f.assigned_to.user.get_full_name|default:"—" }}</span>
+                  <span style="font-size: 0.8rem; color: var(--n600);">{% if f.assigned_to %}
+  {{ f.assigned_to.user.get_full_name }}
+{% else %}
+  —
+{% endif %}
+</span>
                 </div>
               </td>
             </tr>
@@ -280,9 +289,19 @@
           <td>
              <div class="d-flex align-items-center gap-2">
                 <div style="width: 24px; height: 24px; background: var(--t50); color: var(--t500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700;">
-                  {{ lead.assigned_to.user.first_name|default:lead.assigned_to.user.username|slice:":1"|upper|default:"U" }}
+                  {% if lead.assigned_to %}
+  {{ lead.assigned_to.user.first_name|default:lead.assigned_to.user.username|slice:":1"|upper }}
+{% else %}
+  U
+{% endif %}
                 </div>
-                <span style="font-size: 0.8rem; color: var(--n600);">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</span>
+                <span style="font-size: 0.8rem; color: var(--n600);">
+                  {% if lead.assigned_to %}
+  {{ lead.assigned_to.user.get_full_name }}
+{% else %}
+  Unassigned
+{% endif %}
+                </span>
              </div>
           </td>
         </tr>
