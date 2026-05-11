@@ -5,118 +5,117 @@
   .stat-bento {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    text-align: center;
     gap: 12px;
-    padding: 2rem 1rem;
+    padding: 1.5rem;
     height: 100%;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .stat-bento:hover { transform: translateY(-4px); }
+  .stat-bento:hover { 
+    transform: translateY(-3px); 
+    box-shadow: var(--shadow-md); 
+  }
   
   .stat-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
-    margin-bottom: 8px;
+    font-size: 1.35rem;
+    margin-bottom: 4px;
   }
   
-  .stat-val { font-size: 1.75rem; font-weight: 800; font-family: var(--font-heading); color: var(--bb-obsidian); line-height: 1; }
-  .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--bb-text-muted); text-transform: uppercase; letter-spacing: 1px; }
+  .stat-val { 
+    font-size: 1.75rem; 
+    font-weight: 500; 
+    font-family: var(--font-heading); 
+    color: var(--n800); 
+    line-height: 1; 
+  }
+  
+  .stat-label { 
+    font-size: 0.68rem; 
+    font-weight: 700; 
+    color: var(--n400); 
+    text-transform: uppercase; 
+    letter-spacing: 0.12em; 
+  }
 
-  /* Luxury Colored Icons */
-  .icon-blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
-  .icon-gold { background: var(--bb-gold-light); color: var(--bb-gold); }
-  .icon-green { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
-  .icon-purple { background: rgba(124, 58, 237, 0.1); color: #7c3aed; }
-  .icon-orange { background: rgba(234, 88, 12, 0.1); color: #ea580c; }
-  .icon-teal { background: rgba(13, 148, 136, 0.1); color: #0d9488; }
+  /* Brand Kit V2 Accent Icons */
+  .icon-indigo { background: var(--p50); color: var(--p600); }
+  .icon-coral { background: var(--a50); color: var(--a500); }
+  .icon-lime { background: var(--l50); color: var(--l500); }
+  .icon-teal { background: var(--t50); color: var(--t500); }
+  .icon-slate { background: var(--n100); color: var(--n600); }
 
-  /* Specific Card Highlights */
-  .gold-card { background: var(--bb-gold); color: var(--bb-obsidian); }
-  .gold-card .stat-val { color: var(--bb-obsidian); }
-  .gold-card .stat-label { color: rgba(26, 26, 26, 0.8); }
-  .gold-card .stat-icon-wrapper { background: rgba(255,255,255,0.3); color: var(--bb-obsidian); }
+  /* Specific Card Highlights (Replacing Gold Card) */
+  .accent-card { 
+    background: var(--p500); 
+    border-color: var(--p600); 
+  }
+  .accent-card .stat-val { color: white; }
+  .accent-card .stat-label { color: rgba(255, 255, 255, 0.65); }
+  .accent-card .stat-icon-wrapper { background: rgba(255, 255, 255, 0.15); color: white; }
+
+  /* Hot Lead Card Highlight */
+  .hot-card {
+    background: var(--a400);
+    border-color: var(--a500);
+  }
+  .hot-card .stat-val { color: white; }
+  .hot-card .stat-label { color: rgba(255, 255, 255, 0.8); }
+  .hot-card .stat-icon-wrapper { background: rgba(255, 255, 255, 0.2); color: white; }
 
   .bento-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
   }
-  .bento-header h6 { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; }
+  .bento-header h6 { 
+    margin: 0; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-size: 1.15rem; 
+    font-family: var(--font-heading);
+    font-weight: 500;
+    color: var(--n800);
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 
 <div class="mb-4">
-  <h4 class="h-font" style="font-size: 1.2rem;">Overview</h4>
-  <p style="color: var(--bb-text-muted); font-size: 0.9rem; margin:0;">Cross-branch performance matrix</p>
+  <h4 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 500; color: var(--n800); margin:0;">Overview</h4>
+  <p style="color: var(--n400); font-size: 0.85rem; margin-top: 4px; font-family: var(--font-body);">Cross-branch performance matrix</p>
 </div>
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card stat-bento">
-      <div class="stat-icon-wrapper icon-blue">
+    <div class="bento-card stat-bento accent-card">
+      <div class="stat-icon-wrapper">
         <i class="ph-fill ph-users"></i>
       </div>
       <div>
-        <div class="stat-val">{{ total_leads }}</div>
         <div class="stat-label">Total Leads</div>
+        <div class="stat-val mt-1">{{ total_leads }}</div>
       </div>
     </div>
   </div>
   
   <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card stat-bento gold-card">
+    <div class="bento-card stat-bento hot-card">
       <div class="stat-icon-wrapper">
         <i class="ph-fill ph-fire"></i>
       </div>
       <div>
-        <div class="stat-val">{{ hot_leads }}</div>
         <div class="stat-label">Hot Leads</div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card stat-bento">
-      <div class="stat-icon-wrapper icon-green">
-        <i class="ph-fill ph-phone-call"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_calls }}</div>
-        <div class="stat-label">Total Calls</div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card stat-bento">
-      <div class="stat-icon-wrapper icon-purple">
-        <i class="ph-fill ph-buildings"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_branches }}</div>
-        <div class="stat-label">Branches</div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="bento-card stat-bento">
-      <div class="stat-icon-wrapper icon-orange">
-        <i class="ph-fill ph-user-circle"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_users }}</div>
-        <div class="stat-label">Active Users</div>
+        <div class="stat-val mt-1">{{ hot_leads }}</div>
       </div>
     </div>
   </div>
@@ -124,11 +123,47 @@
   <div class="col-6 col-md-4 col-lg-2">
     <div class="bento-card stat-bento">
       <div class="stat-icon-wrapper icon-teal">
+        <i class="ph-fill ph-phone-call"></i>
+      </div>
+      <div>
+        <div class="stat-label">Total Calls</div>
+        <div class="stat-val mt-1">{{ total_calls }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-slate">
+        <i class="ph-fill ph-buildings"></i>
+      </div>
+      <div>
+        <div class="stat-label">Branches</div>
+        <div class="stat-val mt-1">{{ total_branches }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-lime">
+        <i class="ph-fill ph-user-circle"></i>
+      </div>
+      <div>
+        <div class="stat-label">Active Users</div>
+        <div class="stat-val mt-1">{{ total_users }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-6 col-md-4 col-lg-2">
+    <div class="bento-card stat-bento">
+      <div class="stat-icon-wrapper icon-coral">
         <i class="ph-fill ph-calendar-check"></i>
       </div>
       <div>
-        <div class="stat-val">{{ pending_followups }}</div>
         <div class="stat-label">Pending F/U</div>
+        <div class="stat-val mt-1">{{ pending_followups }}</div>
       </div>
     </div>
   </div>
@@ -138,18 +173,18 @@
   <div class="col-md-5">
     <div class="bento-card h-100">
       <div class="bento-header">
-        <h6><i class="ph-fill ph-buildings" style="color: var(--bb-gold);"></i> Leads by Branch</h6>
+        <h6><i class="ph-fill ph-buildings" style="color: var(--n400);"></i> Leads by Branch</h6>
       </div>
       <div style="padding: 4px 0;">
         {% for b in branch_leads %}
-        <div style="display:flex; align-items:center; justify-content:space-between; padding: 14px 0; border-bottom: 1px solid var(--bb-silver);">
-          <span style="font-size:0.95rem; font-weight:500;">{{ b.name }}</span>
-          <span style="font-size:0.9rem; font-weight:700; background: var(--bb-bg); padding: 4px 12px; border-radius: var(--radius-pill);">{{ b.lead_count }}</span>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding: 12px 0; border-bottom: 1px solid var(--n100);">
+          <span style="font-size:0.9rem; font-weight:500; color: var(--n700);">{{ b.name }}</span>
+          <span style="font-family: var(--font-mono); font-size:0.8rem; font-weight:700; color: var(--n600); background: var(--n50); border: 1px solid var(--n150); padding: 4px 10px; border-radius: var(--radius-sm);">{{ b.lead_count }}</span>
         </div>
         {% empty %}
-        <div class="text-center py-4" style="color: var(--bb-text-muted);">
-            <i class="ph ph-buildings" style="font-size: 2rem;"></i>
-            <p class="mt-2">No branches yet</p>
+        <div class="text-center py-4" style="color: var(--n300);">
+            <i class="ph ph-buildings" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+            <p class="mt-2 text-uppercase" style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;">No branches yet</p>
         </div>
         {% endfor %}
       </div>
@@ -159,8 +194,8 @@
   <div class="col-md-7">
     <div class="bento-card h-100">
       <div class="bento-header">
-        <h6><i class="ph-fill ph-calendar-check text-success"></i> Upcoming Follow-Ups (24h)</h6>
-        <a href="{% url 'followups' %}" class="btn-gold" style="padding: 0.4rem 1rem; font-size: 0.8rem; text-decoration: none;">View All</a>
+        <h6><i class="ph-fill ph-calendar-check" style="color: var(--l400);"></i> Upcoming Follow-Ups (24h)</h6>
+        <a href="{% url 'followups' %}" class="btn btn-outline btn-sm" style="border: 1.5px solid var(--n200); color: var(--n700); border-radius: var(--radius-sm); font-size: 0.76rem; padding: 7px 14px; text-decoration: none;">View All</a>
       </div>
       <div class="bento-table-wrapper">
         <table class="bento-table">
@@ -175,18 +210,20 @@
           <tbody>
             {% for f in upcoming_followups %}
             <tr>
-              <td style="font-weight:600;">{{ f.lead.name }}</td>
-              <td><span class="bento-badge" style="background: var(--bb-bg);">{{ f.get_followup_type_display }}</span></td>
-              <td style="color: var(--bb-text-muted);">{{ f.followup_at|date:"d M, g:i A" }}</td>
+              <td style="font-weight:600; color: var(--n800);">{{ f.lead.name }}</td>
+              <td><span class="bento-badge teal"><span class="bdg-dot"></span>{{ f.get_followup_type_display }}</span></td>
+              <td style="color: var(--n500); font-family: var(--font-mono); font-size: 0.75rem;">{{ f.followup_at|date:"d M, g:i A" }}</td>
               <td>
                 <div class="d-flex align-items-center gap-2">
-                  <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;"><i class="ph-fill ph-user"></i></div>
-                  {{ f.assigned_to.user.get_full_name|default:"—" }}
+                  <div style="width: 24px; height: 24px; background: var(--p50); color: var(--p700); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700;">
+                    {{ f.assigned_to.user.first_name|default:f.assigned_to.user.username|slice:":1"|upper }}
+                  </div>
+                  <span style="font-size: 0.8rem; color: var(--n600);">{{ f.assigned_to.user.get_full_name|default:"—" }}</span>
                 </div>
               </td>
             </tr>
             {% empty %}
-            <tr><td colspan="4" class="text-center py-4 text-muted">No upcoming follow-ups in next 24 hours</td></tr>
+            <tr><td colspan="4" class="text-center py-4" style="color: var(--n400); font-size: 0.85rem;">No upcoming follow-ups in next 24 hours</td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -197,8 +234,8 @@
 
 <div class="bento-card">
   <div class="bento-header">
-    <h6><i class="ph-fill ph-users-three" style="color: #2563eb;"></i> Recent Leads</h6>
-    <a href="{% url 'leads' %}" class="btn-gold" style="padding: 0.4rem 1rem; font-size: 0.8rem; text-decoration: none;">View Pipeline</a>
+    <h6><i class="ph-fill ph-users-three" style="color: var(--p500);"></i> Recent Leads</h6>
+    <a href="{% url 'leads' %}" class="btn btn-outline btn-sm" style="border: 1.5px solid var(--n200); color: var(--n700); border-radius: var(--radius-sm); font-size: 0.76rem; padding: 7px 14px; text-decoration: none;">View Pipeline</a>
   </div>
   <div class="bento-table-wrapper">
     <table class="bento-table">
@@ -217,32 +254,46 @@
       <tbody>
         {% for lead in recent_leads %}
         <tr>
-          <td style="color: var(--bb-text-muted);">{{ forloop.counter }}</td>
+          <td style="color: var(--n400); font-family: var(--font-mono); font-size: 0.8rem;">{{ forloop.counter }}</td>
           <td>
-            <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color: var(--bb-obsidian); text-decoration:none;">
+            <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color: var(--n800); text-decoration:none;">
               {{ lead.name }}
             </a>
           </td>
-          <td style="color: var(--bb-text-muted);">{{ lead.phone }}</td>
-          <td>{{ lead.get_source_display }}</td>
+          <td style="color: var(--n600); font-family: var(--font-mono); font-size: 0.8rem;">{{ lead.phone }}</td>
+          <td><span style="color: var(--n500); font-size: 0.8rem;">{{ lead.get_source_display }}</span></td>
           <td>
             {% if lead.temperature == 'hot' %}
-              <span class="bento-badge" style="background: #FFF5F5; color: #E53E3E;"><i class="ph-fill ph-fire"></i> Hot</span>
+              <span class="bento-badge coral"><span class="bdg-dot"></span> Hot</span>
             {% elif lead.temperature == 'warm' %}
-              <span class="bento-badge" style="background: #FFFAF0; color: #DD6B20;">Warm</span>
+              <span class="bento-badge lime"><span class="bdg-dot"></span> Warm</span>
             {% else %}
-              <span class="bento-badge" style="background: #EBF8FF; color: #3182CE;">Cold</span>
+              <span class="bento-badge blue"><span class="bdg-dot"></span> Cold</span>
             {% endif %}
           </td>
-          <td><span class="bento-badge" style="background: var(--bb-bg);">{{ lead.get_stage_display }}</span></td>
-          <td>{{ lead.branch.name|default:"—" }}</td>
-          <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
+          <td>
+            <span class="bento-badge" style="background: var(--n100); color: var(--n500); border: 1px solid var(--n150);">
+              {{ lead.get_stage_display }}
+            </span>
+          </td>
+          <td><span style="color: var(--n600); font-size: 0.8rem;">{{ lead.branch.name|default:"—" }}</span></td>
+          <td>
+             <div class="d-flex align-items-center gap-2">
+                <div style="width: 24px; height: 24px; background: var(--t50); color: var(--t500); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 700;">
+                  {{ lead.assigned_to.user.first_name|default:lead.assigned_to.user.username|slice:":1"|upper|default:"U" }}
+                </div>
+                <span style="font-size: 0.8rem; color: var(--n600);">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</span>
+             </div>
+          </td>
         </tr>
         {% empty %}
         <tr>
             <td colspan="8" class="text-center py-5">
-                <i class="ph ph-users-three text-muted mb-2" style="font-size: 2rem;"></i>
-                <p class="mb-0 text-muted">No leads yet. <a href="{% url 'add_lead' %}" style="color: var(--bb-gold); font-weight: 600;">Add your first lead</a></p>
+                <i class="ph ph-users-three" style="color: var(--n300); font-size: 2.5rem; margin-bottom: 12px;"></i>
+                <p class="mb-0" style="color: var(--n500); font-size: 0.9rem;">
+                  No leads yet. 
+                  <a href="{% url 'add_lead' %}" style="color: var(--p500); font-weight: 600; text-decoration: none;">Add your first lead</a>
+                </p>
             </td>
         </tr>
         {% endfor %}
