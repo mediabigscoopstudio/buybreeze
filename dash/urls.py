@@ -3,6 +3,7 @@ from dash import views
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from dash import meta_views
 
 urlpatterns = [
     # Admin 
@@ -94,4 +95,6 @@ urlpatterns = [
     # Settings
     path('settings', views.settings_view, name='settings'),
 
+    path('api/meta/webhook/',meta_views.meta_webhook,name='meta_webhook'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

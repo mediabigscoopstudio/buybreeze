@@ -125,6 +125,12 @@ class Lead(models.Model):
     ad_creative = models.CharField(max_length=255, blank=True, null=True)
     gclid = models.CharField(max_length=255, blank=True, null=True)  # Google Ads tracking
     landing_page_url = models.URLField(blank=True, null=True)
+    meta_campaign_id = models.CharField(max_length=255, blank=True, null=True)
+    meta_adset_id = models.CharField(max_length=255, blank=True, null=True)
+    meta_ad_id = models.CharField(max_length=255, blank=True, null=True)
+
+    google_campaign_id = models.CharField(max_length=255, blank=True, null=True)
+    google_adgroup_id = models.CharField(max_length=255, blank=True, null=True)
 
     # Property Interest
     property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, blank=True, null=True)

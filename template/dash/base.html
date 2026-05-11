@@ -9,52 +9,98 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <style>
     /* =========================================
-       BUYBUZZ INFRA BRAND KIT & CSS VARS
+       BUYBUZZ INFRA BRAND KIT V2.0 CSS VARS
        ========================================= */
     :root {
-      --bb-gold: #D4AF37;
-      --bb-gold-light: rgba(212, 175, 55, 0.15);
-      --bb-silver: #E5E5E5;
-      --bb-obsidian: #1A1A1A;
-      --bb-obsidian-light: #2A2A2A;
-      --bb-bg: #f7f3f0;
-      --bb-text: #2E2E2E;
-      --bb-text-muted: #6B6B6B;
-      --bb-white: #FFFFFF;
+      /* PRIMARY — Electric Indigo */
+      --p50: #F0F1FF;
+      --p100: #DDE0FF;
+      --p200: #C0C6FF;
+      --p300: #9AA5FF;
+      --p400: #6B7EFF;
+      --p500: #4158F6;
+      --p600: #2D3EE0;
+      --p700: #2230B8;
+      --p800: #1A2490;
+      --p900: #0F1560;
 
-      --font-sans: 'Inter', apple-system, sans-serif;
-      --font-heading: 'Plus Jakarta Sans', sans-serif;
+      /* ACCENT — Vivid Coral */
+      --a50: #FFF1EE;
+      --a100: #FFD9D0;
+      --a200: #FFB09E;
+      --a300: #FF876C;
+      --a400: #FF6B4A;
+      --a500: #F04E2E;
+      --a600: #C43621;
 
-      --sidebar-w: 280px;
-      --topbar-h: 80px;
+      /* LIME — pop accent */
+      --l50: #F2FDE8;
+      --l300: #9CE050;
+      --l400: #72C428;
+      --l500: #52A318;
+
+      /* TEAL — supporting */
+      --t50: #E8FAF6;
+      --t300: #3ECFAC;
+      --t400: #0EB899;
+      --t500: #07967E;
+
+      /* NEUTRAL — blue-tinted grays */
+      --n0:   #FFFFFF;
+      --n50:  #F7F8FC;
+      --n100: #EEF0F8;
+      --n150: #E2E5F0;
+      --n200: #CDD1E2;
+      --n300: #A8AFCA;
+      --n400: #7C85A8;
+      --n500: #555E80;
+      --n600: #3A4265;
+      --n700: #252D50;
+      --n800: #161D3E;
+      --n900: #0A1028;
+
+      /* TOKENS */
       --radius-sm: 8px;
       --radius-md: 12px;
-      --radius-lg: 24px;
-      --radius-pill: 50px;
-      --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.05);
-      --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --radius-lg: 18px;
+      --radius-xl: 24px;
+      --radius-full: 999px;
+
+      --shadow-xs: 0 1px 3px rgba(65,88,246,0.06);
+      --shadow-sm: 0 2px 8px rgba(65,88,246,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 6px 20px rgba(65,88,246,0.10), 0 2px 6px rgba(0,0,0,0.05);
+
+      --font-body: 'Plus Jakarta Sans', sans-serif;
+      --font-heading: 'Fraunces', serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --sidebar-w: 240px;
+      --topbar-h: 72px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body { 
-        font-family: var(--font-sans); 
-        background: var(--bb-bg); 
-        color: var(--bb-text); 
+        font-family: var(--font-body); 
+        background: var(--n50); 
+        color: var(--n700); 
+        font-size: 15px;
+        line-height: 1.6;
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
     }
 
     h1, h2, h3, h4, h5, h6, .h-font {
         font-family: var(--font-heading);
-        font-weight: 600;
-        color: var(--bb-obsidian);
+        font-weight: 500;
+        color: var(--n800);
+        letter-spacing: -0.02em;
     }
 
     /* =========================================
@@ -63,85 +109,97 @@
     .sidebar {
       width: var(--sidebar-w);
       height: 100vh;
-      background: var(--bb-obsidian);
+      background: var(--n50);
+      border-right: 1px solid var(--n100);
       position: fixed;
       top: 0; left: 0;
       display: flex;
       flex-direction: column;
       z-index: 1000;
       overflow-y: auto;
-      padding: 2rem 1.5rem;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 1.5rem 1rem;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .sidebar-brand { margin-bottom: 2.5rem; display: flex; flex-direction: column; }
+    .sidebar-brand { margin-bottom: 2rem; display: flex; flex-direction: column; padding: 0 0.5rem; }
     
     .sidebar-brand .brand-name {
       font-family: var(--font-heading);
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--bb-white);
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--n800);
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
     }
     
-    .sidebar-brand .brand-name i { color: var(--bb-gold); font-size: 1.8rem; }
+    .sidebar-brand .brand-icon {
+      width: 32px; height: 32px;
+      background: var(--p500);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      font-size: 1.1rem;
+    }
 
     .sidebar-brand .brand-sub {
-      font-size: 0.7rem;
-      color: var(--bb-silver);
+      font-size: 0.68rem;
+      color: var(--n400);
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.12em;
       margin-top: 4px;
-      margin-left: 2.55rem;
+      margin-left: 2.7rem;
     }
 
     .sidebar-section {
-      font-size: 0.7rem;
-      color: #6B6B6B;
+      font-size: 0.62rem;
+      color: var(--n300);
       text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      margin-top: 1.5rem;
+      letter-spacing: 0.16em;
+      font-weight: 800;
+      margin-top: 1.25rem;
       margin-bottom: 0.5rem;
-      padding-left: 1rem;
+      padding-left: 0.75rem;
     }
 
-    .sidebar nav { flex-grow: 1; }
+    .sidebar nav { flex-grow: 1; display: flex; flex-direction: column; gap: 2px; }
 
     .sidebar nav a {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      padding: 0.85rem 1.25rem;
-      color: #A0A0A0;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      color: var(--n500);
       text-decoration: none;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 500;
-      border-radius: var(--radius-pill);
-      margin-bottom: 0.25rem;
-      transition: all 0.2s ease;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s ease;
     }
     
-    .sidebar nav a i { font-size: 1.25rem; }
-    .sidebar nav a:hover { background: var(--bb-obsidian-light); color: var(--bb-white); }
+    .sidebar nav a i { font-size: 1.1rem; color: var(--n400); transition: color 0.15s; }
+    .sidebar nav a:hover { background: var(--n100); color: var(--n700); }
+    .sidebar nav a:hover i { color: var(--n600); }
+    
     .sidebar nav a.active { 
-        background: var(--bb-gold); 
-        color: var(--bb-white); 
-        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+        background: var(--n0); 
+        color: var(--p600); 
+        font-weight: 600;
+        box-shadow: var(--shadow-xs);
     }
+    .sidebar nav a.active i { color: var(--p600); }
 
     /* Mobile Overlay */
     .sidebar-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(22, 29, 62, 0.4); /* n800 based */
       z-index: 999;
       opacity: 0;
       visibility: hidden;
       transition: all 0.3s ease;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(2px);
     }
 
     /* =========================================
@@ -156,11 +214,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 3rem;
+      padding: 0 2rem;
       z-index: 99;
-      background: var(--bb-bg);
-      backdrop-filter: blur(10px);
-      transition: left 0.3s ease;
+      background: var(--n0);
+      border-bottom: 1px solid var(--n100);
+      transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .topbar-left {
@@ -171,76 +229,83 @@
 
     .mobile-toggle {
       display: none;
-      background: none;
-      border: none;
-      font-size: 1.75rem;
-      color: var(--bb-obsidian);
+      background: var(--n50);
+      border: 1px solid var(--n100);
+      border-radius: var(--radius-sm);
+      width: 36px; height: 36px;
+      color: var(--n600);
       cursor: pointer;
       padding: 0;
+      align-items: center; justify-content: center;
     }
+    .mobile-toggle:hover { background: var(--n100); color: var(--n800); }
     
     .topbar .page-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      font-family: var(--font-heading);
-      color: var(--bb-obsidian);
+      font-size: 1.375rem; /* H2 equivalent */
       margin: 0;
     }
     
     .admin-pill {
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: var(--bb-white);
-      box-shadow: var(--shadow-soft);
-      border-radius: var(--radius-pill);
-      padding: 0.4rem 0.5rem 0.4rem 1.2rem;
-      font-size: 0.85rem;
+      gap: 10px;
+      background: var(--n0);
+      border: 1px solid var(--n100);
+      box-shadow: var(--shadow-xs);
+      border-radius: var(--radius-full);
+      padding: 0.35rem 0.35rem 0.35rem 1rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: var(--bb-obsidian);
+      color: var(--n700);
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: all 0.15s ease;
     }
 
-    .admin-pill:hover { transform: translateY(-2px); }
+    .admin-pill:hover { border-color: var(--p200); box-shadow: var(--shadow-sm); }
     
     .admin-pill .dot {
-      width: 8px; height: 8px;
-      background: #2ecc71;
+      width: 6px; height: 6px;
+      background: var(--l400); /* Lime success */
       border-radius: 50%;
     }
     
     .admin-pill .avatar-icon {
         width: 32px; height: 32px;
-        background: var(--bb-obsidian);
-        color: var(--bb-gold);
+        background: var(--p50);
+        color: var(--p700);
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-weight: 700;
+        font-size: 0.75rem;
     }
 
     /* Dropdown Styling */
     .dropdown-menu {
       border-radius: var(--radius-md);
-      border: none;
-      box-shadow: var(--shadow-hover);
+      border: 1px solid var(--n100);
+      box-shadow: var(--shadow-md);
       padding: 0.5rem;
       min-width: 200px;
+      font-family: var(--font-body);
     }
-    
+    .dropdown-header { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--n400); }
     .dropdown-item {
       border-radius: var(--radius-sm);
-      padding: 0.6rem 1rem;
-      font-size: 0.9rem;
+      padding: 0.5rem 0.85rem;
+      font-size: 0.85rem;
       font-weight: 500;
+      color: var(--n600);
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
     }
     
-    .dropdown-item i { font-size: 1.1rem; }
-    .dropdown-item:hover { background: var(--bb-bg); }
+    .dropdown-item i { font-size: 1.1rem; color: var(--n400); }
+    .dropdown-item:hover { background: var(--n50); color: var(--n800); }
+    .dropdown-item.text-danger:hover { background: var(--a50); color: var(--a600) !important; }
+    .dropdown-item.text-danger:hover i { color: var(--a500); }
 
     /* =========================================
        MAIN CONTENT
@@ -249,83 +314,100 @@
       margin-left: var(--sidebar-w);
       padding-top: var(--topbar-h);
       min-height: 100vh;
-      transition: margin-left 0.3s ease;
+      transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .content-area { padding: 2rem 3rem; }
+    .content-area { padding: 2rem; max-width: 1400px; margin: 0 auto; }
 
     /* BENTO BOX UTILITIES */
     .bento-card {
-        background: var(--bb-white);
-        border-radius: var(--radius-lg);
+        background: var(--n0);
+        border: 1px solid var(--n100);
+        border-radius: var(--radius-xl);
         padding: 1.75rem;
-        box-shadow: var(--shadow-soft);
-        border: none;
+        box-shadow: var(--shadow-xs);
     }
 
-    .btn-gold {
-        background-color: var(--bb-gold);
-        color: var(--bb-obsidian);
-        border-radius: var(--radius-pill);
-        padding: 0.6rem 1.5rem;
-        font-weight: 700;
-        font-family: var(--font-heading);
+    /* Buttons */
+    .btn-primary {
+        background-color: var(--p500);
+        color: white;
+        border-radius: var(--radius-md);
+        padding: 0.6rem 1.25rem;
+        font-weight: 600;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
         border: none;
-        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(65,88,246,0.32);
+        transition: all 0.15s;
+        letter-spacing: 0.01em;
     }
-    
-    .btn-gold:hover { opacity: 0.9; color: var(--bb-obsidian); transform: translateY(-2px); }
+    .btn-primary:hover { 
+        background-color: var(--p600); 
+        box-shadow: 0 6px 20px rgba(65,88,246,0.44); 
+        transform: translateY(-1px); 
+    }
 
     /* BENTO TABLES */
     .bento-table-wrapper { overflow-x: auto; }
     .bento-table { width: 100%; border-collapse: separate; border-spacing: 0; }
     .bento-table th {
-      color: var(--bb-text-muted);
-      font-size: 0.75rem;
+      color: var(--n300);
+      font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      padding: 1rem;
-      border-bottom: 1px solid var(--bb-silver);
+      letter-spacing: 0.12em;
+      font-weight: 800;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--n100);
     }
     .bento-table td {
-      padding: 1.25rem 1rem;
+      padding: 1rem;
       vertical-align: middle;
-      font-size: 0.9rem;
-      border-bottom: 1px solid #f9f9f9;
+      font-size: 0.85rem;
+      color: var(--n600);
+      border-bottom: 1px solid var(--n50);
+      transition: background 0.12s;
     }
+    .bento-table tr:hover td { background: var(--p50); }
     .bento-table tr:last-child td { border-bottom: none; }
 
     /* Badges */
     .bento-badge {
-      padding: 0.4rem 0.8rem;
-      border-radius: var(--radius-pill);
-      font-size: 0.75rem;
-      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
+      gap: 5px;
+      letter-spacing: 0.03em;
     }
+    .bdg-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .bento-badge.blue { background: var(--p50); color: var(--p700); }
+    .bento-badge.lime { background: var(--l50); color: var(--l500); }
+    .bento-badge.coral { background: var(--a50); color: var(--a600); }
+    .bento-badge.teal { background: var(--t50); color: var(--t500); }
 
     /* Django Message Alert Utilities */
     .alert-bento-error {
-        background-color: #FFF5F5 !important;
-        border: 1px solid #FFE0E0 !important;
+        background-color: var(--a50) !important;
+        border: 1px solid var(--a200) !important;
+        color: var(--a600);
     }
-    
     .alert-bento-success {
-        background-color: #F0FFF4 !important;
-        border: 1px solid #C6F6D5 !important;
+        background-color: var(--l50) !important;
+        border: 1px solid var(--l300) !important;
+        color: var(--l500);
     }
 
     /* RESPONSIVE DESIGN */
     @media (max-width: 992px) {
       .sidebar { transform: translateX(-100%); }
-      .sidebar.mobile-open { transform: translateX(0); }
+      .sidebar.mobile-open { transform: translateX(0); box-shadow: var(--shadow-lg); }
       .sidebar-overlay.mobile-open { opacity: 1; visibility: visible; }
       
       .main-content { margin-left: 0; }
-      .topbar { left: 0; padding: 0 1.5rem; }
-      .mobile-toggle { display: block; }
+      .topbar { left: 0; padding: 0 1.25rem; }
+      .mobile-toggle { display: flex; }
       .content-area { padding: 1.5rem; }
     }
   </style>
@@ -340,7 +422,10 @@
 
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-name"><i class="ph-fill ph-buildings"></i> BuyBuzz</div>
+    <div class="brand-name">
+      <div class="brand-icon"><i class="ph-fill ph-buildings"></i></div>
+      BuyBuzz
+    </div>
     <div class="brand-sub">Infra Admin</div>
   </div>
 
@@ -393,7 +478,7 @@
       <span class="dot"></span>
       {{ request.user.get_full_name|default:request.user.username }}
       <div class="avatar-icon">
-          <i class="ph-fill ph-user"></i>
+          {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
       </div>
     </div>
     
@@ -409,7 +494,7 @@
           <i class="ph ph-gear"></i> Settings
         </a>
       </li>
-      <li><hr class="dropdown-divider"></li>
+      <li><hr class="dropdown-divider" style="border-color: var(--n100);"></li>
       <li>
         <a class="dropdown-item text-danger" href="{% url 'logout_view' %}">
           <i class="ph ph-sign-out"></i> Logout
@@ -424,10 +509,10 @@
 
     {% if messages %}
       {% for message in messages %}
-        <div class="bento-card mb-4 d-flex align-items-center gap-3 {% if message.tags == 'error' %}alert-bento-error{% else %}alert-bento-success{% endif %}" style="padding: 1rem 1.5rem;">
-          <i class="ph-fill {% if message.tags == 'error' %}ph-warning-circle text-danger{% else %}ph-check-circle text-success{% endif %}" style="font-size: 1.5rem;"></i>
-          <span style="font-weight: 500; font-size: 0.95rem;">{{ message }}</span>
-          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        <div class="bento-card mb-4 d-flex align-items-center gap-3 {% if message.tags == 'error' %}alert-bento-error{% else %}alert-bento-success{% endif %}" style="padding: 1rem 1.5rem; border-radius: var(--radius-md);">
+          <i class="ph-fill {% if message.tags == 'error' %}ph-warning-circle{% else %}ph-check-circle{% endif %}" style="font-size: 1.5rem;"></i>
+          <span style="font-weight: 600; font-size: 0.85rem;">{{ message }}</span>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" style="font-size: 0.75rem;"></button>
         </div>
       {% endfor %}
     {% endif %}
