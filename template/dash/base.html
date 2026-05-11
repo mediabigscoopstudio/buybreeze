@@ -253,7 +253,7 @@
     }
     .content-area { padding: 2rem 3rem; }
 
-    /* BENTO BOX UTILITIES (Used across pages) */
+    /* BENTO BOX UTILITIES */
     .bento-card {
         background: var(--bb-white);
         border-radius: var(--radius-lg);
@@ -304,6 +304,17 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+    }
+
+    /* Django Message Alert Utilities */
+    .alert-bento-error {
+        background-color: #FFF5F5 !important;
+        border: 1px solid #FFE0E0 !important;
+    }
+    
+    .alert-bento-success {
+        background-color: #F0FFF4 !important;
+        border: 1px solid #C6F6D5 !important;
     }
 
     /* RESPONSIVE DESIGN */
@@ -413,7 +424,7 @@
 
     {% if messages %}
       {% for message in messages %}
-        <div class="bento-card mb-4 d-flex align-items-center gap-3" style="padding: 1rem 1.5rem; background: {% if message.tags == 'error' %}#FFF5F5{% else %}#F0FFF4{% endif %}; border: 1px solid {% if message.tags == 'error' %}#FFE0E0{% else %}#C6F6D5{% endif %};">
+        <div class="bento-card mb-4 d-flex align-items-center gap-3 {% if message.tags == 'error' %}alert-bento-error{% else %}alert-bento-success{% endif %}" style="padding: 1rem 1.5rem;">
           <i class="ph-fill {% if message.tags == 'error' %}ph-warning-circle text-danger{% else %}ph-check-circle text-success{% endif %}" style="font-size: 1.5rem;"></i>
           <span style="font-weight: 500; font-size: 0.95rem;">{{ message }}</span>
           <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
