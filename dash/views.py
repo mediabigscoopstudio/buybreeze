@@ -63,86 +63,60 @@ def login_view(request):
     # =========================================
     if request.method == 'POST':
 
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        user = authenticate(
-            request,
-            username=username,
-            password=password
-        )
+        phone = request.POST.get('phone')
 
         # =====================================
-        # VALID USER
+        # FIND USER PROFILE
         # =====================================
-        if user is not None:
+        try:
 
-            try:
-                profile = user.profile
-            except:
-                messages.error(request, 'User profile not found.')
-                return redirect('login_view')
+            profile = UserProfile.objects.get(phone=phone)
+            user = profile.user
 
-            # =====================================
-            # PHONE CHECK
-            # =====================================
-            if not profile.phone:
-
-                messages.error(
-                    request,
-                    'Phone number not found in profile.'
-                )
-
-                return redirect('login_view')
-
-            # =====================================
-            # GENERATE OTP
-            # =====================================
-            otp = generate_otp()
-
-            # =====================================
-            # SEND OTP
-            # =====================================
-            otp_sent = send_otp(profile.phone, otp)
-
-            if not otp_sent:
-
-                messages.error(
-                    request,
-                    'Failed to send OTP.'
-                )
-
-                return redirect('login_view')
-
-            # =====================================
-            # STORE SESSION
-            # =====================================
-            request.session['pending_user_id'] = user.id
-            request.session['otp_code'] = otp
-
-            expiry_time = timezone.now() + timedelta(minutes=5)
-
-            request.session['otp_expiry'] = expiry_time.isoformat()
-
-            # =====================================
-            # SUCCESS MESSAGE
-            # =====================================
-            messages.success(
-                request,
-                'OTP sent successfully.'
-            )
-
-            return redirect('verify_otp')
-
-        # =====================================
-        # INVALID LOGIN
-        # =====================================
-        else:
+        except UserProfile.DoesNotExist:
 
             messages.error(
                 request,
-                'Invalid username or password.'
+                'Phone number not registered.'
             )
+
+            return redirect('login_view')
+
+        # =====================================
+        # GENERATE OTP
+        # =====================================
+        otp = generate_otp()
+
+        # =====================================
+        # SEND OTP
+        # =====================================
+        otp_sent = send_otp(profile.phone, otp)
+
+        if not otp_sent:
+
+            messages.error(
+                request,
+                'Failed to send OTP.'
+            )
+
+            return redirect('login_view')
+
+        # =====================================
+        # STORE SESSION
+        # =====================================
+        request.session['pending_user_id'] = user.id
+        request.session['otp_code'] = otp
+
+        expiry_time = timezone.now() + timedelta(minutes=5)
+
+        request.session['otp_expiry'] = expiry_time.isoformat()
+
+        messages.success(
+            request,
+            'OTP sent successfully.'
+        )
+
+        return redirect('verify_otp')
 
     return render(request, 'dash/signin.html')
 

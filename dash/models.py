@@ -41,7 +41,7 @@ class UserProfile(models.Model):
         null=True,
         blank=True
     )
-    phone        = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, unique=True)
     profile_pic  = models.ImageField(upload_to='profiles/', blank=True, null=True)
     reports_to = models.ForeignKey(
         'self',
