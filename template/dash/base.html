@@ -3,516 +3,389 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BuyBuzz Infra — Super Admin</title>
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
+  <title>CoreCRM — Super Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
   <style>
-    /* =========================================
-       BUYBUZZ INFRA BRAND KIT V2.0 CSS VARS
-       ========================================= */
     :root {
-      /* PRIMARY — Electric Indigo */
-      --p50: #F0F1FF;
-      --p100: #DDE0FF;
-      --p200: #C0C6FF;
-      --p300: #9AA5FF;
-      --p400: #6B7EFF;
-      --p500: #4158F6;
-      --p600: #2D3EE0;
-      --p700: #2230B8;
-      --p800: #1A2490;
-      --p900: #0F1560;
-
-      /* ACCENT — Vivid Coral */
-      --a50: #FFF1EE;
-      --a100: #FFD9D0;
-      --a200: #FFB09E;
-      --a300: #FF876C;
-      --a400: #FF6B4A;
-      --a500: #F04E2E;
-      --a600: #C43621;
-
-      /* LIME — pop accent */
-      --l50: #F2FDE8;
-      --l300: #9CE050;
-      --l400: #72C428;
-      --l500: #52A318;
-
-      /* TEAL — supporting */
-      --t50: #E8FAF6;
-      --t300: #3ECFAC;
-      --t400: #0EB899;
-      --t500: #07967E;
-
-      /* NEUTRAL — blue-tinted grays */
-      --n0:   #FFFFFF;
-      --n50:  #F7F8FC;
-      --n100: #EEF0F8;
-      --n150: #E2E5F0;
-      --n200: #CDD1E2;
-      --n300: #A8AFCA;
-      --n400: #7C85A8;
-      --n500: #555E80;
-      --n600: #3A4265;
-      --n700: #252D50;
-      --n800: #161D3E;
-      --n900: #0A1028;
-
-      /* TOKENS */
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 18px;
-      --radius-xl: 24px;
-      --radius-full: 999px;
-
-      --shadow-xs: 0 1px 3px rgba(65,88,246,0.06);
-      --shadow-sm: 0 2px 8px rgba(65,88,246,0.08), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 6px 20px rgba(65,88,246,0.10), 0 2px 6px rgba(0,0,0,0.05);
-
-      --font-body: 'Plus Jakarta Sans', sans-serif;
-      --font-heading: 'Fraunces', serif;
-      --font-mono: 'JetBrains Mono', monospace;
-
       --sidebar-w: 240px;
-      --topbar-h: 72px;
+      --primary: #1a56db;
+      --primary-dark: #1344b5;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #94a3b8;
+      --sidebar-active: #1a56db;
+      --topbar-h: 58px;
+      --surface: #ffffff;
+      --bg: #f1f5f9;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --hot: #ef4444;
+      --warm: #f59e0b;
+      --cold: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body { 
-        font-family: var(--font-body); 
-        background: var(--n50); 
-        color: var(--n700); 
-        font-size: 15px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-        overflow-x: hidden;
-    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
 
-    h1, h2, h3, h4, h5, h6, .h-font {
-        font-family: var(--font-heading);
-        font-weight: 500;
-        color: var(--n800);
-        letter-spacing: -0.02em;
-    }
-
-    /* =========================================
-       SIDEBAR
-       ========================================= */
+    /* SIDEBAR */
     .sidebar {
       width: var(--sidebar-w);
       height: 100vh;
-      background: var(--n50);
-      border-right: 1px solid var(--n100);
+      background: var(--sidebar-bg);
       position: fixed;
       top: 0; left: 0;
       display: flex;
       flex-direction: column;
-      z-index: 1000;
+      z-index: 100;
       overflow-y: auto;
-      padding: 1.5rem 1rem;
-      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .sidebar-brand { margin-bottom: 2rem; display: flex; flex-direction: column; padding: 0 0.5rem; }
-    
+    .sidebar-brand {
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid #1e293b;
+    }
     .sidebar-brand .brand-name {
-      font-family: var(--font-heading);
-      font-size: 1.25rem;
-      font-weight: 500;
-      color: var(--n800);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.3px;
     }
-    
-    .sidebar-brand .brand-icon {
-      width: 32px; height: 32px;
-      background: var(--p500);
-      border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      color: white;
-      font-size: 1.1rem;
-    }
-
     .sidebar-brand .brand-sub {
       font-size: 0.68rem;
-      color: var(--n400);
-      font-weight: 600;
+      color: #475569;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-top: 4px;
-      margin-left: 2.7rem;
+      letter-spacing: 1px;
+      margin-top: 2px;
     }
-
     .sidebar-section {
+      padding: 16px 14px 4px;
       font-size: 0.62rem;
-      color: var(--n300);
+      color: #334155;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-weight: 800;
-      margin-top: 1.25rem;
-      margin-bottom: 0.5rem;
-      padding-left: 0.75rem;
+      letter-spacing: 1.2px;
+      font-weight: 600;
     }
-
-    .sidebar nav { flex-grow: 1; display: flex; flex-direction: column; gap: 2px; }
-
     .sidebar nav a {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 0.75rem;
-      color: var(--n500);
+      gap: 10px;
+      padding: 9px 14px;
+      color: var(--sidebar-text);
       text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      border-radius: var(--radius-sm);
-      transition: all 0.15s ease;
+      font-size: 0.855rem;
+      border-radius: 6px;
+      margin: 1px 8px;
+      transition: all 0.15s;
     }
-    
-    .sidebar nav a i { font-size: 1.1rem; color: var(--n400); transition: color 0.15s; }
-    .sidebar nav a:hover { background: var(--n100); color: var(--n700); }
-    .sidebar nav a:hover i { color: var(--n600); }
-    
-    .sidebar nav a.active { 
-        background: var(--n0); 
-        color: var(--p600); 
-        font-weight: 600;
-        box-shadow: var(--shadow-xs);
+    .sidebar nav a i { font-size: 1rem; width: 18px; text-align: center; }
+    .sidebar nav a:hover { background: #1e293b; color: #e2e8f0; }
+    .sidebar nav a.active { background: var(--sidebar-active); color: #fff; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 14px;
+      border-top: 1px solid #1e293b;
     }
-    .sidebar nav a.active i { color: var(--p600); }
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .sidebar-footer a:hover { background: #1e293b; color: #e2e8f0; }
 
-    /* Mobile Overlay */
-    .sidebar-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(22, 29, 62, 0.4); /* n800 based */
-      z-index: 999;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(2px);
-    }
-
-    /* =========================================
-       TOPBAR
-       ========================================= */
+    /* TOPBAR */
     .topbar {
       height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
       position: fixed;
       top: 0;
       left: var(--sidebar-w);
       right: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
+      padding: 0 24px;
       z-index: 99;
-      background: var(--n0);
-      border-bottom: 1px solid var(--n100);
-      transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 12px;
     }
-
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .mobile-toggle {
-      display: none;
-      background: var(--n50);
-      border: 1px solid var(--n100);
-      border-radius: var(--radius-sm);
-      width: 36px; height: 36px;
-      color: var(--n600);
-      cursor: pointer;
-      padding: 0;
-      align-items: center; justify-content: center;
-    }
-    .mobile-toggle:hover { background: var(--n100); color: var(--n800); }
-    
     .topbar .page-title {
-      font-size: 1.375rem; /* H2 equivalent */
-      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
     }
-    
-    .admin-pill {
+    .topbar .admin-pill {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: var(--n0);
-      border: 1px solid var(--n100);
-      box-shadow: var(--shadow-xs);
-      border-radius: var(--radius-full);
-      padding: 0.35rem 0.35rem 0.35rem 1rem;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
       font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--n700);
-      cursor: pointer;
-      transition: all 0.15s ease;
+      color: var(--muted);
     }
-
-    .admin-pill:hover { border-color: var(--p200); box-shadow: var(--shadow-sm); }
-    
-    .admin-pill .dot {
-      width: 6px; height: 6px;
-      background: var(--l400); /* Lime success */
+    .topbar .admin-pill .dot {
+      width: 7px; height: 7px;
+      background: var(--success);
       border-radius: 50%;
     }
-    
-    .admin-pill .avatar-icon {
-        width: 32px; height: 32px;
-        background: var(--p50);
-        color: var(--p700);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.75rem;
-    }
 
-    /* Dropdown Styling */
-    .dropdown-menu {
-      border-radius: var(--radius-md);
-      border: 1px solid var(--n100);
-      box-shadow: var(--shadow-md);
-      padding: 0.5rem;
-      min-width: 200px;
-      font-family: var(--font-body);
-    }
-    .dropdown-header { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--n400); }
-    .dropdown-item {
-      border-radius: var(--radius-sm);
-      padding: 0.5rem 0.85rem;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--n600);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    
-    .dropdown-item i { font-size: 1.1rem; color: var(--n400); }
-    .dropdown-item:hover { background: var(--n50); color: var(--n800); }
-    .dropdown-item.text-danger:hover { background: var(--a50); color: var(--a600) !important; }
-    .dropdown-item.text-danger:hover i { color: var(--a500); }
-
-    /* =========================================
-       MAIN CONTENT
-       ========================================= */
+    /* MAIN CONTENT */
     .main-content {
       margin-left: var(--sidebar-w);
       padding-top: var(--topbar-h);
       min-height: 100vh;
-      transition: margin-left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .content-area { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+    .content-area { padding: 24px; }
 
-    /* BENTO BOX UTILITIES */
-    .bento-card {
-        background: var(--n0);
-        border: 1px solid var(--n100);
-        border-radius: var(--radius-xl);
-        padding: 1.75rem;
-        box-shadow: var(--shadow-xs);
-    }
-
-    /* Buttons */
-    .btn-primary {
-        background-color: var(--p500);
-        color: white;
-        border-radius: var(--radius-md);
-        padding: 0.6rem 1.25rem;
-        font-weight: 600;
-        font-family: var(--font-body);
-        font-size: 0.85rem;
-        border: none;
-        box-shadow: 0 4px 14px rgba(65,88,246,0.32);
-        transition: all 0.15s;
-        letter-spacing: 0.01em;
-    }
-    .btn-primary:hover { 
-        background-color: var(--p600); 
-        box-shadow: 0 6px 20px rgba(65,88,246,0.44); 
-        transform: translateY(-1px); 
-    }
-
-    /* BENTO TABLES */
-    .bento-table-wrapper { overflow-x: auto; }
-    .bento-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-    .bento-table th {
-      color: var(--n300);
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 800;
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--n100);
-    }
-    .bento-table td {
-      padding: 1rem;
-      vertical-align: middle;
-      font-size: 0.85rem;
-      color: var(--n600);
-      border-bottom: 1px solid var(--n50);
-      transition: background 0.12s;
-    }
-    .bento-table tr:hover td { background: var(--p50); }
-    .bento-table tr:last-child td { border-bottom: none; }
-
-    /* Badges */
-    .bento-badge {
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      font-size: 0.7rem;
-      font-weight: 700;
-      display: inline-flex;
+    /* PAGE HEADER */
+    .page-header {
+      display: flex;
       align-items: center;
-      gap: 5px;
-      letter-spacing: 0.03em;
+      justify-content: space-between;
+      margin-bottom: 20px;
     }
-    .bdg-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-    .bento-badge.blue { background: var(--p50); color: var(--p700); }
-    .bento-badge.lime { background: var(--l50); color: var(--l500); }
-    .bento-badge.coral { background: var(--a50); color: var(--a600); }
-    .bento-badge.teal { background: var(--t50); color: var(--t500); }
+    .page-header h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0;
+    }
+    .page-header .sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
 
-    /* Django Message Alert Utilities */
-    .alert-bento-error {
-        background-color: var(--a50) !important;
-        border: 1px solid var(--a200) !important;
-        color: var(--a600);
+    /* CARDS */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .alert-bento-success {
-        background-color: var(--l50) !important;
-        border: 1px solid var(--l300) !important;
-        color: var(--l500);
+    .card-body { padding: 20px; }
+
+    /* STAT CARDS */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stat-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .stat-val { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+    /* TABLE */
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .table-card .table-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .table-card .table-header h6 { font-size: 0.88rem; font-weight: 600; margin: 0; }
+    .crm-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .crm-table thead th {
+      background: #f8fafc;
+      padding: 10px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .crm-table tbody td {
+      padding: 11px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+    .crm-table tbody tr:last-child td { border-bottom: none; }
+    .crm-table tbody tr:hover td { background: #f8fafc; }
+
+    /* BADGES */
+    .badge-hot { background: #fef2f2; color: #dc2626; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-warm { background: #fffbeb; color: #d97706; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-cold { background: #eff6ff; color: #2563eb; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-enabled { background: #ecfdf5; color: #059669; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-disabled { background: #f9fafb; color: #9ca3af; font-size: 0.7rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-stage {
+      font-size: 0.68rem; padding: 3px 8px; border-radius: 20px; font-weight: 600;
+      background: #f1f5f9; color: #475569;
+    }
+    .badge-stage.new { background: #f0f9ff; color: #0369a1; }
+    .badge-stage.contacted { background: #faf5ff; color: #7c3aed; }
+    .badge-stage.interested { background: #ecfdf5; color: #059669; }
+    .badge-stage.closed { background: #dcfce7; color: #16a34a; }
+    .badge-stage.lost { background: #fef2f2; color: #dc2626; }
+
+    /* BUTTONS */
+    .btn-primary { background: var(--primary); border-color: var(--primary); font-size: 0.83rem; }
+    .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+    .btn-sm { padding: 4px 10px; font-size: 0.75rem; border-radius: 6px; }
+    .btn-action { background: #f8fafc; border: 1px solid var(--border); color: var(--muted); }
+    .btn-action:hover { background: #f1f5f9; color: var(--text); }
+
+    /* FORM */
+    .form-label { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .form-control, .form-select {
+      font-size: 0.84rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text);
+      background: var(--surface);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+    }
+    .form-section {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--muted);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+      margin-top: 4px;
     }
 
-    /* RESPONSIVE DESIGN */
-    @media (max-width: 992px) {
+    /* ALERTS */
+    .alert { font-size: 0.84rem; border-radius: 8px; }
+
+    /* FILTERS BAR */
+    .filters-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .filters-bar .form-control,
+    .filters-bar .form-select { font-size: 0.8rem; padding: 6px 10px; height: auto; }
+    .filters-bar .form-control { max-width: 200px; }
+    .filters-bar .form-select { max-width: 160px; }
+
+    /* EMPTY STATE */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 10px; display: block; color: #cbd5e1; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); }
-      .sidebar.mobile-open { transform: translateX(0); box-shadow: var(--shadow-lg); }
-      .sidebar-overlay.mobile-open { opacity: 1; visibility: visible; }
-      
       .main-content { margin-left: 0; }
-      .topbar { left: 0; padding: 0 1.25rem; }
-      .mobile-toggle { display: flex; }
-      .content-area { padding: 1.5rem; }
+      .topbar { left: 0; }
     }
   </style>
-  
   {% block style %}
+    
   {% endblock style %}
-  
 </head>
 <body>
 
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-<aside class="sidebar" id="sidebar">
+<!-- SIDEBAR -->
+<aside class="sidebar">
   <div class="sidebar-brand">
-    <div class="brand-name">
-      <div class="brand-icon"><i class="ph-fill ph-buildings"></i></div>
-      BuyBuzz
-    </div>
-    <div class="brand-sub">Infra Admin</div>
+    <div class="brand-name">CoreCRM</div>
+    <div class="brand-sub">Super Admin</div>
   </div>
 
   <nav>
     <div class="sidebar-section">Overview</div>
     <a href="{% url 'index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-      <i class="ph ph-squares-four"></i> Dashboard
+      <i class="bi bi-speedometer2"></i> Dashboard
     </a>
 
-    <div class="sidebar-section">CRM Pipeline</div>
+    <div class="sidebar-section">CRM</div>
     <a href="{% url 'leads' %}" class="{% if 'lead' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-users-three"></i> Leads
+      <i class="bi bi-person-lines-fill"></i> Leads
     </a>
     <a href="{% url 'calls' %}" class="{% if 'call' in request.resolver_match.url_name and 'wrapup' not in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-phone-call"></i> Call Logs
+      <i class="bi bi-telephone-fill"></i> Call Logs
     </a>
     <a href="{% url 'wrapups' %}" class="{% if 'wrapup' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-clipboard-text"></i> Wrap-Ups
+      <i class="bi bi-clipboard-check-fill"></i> Wrap-Ups
     </a>
     <a href="{% url 'followups' %}" class="{% if 'followup' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-calendar-check"></i> Follow-Ups
+      <i class="bi bi-calendar-check-fill"></i> Follow-Ups
     </a>
 
     <div class="sidebar-section">Management</div>
     <a href="{% url 'branch' %}" class="{% if 'branch' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-storefront"></i> Branches
+      <i class="bi bi-building"></i> Branches
     </a>
     <a href="{% url 'users' %}" class="{% if 'user' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-user-circle-gear"></i> Users
+      <i class="bi bi-people-fill"></i> Users
     </a>
     <a href="{% url 'hr_panel' %}" class="{% if 'hr' in request.resolver_match.url_name or 'attendance' in request.resolver_match.url_name or 'leave' in request.resolver_match.url_name or 'payroll' in request.resolver_match.url_name %}active{% endif %}">
-      <i class="ph ph-identification-badge"></i> HR Panel
-    </a>
-    <a href="{% url 'dash_apr_report' %}" class="{% if request.resolver_match.url_name == 'dash_apr_report' %}active{% endif %}">
-      <i class="ph ph-chart-line-up"></i> APR Report
+  <i class="bi bi-person-badge-fill"></i> HR Panel
+</a>
+<a href="{% url 'dash_apr_report' %}" class="{% if request.resolver_match.url_name == 'dash_apr_report' %}active{% endif %}">
+    <i class="bi bi-bar-chart-line-fill"></i> APR Report
+</a>
+
+    <div class="sidebar-section">System</div>
+    <a href="{% url 'settings' %}" class="{% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+      <i class="bi bi-gear-fill"></i> Settings
     </a>
   </nav>
+
+  <div class="sidebar-footer">
+    <a href="{% url 'logout_view' %}">
+      <i class="bi bi-box-arrow-left"></i> Logout
+    </a>
+  </div>
 </aside>
 
+<!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-left">
-    <button class="mobile-toggle" id="mobileToggle">
-      <i class="ph ph-list"></i>
-    </button>
-    <h2 class="page-title">Welcome, {{ request.user.first_name|default:request.user.username }}!</h2>
-  </div>
-  
-  <div class="dropdown">
-    <div class="admin-pill" data-bs-toggle="dropdown" aria-expanded="false">
-      <span class="dot"></span>
-      {{ request.user.get_full_name|default:request.user.username }}
-      <div class="avatar-icon">
-          {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
-      </div>
-    </div>
-    
-    <ul class="dropdown-menu dropdown-menu-end mt-2">
-      <li><h6 class="dropdown-header">System Management</h6></li>
-      <li>
-        <a class="dropdown-item" href="#">
-          <i class="ph ph-user-circle"></i> Edit Profile
-        </a>
-      </li>
-      <li>
-        <a class="dropdown-item" href="{% url 'settings' %}">
-          <i class="ph ph-gear"></i> Settings
-        </a>
-      </li>
-      <li><hr class="dropdown-divider" style="border-color: var(--n100);"></li>
-      <li>
-        <a class="dropdown-item text-danger" href="{% url 'logout_view' %}">
-          <i class="ph ph-sign-out"></i> Logout
-        </a>
-      </li>
-    </ul>
+  <div class="page-title">{% block page_title %}CoreCRM{% endblock %}</div>
+  <div class="admin-pill">
+    <span class="dot"></span>
+    {{ request.user.get_full_name|default:request.user.username }}
   </div>
 </div>
 
+<!-- MAIN -->
 <div class="main-content">
   <div class="content-area">
 
     {% if messages %}
       {% for message in messages %}
-        <div class="bento-card mb-4 d-flex align-items-center gap-3 {% if message.tags == 'error' %}alert-bento-error{% else %}alert-bento-success{% endif %}" style="padding: 1rem 1.5rem; border-radius: var(--radius-md);">
-          <i class="ph-fill {% if message.tags == 'error' %}ph-warning-circle{% else %}ph-check-circle{% endif %}" style="font-size: 1.5rem;"></i>
-          <span style="font-weight: 600; font-size: 0.85rem;">{{ message }}</span>
-          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" style="font-size: 0.75rem;"></button>
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show mb-3" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
       {% endfor %}
     {% endif %}
@@ -522,20 +395,6 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Mobile Sidebar Toggle Logic
-  const toggleBtn = document.getElementById('mobileToggle');
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-
-  function toggleMenu() {
-    sidebar.classList.toggle('mobile-open');
-    overlay.classList.toggle('mobile-open');
-  }
-
-  toggleBtn.addEventListener('click', toggleMenu);
-  overlay.addEventListener('click', toggleMenu);
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
