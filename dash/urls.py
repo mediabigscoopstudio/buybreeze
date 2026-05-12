@@ -11,6 +11,7 @@ urlpatterns = [
     # Auth
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('logout/', views.logout_view, name='logout_view'),
 
     # Branch

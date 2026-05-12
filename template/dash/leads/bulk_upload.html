@@ -1,89 +1,283 @@
 {% extends 'dash/base.html' %}
 {% block page_title %}Bulk Upload Leads{% endblock %}
+
+{% block style %}
+<style>
+  /* Page Header Styling */
+  .page-header-bento {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .page-header-bento h4 {
+    font-size: 1.5rem;
+    margin: 0 0 4px 0;
+  }
+  
+  .page-header-bento .sub {
+    color: var(--bb-text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  /* Form Section Headers */
+  .form-section-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--bb-obsidian);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--bb-silver);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Bento Input Fields */
+  .form-label {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--bb-text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .bento-input {
+    background: #FFFFFF;
+    border: 1.5px solid var(--bb-silver);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    font-family: var(--font-sans);
+    color: var(--bb-text);
+    transition: all 0.2s ease;
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .bento-input:focus {
+    border-color: var(--bb-gold);
+    outline: none;
+    box-shadow: 0 0 0 4px var(--bb-gold-light);
+  }
+
+  /* Select specific styling */
+  select.bento-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236B6B6B' viewBox='0 0 256 256'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+    padding-right: 2.5rem;
+  }
+
+  /* File Input Specifics */
+  input[type="file"].bento-input {
+    padding: 0.5rem 1rem;
+    line-height: 1.5;
+  }
+  input[type="file"]::file-selector-button {
+    background: var(--bb-bg);
+    border: 1px solid var(--bb-silver);
+    border-radius: 8px;
+    padding: 0.3rem 0.8rem;
+    margin-right: 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bb-obsidian);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  input[type="file"]::file-selector-button:hover {
+    background: var(--bb-silver);
+  }
+
+  /* Buttons */
+  .btn-secondary-bento {
+    background: transparent;
+    color: var(--bb-text-muted);
+    border: 1.5px solid var(--bb-silver);
+    border-radius: var(--radius-pill);
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .btn-secondary-bento:hover {
+    background: var(--bb-bg);
+    color: var(--bb-obsidian);
+    border-color: var(--bb-obsidian-light);
+  }
+
+  /* Syntax Guide Styles */
+  .syntax-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .syntax-row:last-child { border-bottom: none; }
+  .syntax-key { font-weight: 700; font-family: var(--font-heading); color: var(--bb-obsidian); font-size: 0.85rem; }
+  .syntax-val { font-size: 0.8rem; color: var(--bb-text-muted); line-height: 1.5; }
+  .badge-req { background: #FFF5F5; color: #E53E3E; padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; }
+  .badge-opt { background: var(--bb-bg); color: var(--bb-text-muted); padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="page-header">
+<div class="page-header-bento">
   <div>
-    <h4>Bulk Lead Upload</h4>
-    <div class="sub">Import multiple leads from Excel or CSV</div>
+    <h4 class="h-font">Bulk Lead Upload</h4>
+    <div class="sub">Import pipeline data from CSV or Excel</div>
   </div>
-  <a href="{% url 'leads' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back to Leads</a>
+  <a href="{% url 'leads' %}" class="btn-secondary-bento">
+    <i class="ph ph-arrow-left"></i> Back to Leads
+  </a>
 </div>
 
-<div class="row g-3">
+<div class="row g-4">
   <div class="col-md-7">
-    <div class="card">
-      <div class="card-body">
-        <div class="form-section">Upload File</div>
-        <form method="POST" enctype="multipart/form-data">
-          {% csrf_token %}
-          <div class="row g-3 mb-3">
-            <div class="col-12">
-              <label class="form-label">Select File * <span style="color:#94a3b8; font-weight:400;">(.xlsx or .csv)</span></label>
-              <input type="file" name="bulk_file" class="form-control" accept=".csv,.xlsx,.xls" required>
-              <div style="font-size:0.75rem; color:#94a3b8; margin-top:5px;">Max recommended: 5,000 rows per upload.</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Assign to Branch</label>
-              <select name="branch" class="form-select">
-                <option value="">Select branch (optional)</option>
-                {% for b in branches %}
-                  <option value="{{ b.id }}">{{ b.name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Assign to Member</label>
-              <select name="assigned_to" class="form-select">
-                <option value="">Unassigned (optional)</option>
-                {% for m in members %}
-                  <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div class="d-flex gap-2 mt-2">
-            <button type="submit" class="btn btn-primary btn-sm px-4">
-              <i class="bi bi-upload me-1"></i> Upload & Import
-            </button>
-            <a href="{% url 'leads' %}" class="btn btn-sm btn-action">Cancel</a>
-          </div>
-        </form>
+    <div class="bento-card h-100">
+      <div class="form-section-title" style="margin-top: 0;">
+        <i class="ph-fill ph-file-csv" style="color: #2563eb;"></i> Import Data
       </div>
+      
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <label class="form-label">Select File *</label>
+            <input type="file" name="bulk_file" class="bento-input" accept=".csv,.xlsx,.xls" required>
+            <div style="font-size:0.8rem; color: var(--bb-text-muted); margin-top:8px; display: flex; align-items: center; gap: 6px;">
+              <i class="ph-fill ph-info"></i> Max recommended: 5,000 rows per upload (.xlsx or .csv)
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Bulk Assign to Branch</label>
+            <select name="branch" class="bento-input">
+              <option value="">Select branch (optional)</option>
+              {% for b in branches %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div class="col-md-6">
+            <label class="form-label">Bulk Assign to Member</label>
+            <select name="assigned_to" class="bento-input">
+              <option value="">Unassigned (optional)</option>
+              {% for m in members %}
+                <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3 pt-3 border-top" style="border-color: var(--bb-silver) !important;">
+          <button type="submit" class="btn-gold">
+            <i class="ph-bold ph-upload-simple me-1"></i> Upload & Process
+          </button>
+          <a href="{% url 'leads' %}" class="btn-secondary-bento" style="border: none;">Cancel</a>
+        </div>
+      </form>
     </div>
   </div>
 
   <div class="col-md-5">
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="form-section">Download Template</div>
-        <p style="font-size:0.83rem; color:#475569; margin-bottom:12px;">
-          Download the CSV template with correct column headers and a sample row.
-        </p>
-        <a href="{% url 'download_lead_template' %}" class="btn btn-sm btn-action">
-          <i class="bi bi-download me-1"></i> Download CSV Template
-        </a>
+    
+    <div class="bento-card mb-4" style="background: var(--bb-obsidian); color: var(--bb-white);">
+      <div class="form-section-title" style="color: var(--bb-white); border-color: rgba(255,255,255,0.1); margin-top: 0;">
+        <i class="ph-fill ph-download-simple" style="color: var(--bb-gold);"></i> Data Template
       </div>
+      <p style="font-size:0.85rem; color: #A0A0A0; margin-bottom:1.25rem; line-height: 1.6;">
+        Ensure your data matches the system architecture perfectly. Download the pre-formatted CSV template below.
+      </p>
+      <a href="{% url 'download_lead_template' %}" class="btn-gold" style="display: block; text-align: center; text-decoration: none;">
+        Download CSV Template
+      </a>
     </div>
 
-    <div class="card">
-      <div class="card-body">
-        <div class="form-section">Column Reference</div>
-        <div style="font-size:0.78rem; color:#64748b; display:flex; flex-direction:column; gap:6px;">
-          <div><strong style="color:#dc2626;">Required:</strong> name, phone</div>
-          <div><strong>source:</strong> meta, google, website, social, campaign, referral, walkin, whatsapp, other</div>
-          <div><strong>temperature:</strong> hot, warm, cold</div>
-          <div><strong>stage:</strong> new, contacted, interested, site_visit, negotiation, closed, lost</div>
-          <div><strong>property_type:</strong> apartment, villa, plot, commercial, studio</div>
-          <div><strong>bhk_preference:</strong> 1bhk, 2bhk, 3bhk, 4bhk+</div>
-          <div><strong>purpose:</strong> investment, selfuse, rental</div>
-          <div><strong>timeline:</strong> immediate, 3months, 6months, 1year</div>
-          <div><strong>readiness:</strong> ready, underconstruction</div>
-          <div style="margin-top:4px; color:#94a3b8;">
-            <i class="bi bi-info-circle me-1"></i>
-            Rows missing name or phone are skipped. Invalid values default automatically.
+    <div class="bento-card">
+      <div class="form-section-title" style="margin-top: 0;">
+        <i class="ph-fill ph-book-open-text" style="color: #0d9488;"></i> Column Reference
+      </div>
+      
+      <div class="syntax-guide">
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">name, phone</span>
+            <span class="badge-req">REQUIRED</span>
+          </div>
+          <div class="syntax-val">Rows missing these are skipped automatically.</div>
+        </div>
+        
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">source</span>
+            <span class="badge-opt">OPTIONAL</span>
+          </div>
+          <div class="syntax-val">meta, google, website, social, campaign, referral, walkin, whatsapp, other</div>
+        </div>
+
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">temperature</span>
+            <span class="badge-opt">OPTIONAL</span>
+          </div>
+          <div class="syntax-val">hot, warm, cold</div>
+        </div>
+
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">stage</span>
+            <span class="badge-opt">OPTIONAL</span>
+          </div>
+          <div class="syntax-val">new, contacted, interested, site_visit, negotiation, closed, lost</div>
+        </div>
+
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">property_type</span>
+            <span class="badge-opt">OPTIONAL</span>
+          </div>
+          <div class="syntax-val">apartment, villa, plot, commercial, studio</div>
+        </div>
+
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">bhk_preference</span>
+            <span class="badge-opt">OPTIONAL</span>
+          </div>
+          <div class="syntax-val">1bhk, 2bhk, 3bhk, 4bhk+</div>
+        </div>
+
+        <div class="syntax-row">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="syntax-key">purpose</span>
+            <span class="badge-opt">OPTIONAL</span>
+          </div>
+          <div class="syntax-val">investment, selfuse, rental</div>
+        </div>
+
+        <div class="syntax-row pt-3 mt-2" style="border-top: 1px dashed var(--bb-silver);">
+          <div class="syntax-val" style="display: flex; gap: 8px;">
+            <i class="ph-fill ph-warning-circle" style="color: #ea580c; font-size: 1.2rem;"></i>
+            <span>Invalid values (e.g., typos in spelling) will fall back to system defaults automatically.</span>
           </div>
         </div>
+
       </div>
     </div>
   </div>

@@ -1,4 +1,5 @@
 from pathlib import Path
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -111,3 +112,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom Logic Settings
 WRAPUP_EDIT_WINDOW_MINUTES = 10
+
+FAST2SMS_API_KEY = config('FAST2SMS_API_KEY')
+OTP_TEST_MODE = config('OTP_TEST_MODE', default=True, cast=bool)

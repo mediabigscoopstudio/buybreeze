@@ -20,6 +20,8 @@ from django.http import JsonResponse
 from employee.models import LocationPing # <-- Make sure this is imported at the top!
 from datetime import datetime
 from django.shortcuts import get_object_or_404
+from .otp_utils import generate_otp, send_otp
+
 
 # ============================================================
 # AUTH GUARD
@@ -32,35 +34,220 @@ def superadmin_required(user):
 # AUTH VIEWS
 # ============================================================
 def login_view(request):
+
+    # =========================================
+    # ALREADY LOGGED IN
+    # =========================================
     if request.user.is_authenticated:
+
         if request.user.is_superuser:
             return redirect('http://localhost:8000/')
+
         if hasattr(request.user, 'profile'):
+
             role = request.user.profile.role
-            if role == 'hr':      return redirect('http://hrpanel.localhost:8000/')
-            if role == 'manager': return redirect('http://manager.localhost:8000/')
-            if role == 'tl':      return redirect('http://tl.localhost:8000/')
+
+            if role == 'hr':
+                return redirect('http://hrpanel.localhost:8000/')
+
+            if role == 'manager':
+                return redirect('http://manager.localhost:8000/')
+
+            if role == 'tl':
+                return redirect('http://tl.localhost:8000/')
+
         return redirect('http://localhost:8000/')
 
+    # =========================================
+    # LOGIN POST
+    # =========================================
     if request.method == 'POST':
+
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
 
+        user = authenticate(
+            request,
+            username=username,
+            password=password
+        )
+
+        # =====================================
+        # VALID USER
+        # =====================================
         if user is not None:
-            login(request, user)
-            if user.is_superuser:
-                return redirect('http://localhost:8000/')
-            if hasattr(user, 'profile'):
-                role = user.profile.role
-                if role == 'hr':      return redirect('http://hrpanel.localhost:8000/')
-                if role == 'manager': return redirect('http://manager.localhost:8000/')
-                if role == 'tl':      return redirect('http://tl.localhost:8000/')
-            return redirect('http://localhost:8000/')
+
+            try:
+                profile = user.profile
+            except:
+                messages.error(request, 'User profile not found.')
+                return redirect('login_view')
+
+            # =====================================
+            # PHONE CHECK
+            # =====================================
+            if not profile.phone:
+
+                messages.error(
+                    request,
+                    'Phone number not found in profile.'
+                )
+
+                return redirect('login_view')
+
+            # =====================================
+            # GENERATE OTP
+            # =====================================
+            otp = generate_otp()
+
+            # =====================================
+            # SEND OTP
+            # =====================================
+            otp_sent = send_otp(profile.phone, otp)
+
+            if not otp_sent:
+
+                messages.error(
+                    request,
+                    'Failed to send OTP.'
+                )
+
+                return redirect('login_view')
+
+            # =====================================
+            # STORE SESSION
+            # =====================================
+            request.session['pending_user_id'] = user.id
+            request.session['otp_code'] = otp
+
+            expiry_time = timezone.now() + timedelta(minutes=5)
+
+            request.session['otp_expiry'] = expiry_time.isoformat()
+
+            # =====================================
+            # SUCCESS MESSAGE
+            # =====================================
+            messages.success(
+                request,
+                'OTP sent successfully.'
+            )
+
+            return redirect('verify_otp')
+
+        # =====================================
+        # INVALID LOGIN
+        # =====================================
         else:
-            messages.error(request, 'Invalid credentials.')
+
+            messages.error(
+                request,
+                'Invalid username or password.'
+            )
 
     return render(request, 'dash/signin.html')
+
+def verify_otp(request):
+
+    pending_user_id = request.session.get('pending_user_id')
+    stored_otp = request.session.get('otp_code')
+    otp_expiry = request.session.get('otp_expiry')
+
+    # =========================================
+    # SESSION CHECK
+    # =========================================
+    if not pending_user_id or not stored_otp or not otp_expiry:
+
+        messages.error(
+            request,
+            'Session expired. Please login again.'
+        )
+
+        return redirect('login_view')
+
+    # =========================================
+    # OTP EXPIRY CHECK
+    # =========================================
+    expiry_time = datetime.fromisoformat(otp_expiry)
+
+    if timezone.now() > expiry_time:
+
+        request.session.flush()
+
+        messages.error(
+            request,
+            'OTP expired. Please login again.'
+        )
+
+        return redirect('login_view')
+
+    # =========================================
+    # VERIFY OTP POST
+    # =========================================
+    if request.method == 'POST':
+
+        entered_otp = request.POST.get('otp')
+
+        # =====================================
+        # OTP MATCH
+        # =====================================
+        if entered_otp == stored_otp:
+
+            try:
+                user = User.objects.get(id=pending_user_id)
+
+            except User.DoesNotExist:
+
+                messages.error(
+                    request,
+                    'User not found.'
+                )
+
+                return redirect('login_view')
+
+            # =====================================
+            # FINAL LOGIN
+            # =====================================
+            login(request, user)
+
+            # =====================================
+            # CLEAN SESSION
+            # =====================================
+            request.session.pop('pending_user_id', None)
+            request.session.pop('otp_code', None)
+            request.session.pop('otp_expiry', None)
+
+            # =====================================
+            # ROLE REDIRECT
+            # =====================================
+            if user.is_superuser:
+                return redirect('http://localhost:8000/')
+
+            if hasattr(user, 'profile'):
+
+                role = user.profile.role
+
+                if role == 'hr':
+                    return redirect('http://hrpanel.localhost:8000/')
+
+                if role == 'manager':
+                    return redirect('http://manager.localhost:8000/')
+
+                if role == 'tl':
+                    return redirect('http://tl.localhost:8000/')
+
+            return redirect('http://localhost:8000/')
+
+        # =====================================
+        # INVALID OTP
+        # =====================================
+        else:
+
+            messages.error(
+                request,
+                'Invalid OTP.'
+            )
+
+    return render(request, 'dash/verify_otp.html')
 
 
 def logout_view(request):
