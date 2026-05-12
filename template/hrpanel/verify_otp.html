@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+
+    <style>
+
+        body{
+            margin:0;
+            padding:0;
+            background:#f5f5f5;
+            font-family:Arial, sans-serif;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
+
+        .otp-card{
+            background:white;
+            padding:40px;
+            border-radius:10px;
+            width:350px;
+            box-shadow:0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:20px;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin-top:10px;
+            border:1px solid #ccc;
+            border-radius:5px;
+            font-size:16px;
+            box-sizing:border-box;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            background:black;
+            color:white;
+            border:none;
+            border-radius:5px;
+            margin-top:20px;
+            cursor:pointer;
+        }
+
+        .message{
+            background:#ffe5e5;
+            color:red;
+            padding:10px;
+            margin-bottom:15px;
+            border-radius:5px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div class="otp-card">
+
+    <h2>OTP Verification</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <input
+            type="text"
+            name="otp"
+            placeholder="Enter OTP"
+            required
+        >
+
+        <button type="submit">
+            Verify OTP
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

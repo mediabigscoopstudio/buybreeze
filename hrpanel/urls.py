@@ -6,8 +6,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     # Auth
     path('', views.hr_panel, name='index'),
-    path('login', views.login_view, name='login_view'),
-    path('logout', views.logout_view, name='logout_view'),
+    path('login/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
 
     # Branch
     path('branches', views.branch, name='branch'),

@@ -8,6 +8,7 @@ from dash.views import apr_report, individual_apr_report
 urlpatterns = [
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('logout/', views.logout_view, name='logout_view'),
     path('assign-to-tl/', views.assign_to_tl, name='assign_to_tl'),
     path('unassign_lead/<int:lead_id>/', views.unassign_lead, name='unassign_lead'),

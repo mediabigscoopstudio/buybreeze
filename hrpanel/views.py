@@ -14,6 +14,8 @@ from django.http import HttpResponse
 from dash.models import (
     Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting
 )
+from dash.otp_utils import generate_otp, send_otp
+
 
 
 # ============================================================
@@ -28,33 +30,104 @@ def hr_required(user):
 
 
 # ============================================================
-# AUTH VIEWS
+# HR LOGIN VIEW
 # ============================================================
 def login_view(request):
+
     if request.user.is_authenticated:
-        # If already logged in, send them to the index
-        return redirect('index')
+        return redirect('/')
 
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            try:
-                # Strictly verify the role is 'hr'
-                if user.profile.role == 'hr':
-                    login(request, user)
-                    return redirect('/')
-                else:
-                    messages.error(request, 'Access Denied: This panel is for HR only.')
-            except UserProfile.DoesNotExist:
-                messages.error(request, 'Profile configuration missing. Please contact Admin.')
-        else:
-            messages.error(request, 'Invalid username or password.')
+
+        phone = request.POST.get('phone')
+
+        try:
+            profile = UserProfile.objects.get(
+                phone=phone,
+                role='hr'
+            )
+
+            user = profile.user
+
+            otp = generate_otp()
+
+            request.session['pending_user_id'] = user.id
+            request.session['otp_code'] = otp
+            request.session['otp_expiry'] = (
+                timezone.now() + timedelta(minutes=5)
+            ).isoformat()
+
+            send_otp(phone, otp)
+
+            messages.success(
+                request,
+                'OTP sent successfully.'
+            )
+
+            return redirect('verify_otp')
+
+        except UserProfile.DoesNotExist:
+
+            messages.error(
+                request,
+                'HR account not found.'
+            )
 
     return render(request, 'hrpanel/signin.html')
+
+# ============================================================
+# HR VERIFY OTP
+# ============================================================
+def verify_otp(request):
+
+    pending_user_id = request.session.get('pending_user_id')
+    stored_otp = request.session.get('otp_code')
+    otp_expiry = request.session.get('otp_expiry')
+
+    if not pending_user_id or not stored_otp or not otp_expiry:
+
+        messages.error(
+            request,
+            'Session expired. Please login again.'
+        )
+
+        return redirect('login_view')
+
+    expiry_time = timezone.datetime.fromisoformat(otp_expiry)
+
+    if timezone.now() > expiry_time:
+
+        messages.error(
+            request,
+            'OTP expired.'
+        )
+
+        return redirect('login_view')
+
+    if request.method == 'POST':
+
+        entered_otp = request.POST.get('otp')
+
+        if entered_otp == stored_otp:
+
+            user = User.objects.get(id=pending_user_id)
+
+            login(request, user)
+
+            del request.session['pending_user_id']
+            del request.session['otp_code']
+            del request.session['otp_expiry']
+
+            return redirect('/')
+
+        else:
+
+            messages.error(
+                request,
+                'Invalid OTP.'
+            )
+
+    return render(request, 'hrpanel/verify_otp.html')
 
 
 def logout_view(request):

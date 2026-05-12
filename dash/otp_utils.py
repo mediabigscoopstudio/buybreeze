@@ -1,12 +1,20 @@
 import random
 import requests
+
 from django.conf import settings
 
 
+# ============================================================
+# GENERATE OTP
+# ============================================================
 def generate_otp():
+
     return str(random.randint(100000, 999999))
 
 
+# ============================================================
+# SEND OTP
+# ============================================================
 def send_otp(phone_number, otp):
 
     # =========================================
@@ -24,26 +32,52 @@ def send_otp(phone_number, otp):
         return True
 
     # =========================================
-    # PRODUCTION MODE
+    # LIVE FAST2SMS MODE
     # =========================================
-    url = "https://www.fast2sms.com/dev/bulkV2"
+    try:
 
-    payload = {
-        'route': 'otp',
-        'variables_values': otp,
-        'numbers': phone_number,
-    }
+        url = "https://www.fast2sms.com/dev/bulkV2"
 
-    headers = {
-        'authorization': settings.FAST2SMS_API_KEY
-    }
+        payload = {
+            'authorization': settings.FAST2SMS_API_KEY,
+            'variables_values': otp,
+            'route': 'otp',
+            'numbers': phone_number,
+        }
 
-    response = requests.get(
-        url,
-        params=payload,
-        headers=headers
-    )
+        headers = {
+            'cache-control': "no-cache"
+        }
 
-    print(response.json())
+        response = requests.get(
+            url,
+            params=payload,
+            headers=headers
+        )
 
-    return response.status_code == 200
+        data = response.json()
+
+        print("\n===================================")
+        print("      FAST2SMS RESPONSE")
+        print("===================================")
+        print(data)
+        print("===================================\n")
+
+        # =====================================
+        # SUCCESS CHECK
+        # =====================================
+        if data.get('return') == True:
+
+            return True
+
+        return False
+
+    except Exception as e:
+
+        print("\n===================================")
+        print("        OTP ERROR")
+        print("===================================")
+        print(str(e))
+        print("===================================\n")
+
+        return False
