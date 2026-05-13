@@ -6,7 +6,7 @@ import random
 # =========================================
 def generate_otp():
     #return str(random.randint(100000, 999999))
-    return "000000"
+    return "000000" # Remove before production and un hash the line before 
 
 # =========================================
 # SEND OTP

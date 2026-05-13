@@ -1462,16 +1462,16 @@ def apr_report(request):
         # Grab all regular employees. 
         # Using select_related makes the database query lightning fast!
         employees = User.objects.filter(is_superuser=False).select_related(
-            'userprofile', 
-            'userprofile__branch', 
-            'userprofile__reports_to', 
-            'userprofile__reports_to__user'
+            'profile', 
+            'profile__branch', 
+            'profile__reports_to', 
+            'profile__reports_to__user'
         )
         
         directory_data = []
         for emp in employees:
             # We safely check if they have a UserProfile built
-            if hasattr(emp, 'userprofile'):
+            if hasattr(emp, 'profile'):
                 # Grab the Branch name
                 branch_name = emp.userprofile.branch.name if emp.userprofile.branch else "N/A"
                 
