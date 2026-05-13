@@ -20,7 +20,7 @@ def tl_required(user):
     return (
         user.is_authenticated and
          hasattr(user, 'profile') and
-        user.userprofile.role == 'tl'
+        user.profile.role == 'tl'
     )
 
 
@@ -67,7 +67,7 @@ def login_view(request):
                 'Phone number not registered.'
             )
 
-            return redirect('login_view')
+            return redirect('/login/')
 
         # =====================================
         # GENERATE OTP
@@ -89,7 +89,7 @@ def login_view(request):
                 'Failed to send OTP.'
             )
 
-            return redirect('login_view')
+            return redirect('/login/')
 
         # =====================================
         # STORE SESSION
@@ -136,7 +136,7 @@ def verify_otp(request):
             'Session expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     # =========================================
     # OTP EXPIRY CHECK
@@ -152,7 +152,7 @@ def verify_otp(request):
             'OTP expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     # =========================================
     # VERIFY OTP POST
@@ -179,7 +179,7 @@ def verify_otp(request):
                     'User not found.'
                 )
 
-                return redirect('login_view')
+                return redirect('/login/')
 
             # =====================================
             # FINAL LOGIN
@@ -210,7 +210,7 @@ def verify_otp(request):
             # TEAMLEADER REDIRECT
             # =====================================
             return redirect(
-                'http://teamleader.localhost:8000/'
+                '/'
             )
 
         # =====================================
@@ -237,12 +237,12 @@ def logout_view(request):
     logout(request)
 
     return redirect(
-        'http://teamleader.localhost:8000/login/'
+        '/login/'
     )
 
 @user_passes_test(tl_required, login_url='/login/')
 def index(request):
-    tl = request.user.userprofile
+    tl = request.user.profile
 
     # Only leads assigned to this TL
     leads = Lead.objects.filter(
@@ -298,7 +298,7 @@ def assign_to_employee(request):
             if not lead_ids or not employee_id:
                 return JsonResponse({'status': 'error', 'message': 'Missing data'})
 
-            tl = request.user.userprofile
+            tl = request.user.profile
 
             # Get employee (must be under this TL)
             employee = UserProfile.objects.get(
@@ -330,7 +330,7 @@ from dash.models import UserProfile, Lead
 
 @user_passes_test(tl_required, login_url='/login/')
 def employee_performance(request, id):
-    tl = request.user.userprofile
+    tl = request.user.profile
 
     # Get employee (must belong to this TL)
     employee = get_object_or_404(
