@@ -25,7 +25,7 @@ def hr_required(user):
     return (
         user.is_authenticated and 
         hasattr(user, 'profile') and 
-        user.userprofile.role == 'hr'
+        user.profile.role == 'hr'
     )
 
 
