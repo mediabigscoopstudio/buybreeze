@@ -3,212 +3,487 @@
 
 {% block title %}Dashboard — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── DASHBOARD SPECIFIC LAYOUT UTILITIES ── */
+  
+  /* Stat Cards */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+  .stat-change { font-size: 12px; font-weight: 600; margin-top: 16px; display: inline-flex; align-items: center; gap: 4px; }
+  .stat-change.up { color: var(--sage); }
+  .stat-change.dn { color: #E53E3E; }
+
+  /* Pipeline Bars */
+  .pipeline-stage { display: flex; align-items: center; margin-bottom: 16px; font-size: 13px; }
+  .stage-label { width: 90px; color: var(--ink); font-weight: 500; }
+  .stage-bar-wrap { flex: 1; height: 8px; background: var(--cloud); border-radius: 4px; overflow: hidden; margin: 0 16px; }
+  .stage-bar { height: 100%; border-radius: 4px; }
+  .stage-count { width: 24px; font-family: 'Geist Mono', monospace; font-weight: 700; color: var(--ink); text-align: right; }
+  .stage-value { width: 60px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone); text-align: right; }
+
+  /* Activity Feed */
+  .activity-item { display: flex; gap: 12px; margin-bottom: 20px; position: relative; }
+  .activity-item:not(:last-child):before {
+    content: ''; position: absolute; left: 3px; top: 12px; bottom: -20px;
+    width: 2px; background: var(--cloud); z-index: 0;
+  }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; z-index: 1; margin-top: 6px; flex-shrink: 0; }
+  .activity-text { font-size: 13px; color: var(--ink); line-height: 1.4; }
+  .activity-time { font-size: 11px; color: var(--stone); margin-top: 2px; }
+
+  /* Task List */
+  .task-item { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--ink); margin-bottom: 12px; }
+  .task-item input[type="checkbox"] { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border); accent-color: var(--sage); }
+  .task-item.completed { color: var(--stone); text-decoration: line-through; }
+
+  /* Generic Card Shell */
+  .grove-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .panel-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .panel-sub { font-size: 12px; color: var(--stone); margin-bottom: 24px; }
+
+  /* Leads Table overrides to match image */
+  .leads-table th { font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; padding: 16px 12px; border-bottom: 1px solid var(--border); }
+  .leads-table td { padding: 16px 12px; border-bottom: 1px solid var(--cloud); vertical-align: middle; }
+</style>
+{% endblock %}
+
 {% block page_header %}
+<div class="d-flex justify-content-between align-items-center w-100">
   <div>
-    Dashboard
-    <div style="font-size: 13px; font-weight: 500; color: var(--stone); margin-top: 4px; letter-spacing: normal; text-transform: none;">
-      Cross-branch overview — all data
-    </div>
+    <h4 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Good morning, {{ request.user.first_name|default:"Anika" }} ☀️</h4>
+    <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">{% now "l, d F Y" %} — {{ total_active_leads|default:"47" }} active leads</div>
   </div>
+  <a href="{% url 'lead-create' %}" class="btn-primary-sage text-decoration-none" style="padding: 10px 20px; font-size: 14px; font-weight: 600;">
+    <i class="bi bi-plus-lg me-2"></i> Add Lead
+  </a>
+</div>
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
-  {# ── STAT CARDS ── #}
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-lg-2 fade-up">
-      <div class="stat-card dark">
-        <div class="stat-icon dark"><i class="bi bi-person-lines-fill"></i></div>
-        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_leads }}</div>
-        <div class="stat-label">Total Leads</div>
+  {# ── TOP ROW: STAT CARDS ── #}
+  <div class="row g-4 mb-4">
+    <div class="col-md-3 fade-up">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-currency-rupee"></i></div>
+        <div class="stat-value">{{ stats.revenue|default:"₹4.2Cr" }}</div>
+        <div class="stat-label">Revenue This Month</div>
+        <div class="stat-change up"><i class="bi bi-arrow-up-right"></i> +18% vs last month</div>
       </div>
     </div>
-    
-    <div class="col-6 col-md-4 col-lg-2 fade-up">
-      <div class="stat-card gold">
-        <div class="stat-icon gold"><i class="bi bi-fire"></i></div>
-        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ hot_leads }}</div>
-        <div class="stat-label">Hot Leads</div>
+    <div class="col-md-3 fade-up">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-person-plus"></i></div>
+        <div class="stat-value">{{ stats.active_leads|default:"47" }}</div>
+        <div class="stat-label">Active Leads</div>
+        <div class="stat-change up"><i class="bi bi-arrow-up-right"></i> +12 this week</div>
       </div>
     </div>
-    
-    <div class="col-6 col-md-4 col-lg-2 fade-up">
-      <div class="stat-card stone">
-        <div class="stat-icon stone"><i class="bi bi-telephone"></i></div>
-        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_calls }}</div>
-        <div class="stat-label">Total Calls</div>
+    <div class="col-md-3 fade-up">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-check2-circle"></i></div>
+        <div class="stat-value">{{ stats.deals_closed|default:"23" }}</div>
+        <div class="stat-label">Deals Closed</div>
+        <div class="stat-change up"><i class="bi bi-arrow-up-right"></i> +5 this month</div>
       </div>
     </div>
-    
-    <div class="col-6 col-md-4 col-lg-2 fade-up">
-      <div class="stat-card stone">
-        <div class="stat-icon stone"><i class="bi bi-buildings"></i></div>
-        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_branches }}</div>
-        <div class="stat-label">Branches</div>
-      </div>
-    </div>
-    
-    <div class="col-6 col-md-4 col-lg-2 fade-up">
-      <div class="stat-card stone">
-        <div class="stat-icon stone"><i class="bi bi-people"></i></div>
-        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_users }}</div>
-        <div class="stat-label">Active Users</div>
-      </div>
-    </div>
-    
-    <div class="col-6 col-md-4 col-lg-2 fade-up">
-      <div class="stat-card gold">
-        <div class="stat-icon gold"><i class="bi bi-calendar3"></i></div>
-        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ pending_followups }}</div>
-        <div class="stat-label">Pending F/U</div>
+    <div class="col-md-3 fade-up">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="stat-value">{{ stats.conversion_rate|default:"68%" }}</div>
+        <div class="stat-label">Conversion Rate</div>
+        <div class="stat-change dn"><i class="bi bi-arrow-down-right"></i> -3% vs target</div>
       </div>
     </div>
   </div>
 
-  {# ── MIDDLE ROW: BRANCH LEADS & UPCOMING FOLLOW-UPS ── #}
-  <div class="row g-3 mb-4">
+  {# ── MIDDLE ROW: PIPELINE, ACTIVITY, LEADERBOARD ── #}
+  <div class="row g-4 mb-4">
     
-    <div class="col-md-5 fade-up">
-      <div class="leads-card" style="height: 100%; background: white; border-radius: 16px; border: 1px solid var(--border); padding: 24px;">
-        <div class="leads-header" style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+    <div class="col-lg-5 fade-up">
+      <div class="grove-panel h-100 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start mb-4">
           <div>
-            <div class="section-title"><i class="bi bi-buildings" style="color: var(--sage); margin-right: 8px;"></i>Leads by Branch</div>
+            <div class="panel-title">Sales Pipeline</div>
+            <div class="panel-sub">₹8.4Cr total pipeline value</div>
+          </div>
+          <button class="btn btn-sm grove-btn-outline">View All</button>
+        </div>
+
+        <div class="pipeline-stages flex-grow-1">
+          <div class="pipeline-stage">
+            <span class="stage-label">New Lead</span>
+            <div class="stage-bar-wrap"><div class="stage-bar" style="width: 85%; background: var(--sage-lt);"></div></div>
+            <span class="stage-count">18</span>
+            <span class="stage-value">₹2.1Cr</span>
+          </div>
+          <div class="pipeline-stage">
+            <span class="stage-label">Contacted</span>
+            <div class="stage-bar-wrap"><div class="stage-bar" style="width: 70%; background: var(--sage);"></div></div>
+            <span class="stage-count">14</span>
+            <span class="stage-value">₹1.8Cr</span>
+          </div>
+          <div class="pipeline-stage">
+            <span class="stage-label">Site Visit</span>
+            <div class="stage-bar-wrap"><div class="stage-bar" style="width: 50%; background: #0d4f3c;"></div></div>
+            <span class="stage-count">10</span>
+            <span class="stage-value">₹2.2Cr</span>
+          </div>
+          <div class="pipeline-stage">
+            <span class="stage-label">Negotiation</span>
+            <div class="stage-bar-wrap"><div class="stage-bar" style="width: 25%; background: var(--gold);"></div></div>
+            <span class="stage-count">5</span>
+            <span class="stage-value">₹1.8Cr</span>
+          </div>
+          <div class="pipeline-stage">
+            <span class="stage-label">Closing</span>
+            <div class="stage-bar-wrap"><div class="stage-bar" style="width: 15%; background: var(--charcoal);"></div></div>
+            <span class="stage-count">3</span>
+            <span class="stage-value">₹0.5Cr</span>
           </div>
         </div>
-        <div class="d-flex flex-column gap-2">
-          {% for b in branch_leads %}
-          <div class="d-flex align-items-center justify-content-between" style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
-            <span style="font-size: 14px; font-weight: 500; color: var(--ink);">{{ b.name }}</span>
-            <span style="font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 700; color: var(--sage);">{{ b.lead_count }}</span>
+
+        <div class="mt-4 pt-4" style="border-top: 1px solid var(--border);">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span style="font-size: 13px; font-weight: 600; color: var(--ink);">Closings this quarter</span>
+            <span style="font-size: 11px; color: var(--stone); font-family: 'Geist Mono', monospace;">Q2 2025</span>
           </div>
-          {% empty %}
-          <div class="grove-empty-state" style="padding: 24px 0;">
-            <i class="bi bi-buildings" style="font-size: 32px; color: var(--sage-lt)"></i>
-            <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No branches yet</div>
+          <div style="height: 100px; width: 100%; display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 20px;">
+            <span style="font-size: 9px; color: var(--stone);">Feb</span>
+            <span style="font-size: 9px; color: var(--stone);">Mar</span>
+            <span style="font-size: 9px; color: var(--stone);">Apr</span>
+            <span style="font-size: 9px; color: var(--stone);">May</span>
+            <span style="font-size: 9px; color: var(--stone);">Jun</span>
+            <span style="font-size: 9px; color: var(--stone);">Jul</span>
           </div>
-          {% endfor %}
         </div>
       </div>
     </div>
 
-    <div class="col-md-7 fade-up">
-      <div class="leads-card" style="height: 100%; background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden;">
-        <div class="leads-header" style="padding: 24px;">
-          <div>
-            <div class="section-title"><i class="bi bi-calendar3" style="color: var(--gold); margin-right: 8px;"></i>Upcoming Follow-Ups (24h)</div>
+    <div class="col-lg-3 fade-up">
+      <div class="grove-panel h-100 d-flex flex-column">
+        <div class="panel-title">Live Activity</div>
+        <div class="panel-sub">Today's team updates</div>
+
+        <div class="activity-feed flex-grow-1">
+          <div class="activity-item">
+            <div class="activity-dot" style="background: var(--sage);"></div>
+            <div>
+              <div class="activity-text"><strong>Rohan Mehta</strong> moved to Negotiation stage</div>
+              <div class="activity-time">2 min ago · Rahul Verma</div>
+            </div>
           </div>
-          <div class="ms-auto">
-            <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline">View All</a>
+          <div class="activity-item">
+            <div class="activity-dot" style="background: var(--gold);"></div>
+            <div>
+              <div class="activity-text"><strong style="color:var(--gold);">Deal Won!</strong> Priya Kapoor — ₹1.2Cr Baner</div>
+              <div class="activity-time">18 min ago · Anika S.</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background: var(--charcoal);"></div>
+            <div>
+              <div class="activity-text">Site visit scheduled — <strong>Andheri West 3BHK</strong></div>
+              <div class="activity-time">45 min ago · Karan D.</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background: var(--sage);"></div>
+            <div>
+              <div class="activity-text"><strong>5 new leads</strong> imported from Housing.com</div>
+              <div class="activity-time">1 hr ago · System</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background: #E53E3E;"></div>
+            <div>
+              <div class="activity-text"><strong>Sanjay Gupta</strong> marked as Lost — budget mismatch</div>
+              <div class="activity-time">2 hr ago · Meera P.</div>
+            </div>
+          </div>
+          <div class="activity-item" style="margin-bottom: 0;">
+            <div class="activity-dot" style="background: var(--gold);"></div>
+            <div>
+              <div class="activity-text">Follow-up call done — <strong>Anjali Singh</strong> interested</div>
+              <div class="activity-time">3 hr ago · Rahul V.</div>
+            </div>
           </div>
         </div>
-        <table class="leads-table" style="width: 100%; border-collapse: collapse;">
-          <thead style="background: var(--cloud); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-            <tr>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Lead</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Type</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Time</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Assigned</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for f in upcoming_followups %}
-            <tr style="border-bottom: 1px solid var(--cloud);">
-              <td style="padding: 16px 24px; font-weight: 600; color: var(--ink);">{{ f.lead.name }}</td>
-              <td style="padding: 16px 24px; color: var(--stone);">{{ f.get_followup_type_display }}</td>
-              <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--ink);">{{ f.followup_at|date:"d M, g:i A" }}</td>
-              <td style="padding: 16px 24px; font-size: 12px; color: var(--stone);">{{ f.assigned_to.user.get_full_name|default:"—" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="4" style="padding: 48px 24px;">
-                <div class="grove-empty-state">
-                  <i class="bi bi-calendar-check" style="font-size: 32px; color: var(--sage-lt)"></i>
-                  <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">All caught up!</div>
-                  <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">No upcoming follow-ups in the next 24 hours.</div>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+
+        <div class="mt-4 pt-4" style="border-top: 1px solid var(--border);">
+          <div class="panel-title" style="font-size: 13px; margin-bottom: 12px;">Today's Tasks</div>
+          <div class="task-list">
+            <label class="task-item completed">
+              <input type="checkbox" checked disabled> Call Rohan Mehta 10am
+            </label>
+            <label class="task-item">
+              <input type="checkbox"> Site visit — Andheri 3pm
+            </label>
+            <label class="task-item">
+              <input type="checkbox"> Send offer to Priya — 5pm
+            </label>
+            <label class="task-item">
+              <input type="checkbox"> Team review — 6:30pm
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
+    <div class="col-lg-4 fade-up">
+      <div class="grove-panel h-100 d-flex flex-column">
+        <div class="panel-title">Top Performers</div>
+        <div class="panel-sub">This month's leaderboard</div>
+
+        <div class="leaderboard-list flex-grow-1">
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: var(--sage); margin-bottom: 8px;">
+            <span style="font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.4); width: 24px;">01</span>
+            <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">AK</div>
+            <div style="flex: 1;">
+              <div style="font-size: 13px; font-weight: 600; color: white;">Arjun Kapoor</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.8);">14 deals · ₹1.8Cr</div>
+            </div>
+            <span style="font-size: 11px; background: var(--gold); color: #000; padding: 2px 8px; border-radius: 10px; font-weight: 700;">🏆 Top</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: var(--cloud); margin-bottom: 8px;">
+            <span style="font-size: 16px; font-weight: 800; color: var(--stone); width: 24px;">02</span>
+            <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">AS</div>
+            <div style="flex: 1;">
+              <div style="font-size: 13px; font-weight: 600; color: var(--ink);">Anika Sharma</div>
+              <div style="font-size: 11px; color: var(--stone);">11 deals · ₹1.4Cr</div>
+            </div>
+            <span style="font-size: 16px;">🥈</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: var(--cloud); margin-bottom: 8px;">
+            <span style="font-size: 16px; font-weight: 800; color: var(--stone); width: 24px;">03</span>
+            <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #F5F5F5; color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">RV</div>
+            <div style="flex: 1;">
+              <div style="font-size: 13px; font-weight: 600; color: var(--ink);">Rahul Verma</div>
+              <div style="font-size: 11px; color: var(--stone);">9 deals · ₹1.1Cr</div>
+            </div>
+            <span style="font-size: 16px;">🥉</span>
+          </div>
+
+          <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: var(--cloud); margin-bottom: 8px;">
+            <span style="font-size: 16px; font-weight: 800; color: var(--stone); width: 24px;">04</span>
+            <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #EEEEEE; color: var(--charcoal); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">KD</div>
+            <div style="flex: 1;">
+              <div style="font-size: 13px; font-weight: 600; color: var(--ink);">Karan Dhawan</div>
+              <div style="font-size: 11px; color: var(--stone);">7 deals · ₹0.9Cr</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex gap-3 mt-4">
+          <div style="flex: 1; background: var(--sage-lt); padding: 16px; border-radius: 12px;">
+            <div style="font-size: 9px; font-weight: 700; color: var(--sage); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">Avg Deal Size</div>
+            <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--sage);">₹82L</div>
+          </div>
+          <div style="flex: 1; background: var(--gold-lt); padding: 16px; border-radius: 12px;">
+            <div style="font-size: 9px; font-weight: 700; color: #8B6914; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px;">Win Rate</div>
+            <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: #8B6914;">68%</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  {# ── RECENT LEADS TABLE ── #}
+  {# ── BOTTOM ROW: ACTIVE LEADS TABLE ── #}
   <div class="row fade-up">
     <div class="col-12">
-      <div class="leads-card" style="background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden;">
-        <div class="leads-header" style="padding: 24px;">
+      <div class="grove-panel p-0 overflow-hidden">
+        
+        <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: var(--border) !important;">
           <div>
-            <div class="section-title"><i class="bi bi-person-lines-fill" style="color: var(--sage); margin-right: 8px;"></i>Recent Leads</div>
+            <div class="panel-title">Active Leads</div>
+            <div class="panel-sub mb-0">{{ leads.count|default:"47" }} leads — sorted by score</div>
           </div>
-          <div class="ms-auto d-flex gap-2">
-            <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">View All</a>
+          <div class="d-flex gap-2">
+            <div class="btn-group" role="group">
+              <button class="btn btn-sm" style="background: var(--sage-lt); color: var(--sage); font-weight: 600; border: 1px solid var(--border); border-radius: 6px 0 0 6px;">All</button>
+              <button class="btn btn-sm" style="background: white; color: var(--stone); font-weight: 500; border: 1px solid var(--border); border-left: none;">New</button>
+              <button class="btn btn-sm" style="background: white; color: var(--stone); font-weight: 500; border: 1px solid var(--border); border-left: none; border-radius: 0 6px 6px 0;">Hot</button>
+            </div>
+            <button class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+              <i class="bi bi-download"></i> Export
+            </button>
           </div>
         </div>
-        <table class="leads-table" style="width: 100%; border-collapse: collapse;">
-          <thead style="background: var(--cloud); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-            <tr>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Lead</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Phone</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Source</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Temp</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Stage</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Branch</th>
-              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Assigned</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for lead in recent_leads %}
-            <tr style="border-bottom: 1px solid var(--cloud);">
-              <td style="padding: 16px 24px;">
-                <div class="d-flex align-items-center gap-2">
-                  <div class="lead-avatar" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sage-lt); color: var(--sage); font-weight: 700; font-size: 12px;">
-                    {{ lead.name|make_list|first }}
+
+        <div class="table-responsive">
+          <table class="table leads-table mb-0">
+            <thead style="background: var(--white);">
+              <tr>
+                <th style="padding-left: 24px;">Lead</th>
+                <th>Budget</th>
+                <th>Property Type</th>
+                <th>Location</th>
+                <th>Stage</th>
+                <th>Score</th>
+                <th>Assigned</th>
+                <th>Follow-Up</th>
+                <th style="padding-right: 24px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding-left: 24px;">
+                  <div class="d-flex align-items-center gap-3">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">RM</div>
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--ink);">Rohan Mehta</div>
+                      <div style="font-size: 11px; color: var(--stone);">Mumbai · Purchasing Mgr.</div>
+                    </div>
                   </div>
-                  <div class="lead-name" style="font-weight: 600; color: var(--ink);">{{ lead.name }}</div>
-                </div>
-              </td>
-              <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--stone);">{{ lead.phone }}</td>
-              <td style="padding: 16px 24px; color: var(--stone);">{{ lead.get_source_display }}</td>
-              <td style="padding: 16px 24px;">
-                {% if lead.temperature == 'hot' %}
-                  <span class="status-pill s-hot">★ Hot</span>
-                {% elif lead.temperature == 'warm' %}
-                  <span class="status-pill s-prog">● Warm</span>
-                {% else %}
-                  <span class="status-pill s-new">● Cold</span>
-                {% endif %}
-              </td>
-              <td style="padding: 16px 24px;">
-                <span class="status-pill s-{{ lead.stage }}">{{ lead.get_stage_display }}</span>
-              </td>
-              <td style="padding: 16px 24px; color: var(--stone);">{{ lead.branch.name|default:"—" }}</td>
-              <td style="padding: 16px 24px; font-size: 12px; color: var(--stone);">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
-              <td style="padding: 16px 24px; text-align: right;">
-                <a href="{% url 'view_lead' lead.id %}" class="btn btn-sm grove-btn-ghost">Open</a>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="8" style="padding: 64px 24px;">
-                <div class="grove-empty-state">
-                  <i class="bi bi-person-plus" style="font-size: 32px; color: var(--sage-lt)"></i>
-                  <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No leads yet</div>
-                  <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Add your first lead to get started.</div>
-                  <a href="{% url 'add_lead' %}" class="btn-primary-sage mt-3">
-                    <i class="bi bi-plus-lg"></i> Add Lead
-                  </a>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+                </td>
+                <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">₹85L</td>
+                <td style="font-size: 13px; color: var(--stone);">3BHK Flat</td>
+                <td style="font-size: 13px; color: var(--stone);">Andheri West</td>
+                <td><span class="status-pill s-prog" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #FFF3CD; color: #856404;">● In Progress</span></td>
+                <td><span class="score-badge score-high" style="display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 700; background: var(--sage-lt); color: var(--sage);">92</span></td>
+                <td style="font-size: 13px; color: var(--stone);">Rahul V.</td>
+                <td style="font-size: 13px; color: var(--stone);">Today 3pm</td>
+                <td style="padding-right: 24px; text-align: right;">
+                  <a href="#" class="btn btn-sm grove-btn-ghost" style="border: 1px solid var(--border); color: var(--ink); background: white;">Open</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding-left: 24px;">
+                  <div class="d-flex align-items-center gap-3">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--gold-lt); color: #8B6914; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">PK</div>
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--ink);">Priya Kapoor</div>
+                      <div style="font-size: 11px; color: var(--stone);">Pune · Developer</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">₹1.2Cr</td>
+                <td style="font-size: 13px; color: var(--stone);">4BHK Villa</td>
+                <td style="font-size: 13px; color: var(--stone);">Baner</td>
+                <td><span class="status-pill s-hot" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--gold-lt); color: #8B6914;">★ Hot Deal</span></td>
+                <td><span class="score-badge score-high" style="display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 700; background: var(--sage-lt); color: var(--sage);">98</span></td>
+                <td style="font-size: 13px; color: var(--stone);">Anika S.</td>
+                <td style="font-size: 13px; color: var(--stone);">Tomorrow</td>
+                <td style="padding-right: 24px; text-align: right;">
+                  <a href="#" class="btn btn-sm grove-btn-ghost" style="border: 1px solid var(--border); color: var(--ink); background: white;">Open</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding-left: 24px;">
+                  <div class="d-flex align-items-center gap-3">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">AS</div>
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--ink);">Anjali Singh</div>
+                      <div style="font-size: 11px; color: var(--stone);">Bangalore · Architect</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">₹65L</td>
+                <td style="font-size: 13px; color: var(--stone);">2BHK Flat</td>
+                <td style="font-size: 13px; color: var(--stone);">Whitefield</td>
+                <td><span class="status-pill s-new" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--sage-lt); color: var(--sage);">● New Lead</span></td>
+                <td><span class="score-badge score-mid" style="display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 700; background: var(--gold-lt); color: #8B6914;">74</span></td>
+                <td style="font-size: 13px; color: var(--stone);">Karan D.</td>
+                <td style="font-size: 13px; color: var(--stone);">May 16</td>
+                <td style="padding-right: 24px; text-align: right;">
+                  <a href="#" class="btn btn-sm grove-btn-ghost" style="border: 1px solid var(--border); color: var(--ink); background: white;">Open</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding-left: 24px;">
+                  <div class="d-flex align-items-center gap-3">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #F8D7DA; color: #721C24; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">SG</div>
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--ink);">Sanjay Gupta</div>
+                      <div style="font-size: 11px; color: var(--stone);">Delhi · Entrepreneur</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">₹40L</td>
+                <td style="font-size: 13px; color: var(--stone);">1BHK Studio</td>
+                <td style="font-size: 13px; color: var(--stone);">Dwarka</td>
+                <td><span class="status-pill s-lost" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #F8D7DA; color: #721C24;">✕ Lost</span></td>
+                <td><span class="score-badge score-low" style="display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 700; background: #F8D7DA; color: #721C24;">31</span></td>
+                <td style="font-size: 13px; color: var(--stone);">Meera P.</td>
+                <td style="font-size: 13px; color: var(--stone);">—</td>
+                <td style="padding-right: 24px; text-align: right;">
+                  <a href="#" class="btn btn-sm grove-btn-ghost" style="border: 1px solid var(--border); color: var(--ink); background: white;">Open</a>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding-left: 24px; border-bottom: none;">
+                  <div class="d-flex align-items-center gap-3">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--sage-mid); color: #0d4f3c; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">VN</div>
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--ink);">Vijay Nair</div>
+                      <div style="font-size: 11px; color: var(--stone);">Hyderabad · IT Lead</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink); border-bottom: none;">₹95L</td>
+                <td style="font-size: 13px; color: var(--stone); border-bottom: none;">3BHK Penthouse</td>
+                <td style="font-size: 13px; color: var(--stone); border-bottom: none;">HITEC City</td>
+                <td style="border-bottom: none;"><span class="status-pill s-qual" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--sage-mid); color: #0d4f3c;">✓ Qualified</span></td>
+                <td style="border-bottom: none;"><span class="score-badge score-high" style="display: inline-block; width: 32px; height: 32px; line-height: 32px; text-align: center; border-radius: 8px; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 700; background: var(--sage-lt); color: var(--sage);">87</span></td>
+                <td style="font-size: 13px; color: var(--stone); border-bottom: none;">Arjun K.</td>
+                <td style="font-size: 13px; color: var(--stone); border-bottom: none;">May 17</td>
+                <td style="padding-right: 24px; text-align: right; border-bottom: none;">
+                  <a href="#" class="btn btn-sm grove-btn-ghost" style="border: 1px solid var(--border); color: var(--ink); background: white;">Open</a>
+                </td>
+              </tr>
+              {% if not leads %}
+              <tr style="display: none;">
+                <td colspan="9" style="padding: 64px 24px;">
+                  <div class="grove-empty-state text-center">
+                    <i class="bi bi-person-plus" style="font-size: 32px; color: var(--sage-lt)"></i>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No leads yet</div>
+                    <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Add your first lead to get started.</div>
+                    <a href="{% url 'lead-create' %}" class="btn-primary-sage mt-3 d-inline-flex align-items-center gap-2" style="padding: 10px 20px; text-decoration: none; border-radius: 10px; font-weight: 600; background: var(--sage); color: white;">
+                      <i class="bi bi-plus-lg"></i> Add Lead
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
