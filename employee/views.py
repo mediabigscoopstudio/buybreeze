@@ -47,7 +47,7 @@ def employee_required(user):
     return (
         user.is_authenticated and
         hasattr(user, 'profile') and
-        user.profile.role == 'employee'
+        user.userprofile.role == 'employee'
     )
 
 
@@ -281,7 +281,7 @@ def index(request):
 @login_required
 @require_POST
 def process_punch(request):
-    user_profile = request.user.profile
+    user_profile = request.user.userprofile
     COMPANY_LAT = user_profile.branch.gps_lat
     COMPANY_LON = user_profile.branch.gps_lng
     ALLOWED_RADIUS_METERS = user_profile.branch.gps_radius

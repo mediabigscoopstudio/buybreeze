@@ -20,7 +20,7 @@ def tl_required(user):
     return (
         user.is_authenticated and
          hasattr(user, 'profile') and
-        user.profile.role == 'tl'
+        user.userprofile.role == 'tl'
     )
 
 
@@ -242,7 +242,7 @@ def logout_view(request):
 
 @user_passes_test(tl_required, login_url='/login/')
 def index(request):
-    tl = request.user.profile
+    tl = request.user.userprofile
 
     # Only leads assigned to this TL
     leads = Lead.objects.filter(
@@ -298,7 +298,7 @@ def assign_to_employee(request):
             if not lead_ids or not employee_id:
                 return JsonResponse({'status': 'error', 'message': 'Missing data'})
 
-            tl = request.user.profile
+            tl = request.user.userprofile
 
             # Get employee (must be under this TL)
             employee = UserProfile.objects.get(
@@ -330,7 +330,7 @@ from dash.models import UserProfile, Lead
 
 @user_passes_test(tl_required, login_url='/login/')
 def employee_performance(request, id):
-    tl = request.user.profile
+    tl = request.user.userprofile
 
     # Get employee (must belong to this TL)
     employee = get_object_or_404(

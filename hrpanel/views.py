@@ -25,7 +25,7 @@ def hr_required(user):
     return (
         user.is_authenticated and 
         hasattr(user, 'profile') and 
-        user.profile.role == 'hr'
+        user.userprofile.role == 'hr'
     )
 
 
@@ -296,7 +296,7 @@ def add_user(request):
                 reports_to_id=reports_to_id if reports_to_id else None,
             )
             if request.FILES.get('profile_pic'):
-                profile.profile_pic = request.FILES['profile_pic']
+                profile.userprofile_pic = request.FILES['profile_pic']
             profile.save()
             messages.success(request, 'User created successfully.')
             return redirect('users')
@@ -321,7 +321,7 @@ def edit_user(request, id):
         profile.branch_id  = request.POST.get('branch') or None
         profile.reports_to_id = request.POST.get('reports_to') or None
         if request.FILES.get('profile_pic'):
-            profile.profile_pic = request.FILES['profile_pic']
+            profile.userprofile_pic = request.FILES['profile_pic']
         profile.save()
         messages.success(request, 'User updated successfully.')
         return redirect('users')
@@ -582,7 +582,7 @@ def delete_leave(request, id):
 def approve_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'approved'
-    record.approved_by  = request.user.profile
+    record.approved_by  = request.user.userprofile
     record.save()
     messages.success(request, 'Leave approved.')
     return redirect('leaves')
@@ -592,7 +592,7 @@ def approve_leave(request, id):
 def reject_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'rejected'
-    record.approved_by  = request.user.profile
+    record.approved_by  = request.user.userprofile
     record.save()
     messages.success(request, 'Leave rejected.')
     return redirect('leaves')

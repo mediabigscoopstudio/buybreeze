@@ -20,7 +20,7 @@ def manager_required(user):
     return (
         user.is_authenticated and
         hasattr(user, 'profile') and
-        user.profile.role == 'manager'
+        user.userprofile.role == 'manager'
     )
 
 
@@ -248,7 +248,7 @@ def logout_view(request):
     login_url='/login/'
 )
 def index(request):
-    manager = request.user.profile
+    manager = request.user.userprofile
 
     # ONLY leads assigned to this manager
     leads = Lead.objects.filter(
@@ -320,7 +320,7 @@ def assign_to_tl(request):
 @user_passes_test(manager_required, login_url='/login/')
 def unassign_lead(request, lead_id):
     if request.method == 'POST':
-        manager_profile = request.user.profile
+        manager_profile = request.user.userprofile
         lead = get_object_or_404(Lead, id=lead_id, assigned_to_manager=manager_profile)
         lead.assigned_to_tl = None
         lead.assigned_to    = None
@@ -330,7 +330,7 @@ def unassign_lead(request, lead_id):
 
 @user_passes_test(manager_required, login_url='/login/')
 def tl_performance(request, id):
-    manager = request.user.profile
+    manager = request.user.userprofile
 
     # Get TL (must belong to same branch for safety)
     tl = get_object_or_404(

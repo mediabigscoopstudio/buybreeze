@@ -69,9 +69,9 @@
         </div>
         <div class="col-md-4">
           <label class="form-label">Profile Photo</label>
-          {% if data.profile_pic %}
+          {% if data.userprofile_pic %}
             <div class="mb-1">
-              <img src="{{ data.profile_pic.url }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+              <img src="{{ data.userprofile_pic.url }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
             </div>
           {% endif %}
           <input type="file" name="profile_pic" class="form-control" accept="image/*">
