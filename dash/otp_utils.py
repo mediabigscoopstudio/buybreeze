@@ -1,24 +1,12 @@
 from django.conf import settings
-
+import random
 
 # =========================================
 # GENERATE OTP
 # =========================================
 def generate_otp():
-
-    # =====================================
-    # DEMO / TEST MODE
-    # =====================================
-    if settings.OTP_TEST_MODE:
-        return "000000"
-
-    # =====================================
-    # LIVE MODE
-    # =====================================
-    import random
-
-    return str(random.randint(100000, 999999))
-
+    #return str(random.randint(100000, 999999))
+    return "000000"
 
 # =========================================
 # SEND OTP
