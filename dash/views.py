@@ -65,7 +65,7 @@ def login_view(request):
 
             profile = UserProfile.objects.get(
                 phone=phone,
-                role='superadmin'
+                role='admin'
             )
 
             user = profile.user
