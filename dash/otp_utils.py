@@ -1,29 +1,37 @@
-import random
-import requests
-
 from django.conf import settings
 
 
-# ============================================================
+# =========================================
 # GENERATE OTP
-# ============================================================
+# =========================================
 def generate_otp():
+
+    # =====================================
+    # DEMO / TEST MODE
+    # =====================================
+    if settings.OTP_TEST_MODE:
+        return "000000"
+
+    # =====================================
+    # LIVE MODE
+    # =====================================
+    import random
 
     return str(random.randint(100000, 999999))
 
 
-# ============================================================
+# =========================================
 # SEND OTP
-# ============================================================
+# =========================================
 def send_otp(phone_number, otp):
 
-    # =========================================
+    # =====================================
     # TEST MODE
-    # =========================================
+    # =====================================
     if settings.OTP_TEST_MODE:
 
         print("\n===================================")
-        print("        OTP TEST MODE")
+        print("        DEMO OTP MODE")
         print("===================================")
         print(f"PHONE NUMBER : {phone_number}")
         print(f"OTP CODE     : {otp}")
@@ -31,27 +39,30 @@ def send_otp(phone_number, otp):
 
         return True
 
-    # =========================================
+    # =====================================
     # LIVE FAST2SMS MODE
-    # =========================================
+    # =====================================
     try:
+
+        import requests
 
         url = "https://www.fast2sms.com/dev/bulkV2"
 
         payload = {
-            'authorization': settings.FAST2SMS_API_KEY,
-            'variables_values': otp,
-            'route': 'otp',
+            'sender_id': 'FSTSMS',
+            'message': f'Your BuyBuzz Infra OTP is {otp}',
+            'language': 'english',
+            'route': 'q',
             'numbers': phone_number,
         }
 
         headers = {
-            'cache-control': "no-cache"
+            'authorization': settings.FAST2SMS_API_KEY
         }
 
-        response = requests.get(
+        response = requests.post(
             url,
-            params=payload,
+            data=payload,
             headers=headers
         )
 
@@ -63,14 +74,7 @@ def send_otp(phone_number, otp):
         print(data)
         print("===================================\n")
 
-        # =====================================
-        # SUCCESS CHECK
-        # =====================================
-        if data.get('return') == True:
-
-            return True
-
-        return False
+        return response.status_code == 200
 
     except Exception as e:
 
