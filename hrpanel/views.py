@@ -91,7 +91,7 @@ def verify_otp(request):
             'Session expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     expiry_time = timezone.datetime.fromisoformat(otp_expiry)
 
@@ -102,7 +102,7 @@ def verify_otp(request):
             'OTP expired.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     if request.method == 'POST':
 
@@ -132,7 +132,7 @@ def verify_otp(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('login_view')
+    return redirect('/login/')
 
 
 # ============================================================

@@ -30,6 +30,7 @@ class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('manager', 'Manager'),
+        ('hr', 'hr'),
         ('tl', 'Team Leader'),
         ('employee', 'Employee'),
     ]
