@@ -1473,10 +1473,10 @@ def apr_report(request):
             # We safely check if they have a UserProfile built
             if hasattr(emp, 'profile'):
                 # Grab the Branch name
-                branch_name = emp.userprofile.branch.name if emp.userprofile.branch else "N/A"
+                branch_name = emp.profile.branch.name if emp.profile.branch else "N/A"
                 
                 # Grab the Team Leader's username (following the reports_to -> user link)
-                tl_name = emp.userprofile.reports_to.user.username if emp.userprofile.reports_to else "N/A"
+                tl_name = emp.profile.reports_to.user.username if emp.profile.reports_to else "N/A"
             else:
                 branch_name = "N/A"
                 tl_name = "N/A"
