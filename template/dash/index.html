@@ -1,183 +1,217 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Dashboard{% endblock %}
-{% block content %}
+{% extends "dash/base.html" %}
+{% load static %}
 
-<div class="page-header">
+{% block title %}Dashboard — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
   <div>
-    <h4>Dashboard</h4>
-    <div class="sub">Cross-branch overview — all data</div>
+    Dashboard
+    <div style="font-size: 13px; font-weight: 500; color: var(--stone); margin-top: 4px; letter-spacing: normal; text-transform: none;">
+      Cross-branch overview — all data
+    </div>
   </div>
-</div>
+{% endblock %}
 
-<!-- STAT CARDS -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#eff6ff">
-        <i class="bi bi-person-lines-fill" style="color:#2563eb"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_leads }}</div>
+{% block content %}
+<div class="main-content">
+
+  {# ── STAT CARDS ── #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-lg-2 fade-up">
+      <div class="stat-card dark">
+        <div class="stat-icon dark"><i class="bi bi-person-lines-fill"></i></div>
+        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_leads }}</div>
         <div class="stat-label">Total Leads</div>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fef2f2">
-        <i class="bi bi-fire" style="color:#dc2626"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ hot_leads }}</div>
+    
+    <div class="col-6 col-md-4 col-lg-2 fade-up">
+      <div class="stat-card gold">
+        <div class="stat-icon gold"><i class="bi bi-fire"></i></div>
+        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ hot_leads }}</div>
         <div class="stat-label">Hot Leads</div>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#f0fdf4">
-        <i class="bi bi-telephone-fill" style="color:#16a34a"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_calls }}</div>
+    
+    <div class="col-6 col-md-4 col-lg-2 fade-up">
+      <div class="stat-card stone">
+        <div class="stat-icon stone"><i class="bi bi-telephone"></i></div>
+        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_calls }}</div>
         <div class="stat-label">Total Calls</div>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#faf5ff">
-        <i class="bi bi-building" style="color:#7c3aed"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_branches }}</div>
+    
+    <div class="col-6 col-md-4 col-lg-2 fade-up">
+      <div class="stat-card stone">
+        <div class="stat-icon stone"><i class="bi bi-buildings"></i></div>
+        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_branches }}</div>
         <div class="stat-label">Branches</div>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fff7ed">
-        <i class="bi bi-people-fill" style="color:#ea580c"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ total_users }}</div>
+    
+    <div class="col-6 col-md-4 col-lg-2 fade-up">
+      <div class="stat-card stone">
+        <div class="stat-icon stone"><i class="bi bi-people"></i></div>
+        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ total_users }}</div>
         <div class="stat-label">Active Users</div>
       </div>
     </div>
-  </div>
-  <div class="col-6 col-md-4 col-lg-2">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#ecfdf5">
-        <i class="bi bi-calendar-check-fill" style="color:#059669"></i>
-      </div>
-      <div>
-        <div class="stat-val">{{ pending_followups }}</div>
+    
+    <div class="col-6 col-md-4 col-lg-2 fade-up">
+      <div class="stat-card gold">
+        <div class="stat-icon gold"><i class="bi bi-calendar3"></i></div>
+        <div class="stat-value" style="font-family:'Geist Mono', monospace;">{{ pending_followups }}</div>
         <div class="stat-label">Pending F/U</div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="row g-3 mb-4">
-
-  <!-- BRANCH LEADS -->
-  <div class="col-md-5">
-    <div class="table-card">
-      <div class="table-header">
-        <h6><i class="bi bi-building me-2" style="color:#7c3aed"></i>Leads by Branch</h6>
-      </div>
-      <div style="padding: 4px 0;">
-        {% for b in branch_leads %}
-        <div style="display:flex; align-items:center; justify-content:space-between; padding: 10px 18px; border-bottom: 1px solid #f1f5f9;">
-          <span style="font-size:0.84rem; font-weight:500;">{{ b.name }}</span>
-          <span style="font-size:0.84rem; font-weight:700; color:#1a56db;">{{ b.lead_count }}</span>
+  {# ── MIDDLE ROW: BRANCH LEADS & UPCOMING FOLLOW-UPS ── #}
+  <div class="row g-3 mb-4">
+    
+    <div class="col-md-5 fade-up">
+      <div class="leads-card" style="height: 100%; background: white; border-radius: 16px; border: 1px solid var(--border); padding: 24px;">
+        <div class="leads-header" style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 16px;">
+          <div>
+            <div class="section-title"><i class="bi bi-buildings" style="color: var(--sage); margin-right: 8px;"></i>Leads by Branch</div>
+          </div>
         </div>
-        {% empty %}
-        <div class="empty-state"><i class="bi bi-building"></i><p>No branches yet</p></div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  <!-- UPCOMING FOLLOW-UPS -->
-  <div class="col-md-7">
-    <div class="table-card">
-      <div class="table-header">
-        <h6><i class="bi bi-calendar-check-fill me-2" style="color:#059669"></i>Upcoming Follow-Ups (24h)</h6>
-        <a href="{% url 'followups' %}" class="btn btn-sm btn-action">View All</a>
-      </div>
-      <table class="crm-table">
-        <thead>
-          <tr>
-            <th>Lead</th>
-            <th>Type</th>
-            <th>Time</th>
-            <th>Assigned</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for f in upcoming_followups %}
-          <tr>
-            <td style="font-weight:500;">{{ f.lead.name }}</td>
-            <td>{{ f.get_followup_type_display }}</td>
-            <td>{{ f.followup_at|date:"d M, g:i A" }}</td>
-            <td>{{ f.assigned_to.user.get_full_name|default:"—" }}</td>
-          </tr>
+        <div class="d-flex flex-column gap-2">
+          {% for b in branch_leads %}
+          <div class="d-flex align-items-center justify-content-between" style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+            <span style="font-size: 14px; font-weight: 500; color: var(--ink);">{{ b.name }}</span>
+            <span style="font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 700; color: var(--sage);">{{ b.lead_count }}</span>
+          </div>
           {% empty %}
-          <tr><td colspan="4"><div class="empty-state"><p>No upcoming follow-ups in next 24 hours</p></div></td></tr>
+          <div class="grove-empty-state" style="padding: 24px 0;">
+            <i class="bi bi-buildings" style="font-size: 32px; color: var(--sage-lt)"></i>
+            <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No branches yet</div>
+          </div>
           {% endfor %}
-        </tbody>
-      </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-7 fade-up">
+      <div class="leads-card" style="height: 100%; background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden;">
+        <div class="leads-header" style="padding: 24px;">
+          <div>
+            <div class="section-title"><i class="bi bi-calendar3" style="color: var(--gold); margin-right: 8px;"></i>Upcoming Follow-Ups (24h)</div>
+          </div>
+          <div class="ms-auto">
+            <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline">View All</a>
+          </div>
+        </div>
+        <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background: var(--cloud); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+            <tr>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Lead</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Type</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Time</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Assigned</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in upcoming_followups %}
+            <tr style="border-bottom: 1px solid var(--cloud);">
+              <td style="padding: 16px 24px; font-weight: 600; color: var(--ink);">{{ f.lead.name }}</td>
+              <td style="padding: 16px 24px; color: var(--stone);">{{ f.get_followup_type_display }}</td>
+              <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--ink);">{{ f.followup_at|date:"d M, g:i A" }}</td>
+              <td style="padding: 16px 24px; font-size: 12px; color: var(--stone);">{{ f.assigned_to.user.get_full_name|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" style="padding: 48px 24px;">
+                <div class="grove-empty-state">
+                  <i class="bi bi-calendar-check" style="font-size: 32px; color: var(--sage-lt)"></i>
+                  <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">All caught up!</div>
+                  <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">No upcoming follow-ups in the next 24 hours.</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  {# ── RECENT LEADS TABLE ── #}
+  <div class="row fade-up">
+    <div class="col-12">
+      <div class="leads-card" style="background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden;">
+        <div class="leads-header" style="padding: 24px;">
+          <div>
+            <div class="section-title"><i class="bi bi-person-lines-fill" style="color: var(--sage); margin-right: 8px;"></i>Recent Leads</div>
+          </div>
+          <div class="ms-auto d-flex gap-2">
+            <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">View All</a>
+          </div>
+        </div>
+        <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background: var(--cloud); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+            <tr>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Lead</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Phone</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Source</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Temp</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Stage</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Branch</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase;">Assigned</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lead in recent_leads %}
+            <tr style="border-bottom: 1px solid var(--cloud);">
+              <td style="padding: 16px 24px;">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="lead-avatar" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sage-lt); color: var(--sage); font-weight: 700; font-size: 12px;">
+                    {{ lead.name|make_list|first }}
+                  </div>
+                  <div class="lead-name" style="font-weight: 600; color: var(--ink);">{{ lead.name }}</div>
+                </div>
+              </td>
+              <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--stone);">{{ lead.phone }}</td>
+              <td style="padding: 16px 24px; color: var(--stone);">{{ lead.get_source_display }}</td>
+              <td style="padding: 16px 24px;">
+                {% if lead.temperature == 'hot' %}
+                  <span class="status-pill s-hot">★ Hot</span>
+                {% elif lead.temperature == 'warm' %}
+                  <span class="status-pill s-prog">● Warm</span>
+                {% else %}
+                  <span class="status-pill s-new">● Cold</span>
+                {% endif %}
+              </td>
+              <td style="padding: 16px 24px;">
+                <span class="status-pill s-{{ lead.stage }}">{{ lead.get_stage_display }}</span>
+              </td>
+              <td style="padding: 16px 24px; color: var(--stone);">{{ lead.branch.name|default:"—" }}</td>
+              <td style="padding: 16px 24px; font-size: 12px; color: var(--stone);">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
+              <td style="padding: 16px 24px; text-align: right;">
+                <a href="{% url 'view_lead' lead.id %}" class="btn btn-sm grove-btn-ghost">Open</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" style="padding: 64px 24px;">
+                <div class="grove-empty-state">
+                  <i class="bi bi-person-plus" style="font-size: 32px; color: var(--sage-lt)"></i>
+                  <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No leads yet</div>
+                  <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Add your first lead to get started.</div>
+                  <a href="{% url 'add_lead' %}" class="btn-primary-sage mt-3">
+                    <i class="bi bi-plus-lg"></i> Add Lead
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
 </div>
-
-<!-- RECENT LEADS -->
-<div class="table-card">
-  <div class="table-header">
-    <h6><i class="bi bi-person-lines-fill me-2" style="color:#2563eb"></i>Recent Leads</h6>
-    <a href="{% url 'leads' %}" class="btn btn-sm btn-action">View All</a>
-  </div>
-  <table class="crm-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Phone</th>
-        <th>Source</th>
-        <th>Temp</th>
-        <th>Stage</th>
-        <th>Branch</th>
-        <th>Assigned</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for lead in recent_leads %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td>
-          <a href="{% url 'view_lead' lead.id %}" style="font-weight:600; color:#1e293b; text-decoration:none;">
-            {{ lead.name }}
-          </a>
-        </td>
-        <td style="color:#475569;">{{ lead.phone }}</td>
-        <td>{{ lead.get_source_display }}</td>
-        <td>
-          {% if lead.temperature == 'hot' %}<span class="badge-hot">Hot</span>
-          {% elif lead.temperature == 'warm' %}<span class="badge-warm">Warm</span>
-          {% else %}<span class="badge-cold">Cold</span>{% endif %}
-        </td>
-        <td><span class="badge-stage {{ lead.stage }}">{{ lead.get_stage_display }}</span></td>
-        <td>{{ lead.branch.name|default:"—" }}</td>
-        <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="8"><div class="empty-state"><i class="bi bi-person-lines-fill"></i><p>No leads yet. <a href="{% url 'add_lead' %}">Add your first lead</a></p></div></td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
 {% endblock %}
