@@ -29,7 +29,13 @@ from django.contrib.auth.decorators import login_required
 # AUTH GUARD
 # ============================================================
 def superadmin_required(user):
-    return user.is_authenticated and user.is_superuser
+    return (
+        user.is_authenticated and
+        hasattr(user, 'profile') and
+        user.profile.role == 'admin'
+    )
+
+
 
 
 # ============================================================
@@ -77,7 +83,7 @@ def login_view(request):
                 'Phone number not registered.'
             )
 
-            return redirect('login_view')
+            return redirect('/login/')
 
         # =====================================
         # GENERATE OTP
@@ -99,7 +105,7 @@ def login_view(request):
                 'Failed to send OTP.'
             )
 
-            return redirect('login_view')
+            return redirect('/login/')
 
         # =====================================
         # STORE SESSION
@@ -143,7 +149,7 @@ def verify_otp(request):
             'Session expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     # =========================================
     # OTP EXPIRY CHECK
@@ -159,7 +165,7 @@ def verify_otp(request):
             'OTP expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     # =========================================
     # VERIFY OTP POST
@@ -186,7 +192,7 @@ def verify_otp(request):
                     'User not found.'
                 )
 
-                return redirect('login_view')
+                return redirect('/login/')
 
             # =====================================
             # FINAL LOGIN
@@ -237,10 +243,8 @@ def verify_otp(request):
 # LOGOUT
 # ============================================================
 def logout_view(request):
-
     logout(request)
-
-    return redirect('http://superadmin.localhost:8000/login/')
+    return redirect('/login/')
 
 # ============================================================
 # DASHBOARD HOME
