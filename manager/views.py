@@ -29,21 +29,9 @@ def manager_required(user):
 # ============================================================
 def login_view(request):
 
-    # =========================================
-    # ALREADY LOGGED IN
-    # =========================================
     if request.user.is_authenticated:
+        return redirect('index')
 
-        if manager_required(request.user):
-            return redirect('/')
-
-        logout(request)
-
-        return redirect('/login/')
-
-    # =========================================
-    # LOGIN POST
-    # =========================================
     if request.method == 'POST':
 
         phone = request.POST.get('phone')
@@ -53,18 +41,36 @@ def login_view(request):
         # =====================================
         try:
 
-            profile = UserProfile.objects.get(
-                phone=phone,
+            phone = phone.strip()
+
+            profile = UserProfile.objects.filter(
+                phone__icontains=phone,
                 role='manager'
-            )
+            ).first()
+
+            print("\n===================================")
+            print("PHONE ENTERED :", phone)
+            print("PROFILE FOUND :", profile)
+            print("===================================\n")
+
+            if not profile:
+
+                messages.error(
+                    request,
+                    'Phone number not registered.'
+                )
+
+                return redirect('login_view')
 
             user = profile.user
 
-        except UserProfile.DoesNotExist:
+        except Exception as e:
+
+            print(e)
 
             messages.error(
                 request,
-                'Phone number not registered.'
+                'Login error.'
             )
 
             return redirect('login_view')
@@ -74,9 +80,6 @@ def login_view(request):
         # =====================================
         otp = generate_otp()
 
-        # =====================================
-        # SEND OTP
-        # =====================================
         otp_sent = send_otp(
             profile.phone,
             otp
@@ -95,17 +98,11 @@ def login_view(request):
         # STORE SESSION
         # =====================================
         request.session['pending_user_id'] = user.id
-
         request.session['otp_code'] = otp
 
         expiry_time = timezone.now() + timedelta(minutes=5)
 
         request.session['otp_expiry'] = expiry_time.isoformat()
-
-        messages.success(
-            request,
-            'OTP sent successfully.'
-        )
 
         return redirect('verify_otp')
 
