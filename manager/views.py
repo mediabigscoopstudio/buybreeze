@@ -60,7 +60,7 @@ def login_view(request):
                     'Phone number not registered.'
                 )
 
-                return redirect('login_view')
+                return redirect('/login/')
 
             user = profile.user
 
@@ -73,7 +73,7 @@ def login_view(request):
                 'Login error.'
             )
 
-            return redirect('login_view')
+            return redirect('/login/')
 
         # =====================================
         # GENERATE OTP
@@ -92,7 +92,7 @@ def login_view(request):
                 'Failed to send OTP.'
             )
 
-            return redirect('login_view')
+            return redirect('/login/')
 
         # =====================================
         # STORE SESSION
@@ -133,7 +133,7 @@ def verify_otp(request):
             'Session expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     # =========================================
     # OTP EXPIRY CHECK
@@ -149,7 +149,7 @@ def verify_otp(request):
             'OTP expired. Please login again.'
         )
 
-        return redirect('login_view')
+        return redirect('/login/')
 
     # =========================================
     # VERIFY OTP POST
@@ -176,7 +176,7 @@ def verify_otp(request):
                     'User not found.'
                 )
 
-                return redirect('login_view')
+                return redirect('/login/')
 
             # =====================================
             # FINAL LOGIN
@@ -230,11 +230,9 @@ def verify_otp(request):
 # LOGOUT
 # ============================================================
 def logout_view(request):
-
     logout(request)
-
     return redirect(
-        'http://manager.localhost:8000/login/'
+        '/login/'
     )
 
 # ============================================================
