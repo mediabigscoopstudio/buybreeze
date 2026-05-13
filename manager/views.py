@@ -207,7 +207,7 @@ def verify_otp(request):
             # MANAGER REDIRECT
             # =====================================
             return redirect(
-                'http://manager.localhost:8000/'
+                'https://manager.bigscooptesting.online/'
             )
 
         # =====================================
