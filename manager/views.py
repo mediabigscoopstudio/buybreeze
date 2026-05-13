@@ -20,7 +20,7 @@ def manager_required(user):
     return (
         user.is_authenticated and
         hasattr(user, 'profile') and
-        user.userprofile.role == 'manager'
+        user.profile.role == 'manager'
     )
 
 
