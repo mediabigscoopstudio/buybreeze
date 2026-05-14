@@ -1,215 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BuyBuzz Infra — Access</title>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign In — Buy Buzz CRM{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Standalone Auth Layout Overrides */
+  body {
+    background-color: var(--cloud) !important;
+  }
   
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  .auth-wrapper {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
   
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  .auth-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 32px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+  }
+  
+  .brand-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  
+  .brand-subtitle {
+    font-family: 'Geist', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--stone);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .auth-divider {
+    font-size: 11px;
+    color: var(--stone);
+    text-align: center;
+    margin-top: 32px;
+    font-weight: 500;
+  }
+</style>
+{% endblock %}
 
-  <style>
-    :root {
-      --bg-neutral: #f7f3f0;
-      --gold-primary: #D4AF37;
-      --obsidian: #1A1A1A;
-      --silver-border: #E5E5E5;
-      --text-main: #2E2E2E;
-      --text-muted: #6B6B6B;
-    }
-
-    body {
-      min-height: 100vh;
-      margin: 0;
-      background: var(--bg-neutral);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Inter', sans-serif;
-      color: var(--text-main);
-    }
-
-    /* Bento Box Architecture */
-    .bento-card {
-      background: #FFFFFF;
-      border-radius: 24px;
-      border: none;
-      padding: 48px 40px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-      box-sizing: border-box;
-    }
-
-    /* Typography */
-    .brand-header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card fade-up">
     
-    .brand-header h1 {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: var(--obsidian);
-      margin: 0 0 8px 0;
-      letter-spacing: -0.5px;
-    }
-
-    .brand-header p {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin: 0;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-
-    /* Form Elements */
-    .input-group {
-      margin-bottom: 24px;
-      position: relative;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 8px;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .input-wrapper i {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 1.25rem;
-    }
-
-    .form-control {
-      width: 100%;
-      background: #FFFFFF;
-      border: 1.5px solid var(--silver-border);
-      border-radius: 12px; /* Soft radius for inputs within the bento card */
-      padding: 14px 16px 14px 48px; /* Padding left for Phosphor icon */
-      font-size: 0.95rem;
-      font-family: 'Inter', sans-serif;
-      color: var(--text-main);
-      box-sizing: border-box;
-      transition: all 0.2s ease;
-      outline: none;
-    }
-
-    .form-control::placeholder {
-      color: var(--text-muted);
-      opacity: 0.7;
-    }
-
-    .form-control:focus {
-      border-color: var(--gold-primary);
-      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
-    }
-
-    /* Buttons & Badges */
-    .btn-primary {
-      background: var(--gold-primary);
-      color: var(--obsidian);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      border: none;
-      border-radius: 50px; /* Pill shape */
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 700;
-      width: 100%;
-      cursor: pointer;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-      margin-top: 8px;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
-    }
-
-    /* Django Messages Alert */
-    .alert-danger {
-      background: #FFF5F5;
-      border: 1px solid #FFE0E0;
-      color: #D32F2F;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .divider {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-align: center;
-      margin-top: 32px;
-      font-weight: 500;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="bento-card">
-    <div class="brand-header">
-      <h1>BuyBuzz Infra</h1>
-      <p>System Access</p>
-    </div>
+    <div class="brand-title">BuyBuzz Infra</div>
+    <div class="brand-subtitle">System Access</div>
 
     {% if messages %}
-      {% for message in messages %}
-        <div class="alert-danger">
-          <i class="ph-fill ph-warning-circle" style="font-size: 1.25rem;"></i>
-          <span>{{ message }}</span>
-        </div>
-      {% endfor %}
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="grove-alert grove-alert-error" style="margin-bottom: 8px;">
+            <i class="bi bi-x-circle-fill"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
     {% endif %}
 
     <form method="POST" action="">
       {% csrf_token %}
       
-      <div class="input-group">
-  <label class="form-label">Phone Number</label>
+      <div class="grove-field mb-4">
+        <label class="grove-label">Phone Number</label>
+        <div style="position: relative;">
+          <i class="bi bi-telephone" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
+          
+          <input 
+            type="text" 
+            name="phone" 
+            class="grove-input" 
+            style="padding-left: 44px; font-family: 'Geist Mono', monospace;" 
+            placeholder="Enter your phone number" 
+            required 
+            autofocus
+          >
+        </div>
+      </div>
 
-  <div class="input-wrapper">
-
-    <i class="ph ph-phone"></i>
-
-    <input
-      type="text"
-      name="phone"
-      class="form-control"
-      placeholder="Enter your phone number"
-      required
-      autofocus
-    >
-
-  </div>
-</div>
-
-      
-
-      <button type="submit" class="btn-primary">Sign In</button>
+      <button type="submit" class="btn-primary-sage w-100" style="padding: 12px; font-size: 14px;">
+        Sign In
+      </button>
     </form>
 
-    <div class="divider">BuyBuzz Infra · Enterprise CRM Hub</div>
+    <div class="auth-divider">BuyBuzz Infra · Enterprise CRM Hub</div>
+    
   </div>
-
-</body>
-</html>
+</div>
+{% endblock %}

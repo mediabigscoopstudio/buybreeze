@@ -1,84 +1,131 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Payroll{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payroll — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  HR Panel
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Payroll Records</h4><div class="sub">Salary records across all branches</div></div>
-  <a href="{% url 'add_payroll' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Payroll</a>
-</div>
-
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <input type="text" name="q" class="form-control" placeholder="Search employee..." value="{{ search }}">
-    <select name="month" class="form-select">
-      <option value="">All Months</option>
-      <option value="January" {% if month_filter == 'January' %}selected{% endif %}>January</option>
-      <option value="February" {% if month_filter == 'February' %}selected{% endif %}>February</option>
-      <option value="March" {% if month_filter == 'March' %}selected{% endif %}>March</option>
-      <option value="April" {% if month_filter == 'April' %}selected{% endif %}>April</option>
-      <option value="May" {% if month_filter == 'May' %}selected{% endif %}>May</option>
-      <option value="June" {% if month_filter == 'June' %}selected{% endif %}>June</option>
-      <option value="July" {% if month_filter == 'July' %}selected{% endif %}>July</option>
-      <option value="August" {% if month_filter == 'August' %}selected{% endif %}>August</option>
-      <option value="September" {% if month_filter == 'September' %}selected{% endif %}>September</option>
-      <option value="October" {% if month_filter == 'October' %}selected{% endif %}>October</option>
-      <option value="November" {% if month_filter == 'November' %}selected{% endif %}>November</option>
-      <option value="December" {% if month_filter == 'December' %}selected{% endif %}>December</option>
-    </select>
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'payroll' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
-
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Employee</th>
-        <th>Month</th>
-        <th>Year</th>
-        <th>Base Salary</th>
-        <th>Bonus</th>
-        <th>Deductions</th>
-        <th>Net Salary</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in records %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td style="font-weight:600;">{{ r.employee.user.get_full_name }}</td>
-        <td>{{ r.month }}</td>
-        <td>{{ r.year }}</td>
-        <td>₹{{ r.base_salary|floatformat:0 }}</td>
-        <td style="color:#059669;">₹{{ r.bonus|floatformat:0 }}</td>
-        <td style="color:#dc2626;">₹{{ r.deductions|floatformat:0 }}</td>
-        <td style="font-weight:700; color:#1a56db;">₹{{ r.net_salary|floatformat:0 }}</td>
-        <td style="white-space:nowrap;">
-          <a href="{% url 'edit_payroll' r.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
-          <a href="{% url 'delete_payroll' r.id %}" class="btn btn-sm btn-action" onclick="return confirm('Delete this payroll record?')">
-            <i class="bi bi-trash" style="color:#dc2626"></i>
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="9">
-        <div class="empty-state">
-          <i class="bi bi-cash-stack"></i>
-          <p>No payroll records found</p>
+  <div class="leads-card fade-up">
+    
+    {# ── HEADER & FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="section-title">Payroll Records</div>
+          <div style="font-size:12px;color:var(--stone);">Salary records across all branches</div>
         </div>
-      </td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+        <a href="{% url 'add_payroll' %}" class="btn-primary-sage">
+          <i class="bi bi-plus-lg"></i> Add Payroll
+        </a>
+      </div>
 
+      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
+        <input type="text" name="q" class="grove-input" style="max-width: 220px; padding: 6px 12px; min-height: 36px;" placeholder="Search employee..." value="{{ search }}">
+        
+        <select name="month" class="grove-input" style="max-width: 160px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Months</option>
+          <option value="January" {% if month_filter == 'January' %}selected{% endif %}>January</option>
+          <option value="February" {% if month_filter == 'February' %}selected{% endif %}>February</option>
+          <option value="March" {% if month_filter == 'March' %}selected{% endif %}>March</option>
+          <option value="April" {% if month_filter == 'April' %}selected{% endif %}>April</option>
+          <option value="May" {% if month_filter == 'May' %}selected{% endif %}>May</option>
+          <option value="June" {% if month_filter == 'June' %}selected{% endif %}>June</option>
+          <option value="July" {% if month_filter == 'July' %}selected{% endif %}>July</option>
+          <option value="August" {% if month_filter == 'August' %}selected{% endif %}>August</option>
+          <option value="September" {% if month_filter == 'September' %}selected{% endif %}>September</option>
+          <option value="October" {% if month_filter == 'October' %}selected{% endif %}>October</option>
+          <option value="November" {% if month_filter == 'November' %}selected{% endif %}>November</option>
+          <option value="December" {% if month_filter == 'December' %}selected{% endif %}>December</option>
+        </select>
+        
+        <select name="branch" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+        
+        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
+        <a href="{% url 'payroll' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+      </form>
+    </div>
+
+    {# ── DATA TABLE ── #}
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Employee</th>
+          <th>Month</th>
+          <th>Year</th>
+          <th>Base Salary</th>
+          <th>Bonus</th>
+          <th>Deductions</th>
+          <th>Net Salary</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+              {{ forloop.counter|stringformat:"02d" }}
+            </span>
+          </td>
+          <td>
+            <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ r.employee.user.get_full_name }}</span>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--ink);">{{ r.month }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--stone);">{{ r.year }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--ink);">₹{{ r.base_salary|floatformat:0 }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--sage);">₹{{ r.bonus|floatformat:0 }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:#E53E3E;">₹{{ r.deductions|floatformat:0 }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--ink);">₹{{ r.net_salary|floatformat:0 }}</span>
+          </td>
+          <td>
+            <div class="d-flex gap-1 justify-content-end">
+              <a href="{% url 'edit_payroll' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit">
+                <i class="bi bi-pencil" style="color:var(--stone);"></i>
+              </a>
+              <a href="{% url 'delete_payroll' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this payroll record?')" title="Delete">
+                <i class="bi bi-trash" style="color:#E53E3E;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        
+        {% empty %}
+        {# ── EMPTY STATE ── #}
+        <tr>
+          <td colspan="9">
+            <div class="grove-empty-state">
+              <i class="bi bi-cash-stack" style="font-size:32px; color:var(--sage-lt)"></i>
+              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No payroll records found</div>
+              <div style="font-size:12px; color:var(--stone);">Employee salary logs will appear here.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
 {% endblock %}

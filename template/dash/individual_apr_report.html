@@ -1,152 +1,188 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ target_employee.username }} - APR Report</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <style> body { background-color: #f8f9fa; } </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% load static %}
 
-    <nav class="navbar bg-white border-bottom shadow-sm px-4 py-3 mb-4 sticky-top">
-        <div class="container-fluid">
-            <span class="navbar-brand mb-0 h4 fw-bold text-dark d-flex align-items-center gap-2">
-                <i class="bi bi-person-lines-fill text-primary"></i>
-                Performance Profile: <span class="text-primary ms-1">{{ target_employee.username }}</span>
-            </span>
-            <button onclick="history.back()" class="btn btn-outline-dark rounded-pill px-4 shadow-sm fw-medium">
-                <i class="bi bi-arrow-left me-2"></i> Back to Directory
-            </button>
-        </div>
-    </nav>
+{% block title %}{{ target_employee.username }} - APR Report — Buy Buzz CRM{% endblock %}
 
-    <div class="container-fluid px-4 pb-5" style="max-width: 1400px;">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-secondary">
-                        <tr>
-                            <th class="ps-4 py-3">Date</th>
-                            <th class="py-3">Employee</th>
-                            <th class="py-3">Punch In</th>
-                            <th class="py-3">Punch Out</th>
-                            <th class="text-center py-3">New Leads</th>
-                            <th class="text-center py-3">Closed</th>
-                            <th class="text-center py-3">Avg Call Time</th>
-                            <th class="text-end pe-4 py-3">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in report_data %}
-                        <tr>
-                            <td class="fw-medium ps-4">{{ row.date|date:"d M Y" }}</td>
-                            <td class="fw-bold text-dark">{{ row.employee_name }}</td>
-                            <td>
-                                {% if row.punch_in %}
-                                    <span class="badge bg-success bg-opacity-10 text-success">{{ row.punch_in|time:"h:i A" }}</span>
-                                {% else %}
-                                    <span class="text-muted small">Missing</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if row.punch_out %}
-                                    <span class="badge bg-danger bg-opacity-10 text-danger">{{ row.punch_out|time:"h:i A" }}</span>
-                                {% else %}
-                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">Active</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center text-primary fw-semibold">{{ row.new_leads }}</td>
-                            <td class="text-center text-success fw-semibold">{{ row.closed_contacts }}</td>
-                            <td class="text-center font-monospace">{{ row.avg_call_time }}</td>
-                            
-                            <td class="text-end pe-4">
-                                <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date|date:'Y-m-d' }}')" 
-                                        class="btn btn-sm btn-primary fw-medium rounded-pill px-3 shadow-sm"
-                                        data-bs-toggle="modal" data-bs-target="#mapModal">
-                                    <i class="bi bi-geo-alt-fill me-1"></i> Track Route
-                                </button>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">No attendance data found for this employee.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+{% block page_header %}
+  Performance
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">
+        Performance Profile: <span style="color: var(--sage);">{{ target_employee.username }}</span>
+      </div>
+      <div style="font-size: 14px; color: var(--stone);">Individual Agent Performance Report and daily metrics</div>
+    </div>
+    <button onclick="history.back()" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back to Directory
+    </button>
+  </div>
+
+  {# ── REPORT TABLE CARD ── #}
+  <div class="leads-card fade-up" style="animation-delay: 0.05s;">
+    <div class="leads-header">
+      <div class="section-title"><i class="bi bi-person-badge" style="margin-right: 8px; color: var(--stone);"></i>Attendance & CRM Metrics</div>
     </div>
 
-    <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow">
-                <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-dark">Field Route: <span id="mapEmpName" class="text-primary"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div id="routeMap" style="height: 450px; width: 100%; border-radius: 12px; background: #e9ecef; z-index: 1;"></div>
-                </div>
-            </div>
-        </div>
+    <div style="max-height: 650px; overflow-y: auto;">
+      <table class="leads-table">
+        <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
+          <tr>
+            <th style="padding-left: 24px;">Date</th>
+            <th>Employee</th>
+            <th>Punch In</th>
+            <th>Punch Out</th>
+            <th style="text-align: center;">New Leads</th>
+            <th style="text-align: center;">Closed</th>
+            <th style="text-align: center;">Avg Call Time</th>
+            <th style="text-align: right; padding-right: 24px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in report_data %}
+          <tr>
+            <td style="padding-left: 24px;">
+              <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ row.date|date:"d M Y" }}</span>
+            </td>
+            <td>
+              <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ row.employee_name }}</span>
+            </td>
+            <td>
+              {% if row.punch_in %}
+                <span class="status-pill s-qual" style="font-family:'Geist Mono', monospace;">{{ row.punch_in|time:"h:i A" }}</span>
+              {% else %}
+                <span style="font-size: 12px; color: var(--stone);">Missing</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if row.punch_out %}
+                <span class="status-pill s-lost" style="font-family:'Geist Mono', monospace;">{{ row.punch_out|time:"h:i A" }}</span>
+              {% else %}
+                <span class="status-pill s-prog">Active</span>
+              {% endif %}
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--sage);">{{ row.new_leads }}</span>
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--ink);">{{ row.closed_contacts }}</span>
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--stone);">{{ row.avg_call_time }}</span>
+            </td>
+            <td style="text-align: right; padding-right: 24px;">
+              {# FIXED: Using double quotes for Django filter to prevent JS string breakage #}
+              <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date.isoformat }}')"
+                      class="btn btn-sm grove-btn-outline"
+                      style="font-size: 12px; padding: 6px 12px;"
+                      data-bs-toggle="modal" data-bs-target="#mapModal">
+                <i class="bi bi-geo-alt-fill" style="margin-right: 4px;"></i> Track Route
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">
+              <div class="grove-empty-state" style="padding: 50px 0;">
+                <i class="bi bi-clipboard-x" style="font-size:32px; color:var(--sage-lt)"></i>
+                <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No attendance data found</div>
+                <div style="font-size:12px; color:var(--stone); margin-top:4px;">Records for this specific employee will appear here.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        let map = null;
-        let polyline = null;
+{# ── MAP MODAL ── #}
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="background: var(--white); border-bottom: 1px solid var(--border); padding: 20px 24px;">
+        <h5 class="modal-title" style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">
+          Field Route: <span id="mapEmpName" style="color: var(--sage);"></span>
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="routeMap" style="height: 500px; width: 100%; z-index: 1;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        function viewRoute(username, dateStr) {
-            document.getElementById('mapEmpName').innerText = username;
+{# ── EXTERNAL ASSETS & SCRIPTS ── #}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-            fetch(`/api/route/${username}/${dateStr}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        drawMap(data.route);
-                    } else {
-                        alert('Could not load route data.');
-                    }
-                })
-                .catch(err => {
-                    console.error("Map fetch error:", err);
-                    alert("Error reaching the route API.");
-                });
+<script>
+    let map = null;
+    let polyline = null;
+    let markers = [];
+
+    function viewRoute(username, dateStr) {
+        const empTitle = document.getElementById('mapEmpName');
+        if (empTitle) empTitle.innerText = username;
+
+        fetch(`/api/route/${username}/${dateStr}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    drawMap(data.route);
+                } else {
+                    alert('Could not load route data.');
+                }
+            })
+            .catch(err => {
+                console.error("Map fetch error:", err);
+            });
+    }
+
+    function drawMap(routePoints) {
+        if (!map) {
+            map = L.map('routeMap');
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
         }
 
-        function drawMap(routePoints) {
-            if (!map) {
-                map = L.map('routeMap');
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-            }
-
-            if (polyline) { map.removeLayer(polyline); }
-            
-            if (routePoints.length === 0) {
-                alert("No location data found for this employee today.");
-                return;
-            }
-
-            const latlngs = routePoints.map(point => [point.lat, point.lng]);
-            polyline = L.polyline(latlngs, {color: 'red', weight: 4}).addTo(map);
-
-            map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
-
-            L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
-            if (latlngs.length > 1) {
-                const lastIdx = latlngs.length - 1;
-                L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
-            }
-
-            setTimeout(() => { map.invalidateSize(); }, 250);
+        if (polyline) { map.removeLayer(polyline); }
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        
+        if (!routePoints || routePoints.length === 0) {
+            alert("No location data found for this employee today.");
+            return;
         }
-    </script>
-</body>
-</html>
+
+        const latlngs = routePoints.map(point => [point.lat, point.lng]);
+        polyline = L.polyline(latlngs, {color: '#4F7942', weight: 5, opacity: 0.8}).addTo(map);
+
+        map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
+
+        const startMarker = L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
+        markers.push(startMarker);
+
+        if (latlngs.length > 1) {
+            const lastIdx = latlngs.length - 1;
+            const endMarker = L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
+            markers.push(endMarker);
+        }
+
+        setTimeout(() => { map.invalidateSize(); }, 300);
+    }
+</script>
+
+<style>
+  .leaflet-container { font-family: 'Geist', sans-serif !important; }
+  .leaflet-popup-content-wrapper { border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+</style>
+{% endblock %}

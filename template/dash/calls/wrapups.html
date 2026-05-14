@@ -1,87 +1,129 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Wrap-Ups{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Wrap-Ups — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Wrap-Ups
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Call Wrap-Ups</h4><div class="sub">Post-call summaries — all branches</div></div>
-</div>
-
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    <select name="locked" class="form-select">
-      <option value="">All</option>
-      <option value="1" {% if locked_filter == '1' %}selected{% endif %}>Locked Only</option>
-      <option value="0" {% if locked_filter == '0' %}selected{% endif %}>Unlocked Only</option>
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'wrapups' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
-
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Lead</th>
-        <th>Outcome</th>
-        <th>Temperature</th>
-        <th>Stage</th>
-        <th>Next Action</th>
-        <th>Follow-up At</th>
-        <th>Submitted By</th>
-        <th>Lock Status</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for w in wrapups %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td style="font-weight:600;">
-          <a href="{% url 'view_lead' w.lead.id %}" style="color:#1e293b; text-decoration:none;">
-            {{ w.lead.name }}
-          </a>
-        </td>
-        <td style="font-size:0.78rem;">{{ w.get_call_outcome_display }}</td>
-        <td>
-          {% if w.temperature_update == 'hot' %}<span class="badge-hot">🔥 Hot</span>
-          {% elif w.temperature_update == 'warm' %}<span class="badge-warm">🌤 Warm</span>
-          {% else %}<span class="badge-cold">❄️ Cold</span>{% endif %}
-        </td>
-        <td><span class="badge-stage {{ w.stage_update }}">{{ w.get_stage_update_display }}</span></td>
-        <td style="font-size:0.78rem;">{{ w.get_next_action_display }}</td>
-        <td style="font-size:0.75rem; white-space:nowrap;">{{ w.followup_at|date:"d M g:i A"|default:"—" }}</td>
-        <td style="font-size:0.78rem;">{{ w.submitted_by.user.get_full_name|default:"—" }}</td>
-        <td>
-          {% if w.is_locked %}
-            <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; background:#fef2f2; color:#dc2626; font-weight:600;">
-              <i class="bi bi-lock-fill"></i> Locked
-            </span>
-          {% else %}
-            <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; background:#ecfdf5; color:#059669; font-weight:600;">
-              <i class="bi bi-unlock-fill"></i> Open
-            </span>
-          {% endif %}
-        </td>
-        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ w.created_at|date:"d M Y" }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="10">
-        <div class="empty-state">
-          <i class="bi bi-clipboard-check-fill"></i>
-          <p>No wrap-ups submitted yet</p>
+  <div class="leads-card fade-up">
+    
+    {# ── HEADER & FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="section-title">Call Wrap-Ups</div>
+          <div style="font-size:12px;color:var(--stone);">Post-call summaries — all branches</div>
         </div>
-      </td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+      </div>
 
+      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
+        <select name="branch" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+        
+        <select name="locked" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Statuses</option>
+          <option value="1" {% if locked_filter == '1' %}selected{% endif %}>Locked Only</option>
+          <option value="0" {% if locked_filter == '0' %}selected{% endif %}>Unlocked Only</option>
+        </select>
+        
+        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
+        <a href="{% url 'wrapups' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+      </form>
+    </div>
+
+    {# ── DATA TABLE ── #}
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Lead</th>
+          <th>Outcome</th>
+          <th>Temperature</th>
+          <th>Stage</th>
+          <th>Next Action</th>
+          <th>Follow-up At</th>
+          <th>Submitted By</th>
+          <th>Lock Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for w in wrapups %}
+        <tr>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+              {{ forloop.counter|stringformat:"02d" }}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'view_lead' w.lead.id %}" style="font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;">
+              {{ w.lead.name }}
+            </a>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--stone);">{{ w.get_call_outcome_display }}</span>
+          </td>
+          <td>
+            {% if w.temperature_update == 'hot' %}
+              <span class="status-pill s-hot">🔥 Hot</span>
+            {% elif w.temperature_update == 'warm' %}
+              <span class="status-pill s-prog">🌤 Warm</span>
+            {% else %}
+              <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; letter-spacing:0.5px;">❄️ Cold</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="status-pill s-qual">{{ w.get_stage_update_display }}</span>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--ink);">{{ w.get_next_action_display }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--ink);">
+              {{ w.followup_at|date:"d M g:i A"|default:"—" }}
+            </span>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--stone);">{{ w.submitted_by.user.get_full_name|default:"—" }}</span>
+          </td>
+          <td>
+            {% if w.is_locked %}
+              <span class="status-pill s-lost"><i class="bi bi-lock-fill" style="margin-right:4px;"></i> Locked</span>
+            {% else %}
+              <span class="status-pill s-new"><i class="bi bi-unlock-fill" style="margin-right:4px;"></i> Open</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+              {{ w.created_at|date:"d M Y" }}
+            </span>
+          </td>
+        </tr>
+        
+        {% empty %}
+        {# ── EMPTY STATE ── #}
+        <tr>
+          <td colspan="10">
+            <div class="grove-empty-state">
+              <i class="bi bi-clipboard-check" style="font-size:32px; color:var(--sage-lt)"></i>
+              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No wrap-ups submitted yet</div>
+              <div style="font-size:12px; color:var(--stone);">Post-call summaries will appear here.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
 {% endblock %}

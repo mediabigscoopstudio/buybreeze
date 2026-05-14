@@ -1,94 +1,144 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Add User{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add User — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  User Management
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div>
-    <h4>Add User</h4>
-    <div class="sub">Create a new user account</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Add User</div>
+      <div style="font-size: 14px; color: var(--stone);">Create a new user account</div>
+    </div>
+    <a href="{% url 'users' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
   </div>
-  <a href="{% url 'users' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
 
-<div class="card" style="max-width:720px;">
-  <div class="card-body">
-    <form method="POST" enctype="multipart/form-data">
+  {# ── MAIN FORM CARD ── #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
+    <form method="POST" enctype="multipart/form-data" action="">
       {% csrf_token %}
 
-      <div class="form-section">Account Info</div>
-      <div class="row g-3 mb-3">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
+        <i class="bi bi-person-badge" style="margin-right: 4px; color: var(--sage);"></i> Account Info
+      </div>
+      
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">First Name *</label>
-          <input type="text" name="first_name" class="form-control" required placeholder="First name">
+          <div class="grove-field">
+            <label class="grove-label">First Name *</label>
+            <input type="text" name="first_name" class="grove-input" required placeholder="First name">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Last Name</label>
-          <input type="text" name="last_name" class="form-control" placeholder="Last name">
+          <div class="grove-field">
+            <label class="grove-label">Last Name</label>
+            <input type="text" name="last_name" class="grove-input" placeholder="Last name">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Username *</label>
-          <input type="text" name="username" class="form-control" required placeholder="Unique username">
+          <div class="grove-field">
+            <label class="grove-label">Username *</label>
+            <input type="text" name="username" class="grove-input" required placeholder="Unique username">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" placeholder="email@domain.com">
+          <div class="grove-field">
+            <label class="grove-label">Email</label>
+            <input type="email" name="email" class="grove-input" placeholder="email@domain.com">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Password *</label>
-          <input type="password" name="password" class="form-control" required placeholder="Set password">
+          <div class="grove-field">
+            <label class="grove-label">Password *</label>
+            <input type="password" name="password" class="grove-input" required placeholder="Set password">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Phone</label>
-          <input type="text" name="phone" class="form-control" placeholder="+91 XXXXX XXXXX">
+          <div class="grove-field">
+            <label class="grove-label">Phone</label>
+            <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="+91 XXXXX XXXXX">
+          </div>
         </div>
       </div>
 
-      <div class="form-section">Role & Assignment</div>
-      <div class="row g-3 mb-3">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
+        <i class="bi bi-diagram-3" style="margin-right: 4px; color: var(--sage);"></i> Role & Assignment
+      </div>
+      
+      <div class="row g-4 mb-4">
         <div class="col-md-4">
-          <label class="form-label">Role *</label>
-          <select name="role" class="form-select" required>
-            <option value="">Select role</option>
-            <option value="manager">Branch Manager</option>
-            <option value="tl">Team Leader</option>
-            <option value="employee">Call Team Member</option>
-            <option value="hr">HR Panel</option>
-            <option value="marketing">Marketing Admin</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Role *</label>
+            <select name="role" class="grove-input" required>
+              <option value="">Select role</option>
+              <option value="manager">Branch Manager</option>
+              <option value="tl">Team Leader</option>
+              <option value="employee">Call Team Member</option>
+              <option value="hr">HR Panel</option>
+              <option value="marketing">Marketing Admin</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">Branch</label>
-          <select name="branch" class="form-select">
-            <option value="">Select branch</option>
-            {% for b in branches %}
-              <option value="{{ b.id }}">{{ b.name }}</option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Branch</label>
+            <select name="branch" class="grove-input">
+              <option value="">Select branch</option>
+              {% for b in branches %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">Reports To</label>
-          <select name="reports_to" class="form-select">
-            <option value="">None</option>
-            {% for p in all_profiles %}
-              <option value="{{ p.id }}" {% if data.reports_to_id == p.id %}selected{% endif %}>
-              {{ p.user.get_full_name|default:p.user.username }} 
-              ({{ p.get_role_display }} | {{ p.branch.name|default:"No Branch" }})
-              </option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Reports To</label>
+            <select name="reports_to" class="grove-input">
+              <option value="">None</option>
+              {% for p in all_profiles %}
+                <option value="{{ p.id }}" {% if data.reports_to_id == p.id %}selected{% endif %}>
+                  {{ p.user.get_full_name|default:p.user.username }} 
+                  ({{ p.get_role_display }} | {{ p.branch.name|default:"No Branch" }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="col-md-4">
-          <label class="form-label">Profile Photo</label>
-          <input type="file" name="profile_pic" class="form-control" accept="image/*">
+        
+        <div class="col-md-6">
+          <div class="grove-field">
+            <label class="grove-label">Profile Photo</label>
+            <input type="file" name="profile_pic" class="grove-input" accept="image/*" style="padding: 8px 16px; line-height: 1.5; font-size: 13px;">
+          </div>
         </div>
       </div>
 
-      <div class="d-flex gap-2 mt-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Create User</button>
-        <a href="{% url 'users' %}" class="btn btn-sm btn-action">Cancel</a>
+      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn-primary-sage px-4">
+           <i class="bi bi-person-plus" style="margin-right: 4px;"></i> Create User
+        </button>
+        <a href="{% url 'users' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
+      
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

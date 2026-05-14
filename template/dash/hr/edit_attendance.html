@@ -1,71 +1,121 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Edit Attendance{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Attendance — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  HR Panel
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Edit Attendance</h4><div class="sub">Update punch record</div></div>
-  <a href="{% url 'attendance' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Attendance</div>
+      <div style="font-size: 14px; color: var(--stone);">Update punch record details</div>
+    </div>
+    <a href="{% url 'attendance' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
 
-<div class="card" style="max-width:620px;">
-  <div class="card-body">
-    <form method="POST">
+  {# ── MAIN FORM CARD ── #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
+    <form method="POST" action="">
       {% csrf_token %}
-      <div class="row g-3 mb-3">
+
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
+        Punch Details
+      </div>
+
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">Employee *</label>
-          <select name="employee" class="form-select" required>
-            {% for e in employees %}<option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>{{ e.user.get_full_name }}</option>{% endfor %}
-          </select>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Branch</label>
-          <select name="branch" class="form-select">
-            <option value="">Select branch</option>
-            {% for b in branches %}<option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
-          </select>
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Date *</label>
-          <input type="date" name="date" class="form-control" required value="{{ data.date|date:'Y-m-d' }}">
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Punch In</label>
-          <input type="datetime-local" name="punch_in" class="form-control" value="{{ data.punch_in|date:'Y-m-d\TH:i' }}">
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Punch Out</label>
-          <input type="datetime-local" name="punch_out" class="form-control" value="{{ data.punch_out|date:'Y-m-d\TH:i' }}">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Status *</label>
-          <select name="status" class="form-select" required>
-            <option value="present" {% if data.status == 'present' %}selected{% endif %}>Present</option>
-            <option value="absent" {% if data.status == 'absent' %}selected{% endif %}>Absent</option>
-            <option value="late" {% if data.status == 'late' %}selected{% endif %}>Late</option>
-            <option value="half_day" {% if data.status == 'half_day' %}selected{% endif %}>Half Day</option>
-            <option value="wfh" {% if data.status == 'wfh' %}selected{% endif %}>Work From Home</option>
-            <option value="on_leave" {% if data.status == 'on_leave' %}selected{% endif %}>On Leave</option>
-            <option value="holiday" {% if data.status == 'holiday' %}selected{% endif %}>Holiday</option>
-          </select>
-        </div>
-        <div class="col-md-6 d-flex align-items-end">
-          <div class="form-check">
-            <input type="checkbox" name="is_out_of_zone" class="form-check-input" id="outofzone" {% if data.is_out_of_zone %}checked{% endif %}>
-            <label class="form-check-label" for="outofzone" style="font-size:0.84rem;">Out of Zone</label>
+          <div class="grove-field">
+            <label class="grove-label">Employee *</label>
+            <select name="employee" class="grove-input" required>
+              {% for e in employees %}
+                <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>{{ e.user.get_full_name }}</option>
+              {% endfor %}
+            </select>
           </div>
         </div>
+        
+        <div class="col-md-6">
+          <div class="grove-field">
+            <label class="grove-label">Branch</label>
+            <select name="branch" class="grove-input">
+              <option value="">Select branch</option>
+              {% for b in branches %}
+                <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="grove-field">
+            <label class="grove-label">Date *</label>
+            <input type="date" name="date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.date|date:'Y-m-d' }}">
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="grove-field">
+            <label class="grove-label">Punch In</label>
+            <input type="datetime-local" name="punch_in" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.punch_in|date:'Y-m-d\TH:i' }}">
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="grove-field">
+            <label class="grove-label">Punch Out</label>
+            <input type="datetime-local" name="punch_out" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.punch_out|date:'Y-m-d\TH:i' }}">
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="grove-field">
+            <label class="grove-label">Status *</label>
+            <select name="status" class="grove-input" required>
+              <option value="present" {% if data.status == 'present' %}selected{% endif %}>Present</option>
+              <option value="absent" {% if data.status == 'absent' %}selected{% endif %}>Absent</option>
+              <option value="late" {% if data.status == 'late' %}selected{% endif %}>Late</option>
+              <option value="half_day" {% if data.status == 'half_day' %}selected{% endif %}>Half Day</option>
+              <option value="wfh" {% if data.status == 'wfh' %}selected{% endif %}>Work From Home</option>
+              <option value="on_leave" {% if data.status == 'on_leave' %}selected{% endif %}>On Leave</option>
+              <option value="holiday" {% if data.status == 'holiday' %}selected{% endif %}>Holiday</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-md-6 d-flex align-items-center" style="padding-top: 28px;">
+          <div class="form-check d-flex align-items-center gap-2 m-0 p-0">
+            <input type="checkbox" name="is_out_of_zone" class="form-check-input m-0" id="outofzone" style="width: 18px; height: 18px; accent-color: var(--sage); border-color: var(--border); cursor: pointer;" {% if data.is_out_of_zone %}checked{% endif %}>
+            <label class="form-check-label m-0" for="outofzone" style="font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer;">Out of Zone</label>
+          </div>
+        </div>
+        
         <div class="col-12">
-          <label class="form-label">Notes</label>
-          <textarea name="notes" class="form-control" rows="2">{{ data.notes }}</textarea>
+          <div class="grove-field">
+            <label class="grove-label">Notes</label>
+            <textarea name="notes" class="grove-input" rows="2">{{ data.notes }}</textarea>
+          </div>
         </div>
       </div>
+
+      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
+
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Update Record</button>
-        <a href="{% url 'attendance' %}" class="btn btn-sm btn-action">Cancel</a>
+        <button type="submit" class="btn-primary-sage px-4">
+           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update Record
+        </button>
+        <a href="{% url 'attendance' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
+      
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

@@ -1,121 +1,171 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Manager Perfomance{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manager Performance — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Performance
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1600px;">
+<div class="main-content">
 
-    <!-- HEADER -->
-    <div class="mb-4">
-        <h3 class="fw-bold text-dark mb-1">
-            <span class="text-muted fw-normal fs-4">Manager / </span>{{ manager.user.username }}
-        </h3>
-        <p class="text-secondary small mb-0">Performance overview and lead tracking</p>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">
+        <span style="color: var(--stone); font-weight: 500;">Manager /</span> {{ manager.user.username }}
+      </div>
+      <div style="font-size: 14px; color: var(--stone);">Performance overview and lead tracking</div>
+    </div>
+    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back to Leads
+    </a>
+  </div>
+
+  {# ── KPI STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4 fade-up" style="animation-delay: 0.05s;">
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2;">{{ total_leads }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Total Leads</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: #E53E3E; line-height: 1.2;">{{ hot_leads }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Hot Leads</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--sage); line-height: 1.2;">{{ new_leads }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">New Leads</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--gold); line-height: 1.2;">{{ closed_leads }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Closed Leads</div>
+      </div>
+    </div>
+    
+  </div>
+
+  {# ── MAIN DATA TABLE ── #}
+  <div class="leads-card fade-up" style="animation-delay: 0.1s;">
+    <div class="leads-header">
+      <div class="section-title"><i class="bi bi-diagram-3" style="margin-right: 8px; color: var(--stone);"></i>Leads Under Manager</div>
     </div>
 
-    <!-- KPI -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
-        <div class="col"><div class="card p-4 text-center"><h3>{{ total_leads }}</h3>Total</div></div>
-        <div class="col"><div class="card p-4 text-center text-danger"><h3>{{ hot_leads }}</h3>Hot</div></div>
-        <div class="col"><div class="card p-4 text-center text-primary"><h3>{{ new_leads }}</h3>New</div></div>
-        <div class="col"><div class="card p-4 text-center text-success"><h3>{{ closed_leads }}</h3>Closed</div></div>
+    <div style="max-height: 600px; overflow-y: auto;">
+      <table class="leads-table">
+        <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
+          <tr>
+            <th style="padding-left: 24px;">Lead</th>
+            <th>Phone</th>
+            <th>Source</th>
+            <th>Campaign</th>
+            <th>Manager</th>
+            <th>Team Leader</th>
+            <th>Employee</th>
+            <th>Stage</th>
+            <th>Temp</th>
+            <th style="text-align: right; padding-right: 24px;">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr>
+            <td style="padding-left: 24px;">
+              <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ lead.name }}</span>
+            </td>
+            <td>
+              <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ lead.phone|default:"—" }}</span>
+            </td>
+            <td>
+              <span style="font-size:12px; color:var(--stone); text-transform: capitalize;">{{ lead.source|default:"—" }}</span>
+            </td>
+            <td>
+              <span style="font-size:12px; color:var(--stone);">{{ lead.campaign_name|default:"—" }}</span>
+            </td>
+            
+            <td>
+              <span style="font-size:12px; color:var(--ink); font-weight:500;">
+                {% if lead.assigned_to.role == 'manager' %}
+                  {{ lead.assigned_to.user.username }}
+                {% elif lead.assigned_to.reports_to and lead.assigned_to.reports_to.reports_to %}
+                  {{ lead.assigned_to.reports_to.reports_to.user.username }}
+                {% else %}
+                  <span style="color:var(--stone);">—</span>
+                {% endif %}
+              </span>
+            </td>
+
+            <td>
+              <span style="font-size:12px; color:var(--ink); font-weight:500;">
+                {% if lead.assigned_to.role == 'tl' %}
+                  {{ lead.assigned_to.user.username }}
+                {% elif lead.assigned_to.role == 'employee' and lead.assigned_to.reports_to %}
+                  {{ lead.assigned_to.reports_to.user.username }}
+                {% else %}
+                  <span style="color:var(--stone);">—</span>
+                {% endif %}
+              </span>
+            </td>
+
+            <td>
+              <span style="font-size:12px; color:var(--ink); font-weight:500;">
+                {% if lead.assigned_to.role == 'employee' %}
+                  {{ lead.assigned_to.user.username }}
+                {% else %}
+                  <span style="color:var(--stone);">—</span>
+                {% endif %}
+              </span>
+            </td>
+
+            <td>
+              <span class="status-pill s-new">{{ lead.stage }}</span>
+            </td>
+
+            <td>
+              {% if lead.temperature == 'hot' %}
+                <span class="status-pill s-hot">🔥 Hot</span>
+              {% elif lead.temperature == 'warm' %}
+                <span class="status-pill s-prog">🌤 Warm</span>
+              {% elif lead.temperature == 'cold' %}
+                <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px;">❄️ Cold</span>
+              {% else %}
+                <span style="font-size: 12px; color: var(--stone);">—</span>
+              {% endif %}
+            </td>
+
+            <td style="text-align: right; padding-right: 24px;">
+              <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+                {{ lead.created_at|date:"M d, Y" }}
+              </span>
+            </td>
+          </tr>
+          
+          {% empty %}
+          <tr>
+            <td colspan="10">
+              <div class="grove-empty-state" style="padding: 40px 0;">
+                <i class="bi bi-diagram-3" style="font-size:32px; color:var(--sage-lt)"></i>
+                <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No leads found</div>
+                <div style="font-size:12px; color:var(--stone);">This manager currently has no assigned pipeline.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    <!-- TABLE -->
-    <div class="card">
-        <div class="card-header">
-            <h5>Leads Under Manager</h5>
-        </div>
-
-        <div class="card-body table-responsive" style="max-height:600px;">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Lead</th>
-                        <th>Phone</th>
-                        <th>Source</th>
-                        <th>Campaign</th>
-                        <th>Manager</th>
-                        <th>Team Leader</th>
-                        <th>Employee</th>
-                        <th>Stage</th>
-                        <th>Temp</th>
-                        <th class="text-end">Date</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                {% for lead in leads %}
-                <tr>
-                    <td class="fw-bold">{{ lead.name }}</td>
-                    <td>{{ lead.phone|default:"-" }}</td>
-                    <td>{{ lead.source|default:"-" }}</td>
-
-                    <!-- ✅ FIXED CAMPAIGN -->
-                    <td>{{ lead.campaign_name|default:"-" }}</td>
-
-                    <!-- ✅ CORRECT HIERARCHY -->
-                    <td>
-                        {% if lead.assigned_to.role == 'manager' %}
-                            {{ lead.assigned_to.user.username }}
-                        {% elif lead.assigned_to.reports_to and lead.assigned_to.reports_to.reports_to %}
-                            {{ lead.assigned_to.reports_to.reports_to.user.username }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if lead.assigned_to.role == 'tl' %}
-                            {{ lead.assigned_to.user.username }}
-                        {% elif lead.assigned_to.role == 'employee' and lead.assigned_to.reports_to %}
-                            {{ lead.assigned_to.reports_to.user.username }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if lead.assigned_to.role == 'employee' %}
-                            {{ lead.assigned_to.user.username }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-
-                    <!-- STAGE -->
-                    <td>
-                        <span class="badge bg-dark border">
-                            {{ lead.stage }}
-                        </span>
-                    </td>
-
-                    <!-- TEMPERATURE -->
-                    <td>
-                        {% if lead.temperature == 'hot' %}
-                            <span class="badge bg-danger">Hot</span>
-                        {% elif lead.temperature == 'warm' %}
-                            <span class="badge bg-warning text-dark">Warm</span>
-                        {% else %}
-                            <span class="badge bg-info text-dark">Cold</span>
-                        {% endif %}
-                    </td>
-
-                    <td class="text-end small">
-                        {{ lead.created_at|date:"M d, Y" }}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="10" class="text-center py-5 text-muted">
-                        No leads found
-                    </td>
-                </tr>
-                {% endfor %}
-                </tbody>
-
-            </table>
-        </div>
-    </div>
+  </div>
 
 </div>
 {% endblock %}

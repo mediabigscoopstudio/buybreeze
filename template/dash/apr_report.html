@@ -1,95 +1,133 @@
-{% extends 'dash/base.html' %}
- 
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}APR Report — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Reports
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="fw-bold text-dark mb-1">Agent Performance Report (APR)</h3>
-            <p class="text-muted small mb-0">Daily overview of employee attendance and CRM metrics.</p>
-        </div>
-        <button class="btn btn-dark shadow-sm"><i class="bi bi-download"></i> Export CSV</button>
+<div class="main-content">
+
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Agent Performance Report (APR)</div>
+      <div style="font-size: 14px; color: var(--stone);">Daily overview of employee attendance and CRM metrics</div>
+    </div>
+    <button class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-download" style="margin-right: 4px;"></i> Export CSV
+    </button>
+  </div>
+
+  {# ── MAIN DATA TABLE ── #}
+  <div class="leads-card fade-up" style="animation-delay: 0.05s;">
+    <div class="leads-header">
+      <div class="section-title"><i class="bi bi-bar-chart-line" style="margin-right: 8px; color: var(--stone);"></i>Performance Logs</div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-secondary">
-                    <tr>
-                        <th>Date</th>
-                        <th>Employee</th>
-                        <th>Punch In</th>
-                        <th>Punch Out</th>
-                        <th class="text-center">New Leads</th>
-                        <th class="text-center">Closed</th>
-                        <th class="text-center">Avg Call Time</th>
-                        <th class="text-end pe-4">Action</th> </tr>
-                </thead>
-                <tbody>
-                    {% for row in report_data %}
-                    <tr>
-                        <td class="fw-medium">{{ row.date|date:"d M Y" }}</td>
-                        <td class="fw-bold text-dark">{{ row.employee_name }}</td>
-                        <td>
-                            {% if row.punch_in %}
-                                <span class="badge bg-success bg-opacity-10 text-success">{{ row.punch_in|time:"h:i A" }}</span>
-                            {% else %}
-                                <span class="text-muted small">Missing</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if row.punch_out %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger">{{ row.punch_out|time:"h:i A" }}</span>
-                            {% else %}
-                                <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">Active</span>
-                            {% endif %}
-                        </td>
-                        <td class="text-center text-primary fw-semibold">{{ row.new_leads }}</td>
-                        <td class="text-center text-success fw-semibold">{{ row.closed_contacts }}</td>
-                        <td class="text-center font-monospace">{{ row.avg_call_time }}</td>
-                        
-                        <td class="text-end pe-4">
-                            <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date|date:'Y-m-d' }}')" 
-                                    class="btn btn-sm btn-primary fw-medium rounded-pill px-3 shadow-sm"
-                                    data-bs-toggle="modal" data-bs-target="#mapModal">
-                                <i class="bi bi-geo-alt-fill me-1"></i> Track Route
-                            </button>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">No data available.</td> </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div style="max-height: 650px; overflow-y: auto;">
+      <table class="leads-table">
+        <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
+          <tr>
+            <th style="padding-left: 24px;">Date</th>
+            <th>Employee</th>
+            <th>Punch In</th>
+            <th>Punch Out</th>
+            <th style="text-align: center;">New Leads</th>
+            <th style="text-align: center;">Closed</th>
+            <th style="text-align: center;">Avg Call Time</th>
+            <th style="text-align: right; padding-right: 24px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in report_data %}
+          <tr>
+            <td style="padding-left: 24px;">
+              <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ row.date|date:"d M Y" }}</span>
+            </td>
+            <td>
+              <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ row.employee_name }}</span>
+            </td>
+            <td>
+              {% if row.punch_in %}
+                <span class="status-pill s-qual" style="font-family:'Geist Mono', monospace;">{{ row.punch_in|time:"h:i A" }}</span>
+              {% else %}
+                <span style="font-size: 12px; color: var(--stone);">Missing</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if row.punch_out %}
+                <span class="status-pill s-lost" style="font-family:'Geist Mono', monospace;">{{ row.punch_out|time:"h:i A" }}</span>
+              {% else %}
+                <span class="status-pill s-prog">Active</span>
+              {% endif %}
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--sage);">{{ row.new_leads }}</span>
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--ink);">{{ row.closed_contacts }}</span>
+            </td>
+            <td style="text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--stone);">{{ row.avg_call_time }}</span>
+            </td>
+            <td style="text-align: right; padding-right: 24px;">
+              <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date.isoformat }}')" 
+                      class="btn btn-sm grove-btn-outline"
+                      style="font-size: 12px; padding: 6px 12px;"
+                      data-bs-toggle="modal" data-bs-target="#mapModal">
+                <i class="bi bi-geo-alt-fill" style="margin-right: 4px;"></i> Track Route
+              </button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">
+              <div class="grove-empty-state" style="padding: 40px 0;">
+                <i class="bi bi-folder2-open" style="font-size:32px; color:var(--sage-lt)"></i>
+                <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No data available</div>
+                <div style="font-size:12px; color:var(--stone); margin-top:4px;">APR records will appear once employees punch in.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
+{# ── MAP MODAL ── #}
 <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-dark" id="mapModalLabel">Field Route: <span id="mapEmpName" class="text-primary"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div id="routeMap" style="height: 450px; width: 100%; border-radius: 12px; background: #e9ecef; z-index: 1;"></div>
-            </div>
-        </div>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="background: var(--white); border-bottom: 1px solid var(--border); padding: 20px 24px;">
+        <h5 class="modal-title" style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">
+          Field Route: <span id="mapEmpName" style="color: var(--sage);"></span>
+        </h5>
+        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div id="routeMap" style="height: 500px; width: 100%; z-index: 1;"></div>
+      </div>
     </div>
+  </div>
 </div>
 
+{# ── EXTERNAL ASSETS & SCRIPTS ── #}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
     let map = null;
     let polyline = null;
+    let markers = [];
 
     function viewRoute(username, dateStr) {
         document.getElementById('mapEmpName').innerText = username;
 
-        // Fetch the GPS pings using the Username
         fetch(`/api/route/${username}/${dateStr}/`)
             .then(response => response.json())
             .then(data => {
@@ -109,7 +147,10 @@
             }).addTo(map);
         }
 
+        // Clean up previous layers
         if (polyline) { map.removeLayer(polyline); }
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
         
         if (routePoints.length === 0) {
             alert("No location data found for this employee today.");
@@ -117,17 +158,29 @@
         }
 
         const latlngs = routePoints.map(point => [point.lat, point.lng]);
-        polyline = L.polyline(latlngs, {color: 'red', weight: 4}).addTo(map);
+        polyline = L.polyline(latlngs, {color: '#4F7942', weight: 5, opacity: 0.8}).addTo(map);
 
         map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
 
-        L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
+        // Add Start/End Markers
+        const startMarker = L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
+        markers.push(startMarker);
+
         if (latlngs.length > 1) {
             const lastIdx = latlngs.length - 1;
-            L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
+            const endMarker = L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
+            markers.push(endMarker);
         }
 
-        setTimeout(() => { map.invalidateSize(); }, 250);
+        // Fix Leaflet grey tiles issue on modal open
+        setTimeout(() => { map.invalidateSize(); }, 300);
     }
 </script>
+
+<style>
+  /* Leaflet Internal Overrides */
+  .leaflet-container { font-family: 'Geist', sans-serif !important; }
+  .leaflet-popup-content-wrapper { border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+</style>
+
 {% endblock %}

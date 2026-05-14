@@ -1,94 +1,140 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Edit Call Log{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Call Log — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Call Logs
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Edit Call Log</h4><div class="sub">Update call details</div></div>
-  <a href="{% url 'calls' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Call Log</div>
+      <div style="font-size: 14px; color: var(--stone);">Update call details</div>
+    </div>
+    <a href="{% url 'calls' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
 
-<div class="card" style="max-width:680px;">
-  <div class="card-body">
-    <form method="POST">
+  {# ── MAIN FORM CARD ── #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
+    <form method="POST" action="">
       {% csrf_token %}
 
-      <div class="form-section">Call Details</div>
-      <div class="row g-3 mb-3">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
+        Call Details
+      </div>
+      
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">Lead *</label>
-          <select name="lead" class="form-select" required>
-            <option value="">Select lead</option>
-            {% for l in all_leads %}
-              <option value="{{ l.id }}" {% if data.lead_id == l.id %}selected{% endif %}>
-                {{ l.name }} — {{ l.phone }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Lead *</label>
+            <select name="lead" class="grove-input" required>
+              <option value="">Select lead</option>
+              {% for l in all_leads %}
+                <option value="{{ l.id }}" {% if data.lead_id == l.id %}selected{% endif %}>
+                  {{ l.name }} — {{ l.phone }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-3">
-          <label class="form-label">Call Type *</label>
-          <select name="call_type" class="form-select" required>
-            <option value="outbound" {% if data.call_type == 'outbound' %}selected{% endif %}>Outbound</option>
-            <option value="inbound" {% if data.call_type == 'inbound' %}selected{% endif %}>Inbound</option>
-            <option value="missed" {% if data.call_type == 'missed' %}selected{% endif %}>Missed</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Call Type *</label>
+            <select name="call_type" class="grove-input" required>
+              <option value="outbound" {% if data.call_type == 'outbound' %}selected{% endif %}>Outbound</option>
+              <option value="inbound" {% if data.call_type == 'inbound' %}selected{% endif %}>Inbound</option>
+              <option value="missed" {% if data.call_type == 'missed' %}selected{% endif %}>Missed</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-3">
-          <label class="form-label">Duration (seconds)</label>
-          <input type="number" name="call_duration" class="form-control" value="{{ data.call_duration }}" min="0">
+          <div class="grove-field">
+            <label class="grove-label">Duration (sec)</label>
+            <input type="number" name="call_duration" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.call_duration }}" min="0">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Outcome *</label>
-          <select name="call_outcome" class="form-select" required>
-            <option value="interested" {% if data.call_outcome == 'interested' %}selected{% endif %}>Interested</option>
-            <option value="not_interested" {% if data.call_outcome == 'not_interested' %}selected{% endif %}>Not Interested</option>
-            <option value="callback" {% if data.call_outcome == 'callback' %}selected{% endif %}>Callback Requested</option>
-            <option value="not_answered" {% if data.call_outcome == 'not_answered' %}selected{% endif %}>Not Answered</option>
-            <option value="converted" {% if data.call_outcome == 'converted' %}selected{% endif %}>Converted</option>
-            <option value="site_visit" {% if data.call_outcome == 'site_visit' %}selected{% endif %}>Site Visit Scheduled</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Outcome *</label>
+            <select name="call_outcome" class="grove-input" required>
+              <option value="interested" {% if data.call_outcome == 'interested' %}selected{% endif %}>Interested</option>
+              <option value="not_interested" {% if data.call_outcome == 'not_interested' %}selected{% endif %}>Not Interested</option>
+              <option value="callback" {% if data.call_outcome == 'callback' %}selected{% endif %}>Callback Requested</option>
+              <option value="not_answered" {% if data.call_outcome == 'not_answered' %}selected{% endif %}>Not Answered</option>
+              <option value="converted" {% if data.call_outcome == 'converted' %}selected{% endif %}>Converted</option>
+              <option value="site_visit" {% if data.call_outcome == 'site_visit' %}selected{% endif %}>Site Visit Scheduled</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Next Follow-up Date & Time</label>
-          <input type="datetime-local" name="next_followup_at" class="form-control"
-            value="{{ data.next_followup_at|date:'Y-m-d\TH:i' }}">
+          <div class="grove-field">
+            <label class="grove-label">Next Follow-up</label>
+            <input type="datetime-local" name="next_followup_at" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.next_followup_at|date:'Y-m-d\TH:i' }}">
+          </div>
         </div>
+        
         <div class="col-12">
-          <label class="form-label">Call Notes</label>
-          <textarea name="call_notes" class="form-control" rows="3">{{ data.call_notes }}</textarea>
+          <div class="grove-field">
+            <label class="grove-label">Call Notes</label>
+            <textarea name="call_notes" class="grove-input" rows="3">{{ data.call_notes }}</textarea>
+          </div>
         </div>
       </div>
 
-      <div class="form-section">Assignment</div>
-      <div class="row g-3 mb-4">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
+        Assignment
+      </div>
+      
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">Called By</label>
-          <select name="called_by" class="form-select">
-            <option value="">Select member</option>
-            {% for m in members %}
-              <option value="{{ m.id }}" {% if data.called_by_id == m.id %}selected{% endif %}>
-                {{ m.user.get_full_name }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Called By</label>
+            <select name="called_by" class="grove-input">
+              <option value="">Select member</option>
+              {% for m in members %}
+                <option value="{{ m.id }}" {% if data.called_by_id == m.id %}selected{% endif %}>
+                  {{ m.user.get_full_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Branch</label>
-          <select name="branch" class="form-select">
-            <option value="">Select branch</option>
-            {% for b in branches %}
-              <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Branch</label>
+            <select name="branch" class="grove-input">
+              <option value="">Select branch</option>
+              {% for b in branches %}
+                <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
       </div>
+
+      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
 
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Update Call Log</button>
-        <a href="{% url 'calls' %}" class="btn btn-sm btn-action">Cancel</a>
+        <button type="submit" class="btn-primary-sage px-4">
+           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update Call Log
+        </button>
+        <a href="{% url 'calls' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
+      
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

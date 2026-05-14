@@ -1,75 +1,141 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Attendance{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Attendance — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  HR Panel
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Attendance Records</h4><div class="sub">All punch-in / punch-out records</div></div>
-  <a href="{% url 'add_attendance' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Record</a>
+  <div class="leads-card fade-up">
+    
+    {# ── HEADER & FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="section-title">Attendance Records</div>
+          <div style="font-size:12px;color:var(--stone);">All punch-in / punch-out records</div>
+        </div>
+        <a href="{% url 'add_attendance' %}" class="btn-primary-sage">
+          <i class="bi bi-plus-lg"></i> Add Record
+        </a>
+      </div>
+
+      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
+        <input type="text" name="q" class="grove-input" style="max-width: 200px; padding: 6px 12px; min-height: 36px;" placeholder="Search employee..." value="{{ search }}">
+        
+        <input type="date" name="date" class="grove-input" style="max-width: 160px; padding: 6px 12px; min-height: 36px; font-family: 'Geist Mono', monospace;" value="{{ date_filter }}">
+        
+        <select name="status" class="grove-input" style="max-width: 150px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Statuses</option>
+          <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
+          <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
+          <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Late</option>
+          <option value="half_day" {% if status_filter == 'half_day' %}selected{% endif %}>Half Day</option>
+          <option value="wfh" {% if status_filter == 'wfh' %}selected{% endif %}>WFH</option>
+          <option value="on_leave" {% if status_filter == 'on_leave' %}selected{% endif %}>On Leave</option>
+        </select>
+        
+        <select name="branch" class="grove-input" style="max-width: 160px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+        
+        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
+        <a href="{% url 'attendance' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+      </form>
+    </div>
+
+    {# ── DATA TABLE ── #}
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Employee</th>
+          <th>Date</th>
+          <th>Punch In</th>
+          <th>Punch Out</th>
+          <th>Hours</th>
+          <th>Status</th>
+          <th>Zone</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+              {{ forloop.counter|stringformat:"02d" }}
+            </span>
+          </td>
+          <td>
+            <div style="font-size:14px; font-weight:600; color:var(--ink);">{{ r.employee.user.get_full_name }}</div>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--ink);">{{ r.date|date:"d M Y" }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.punch_in|date:"g:i A"|default:"—" }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.punch_out|date:"g:i A"|default:"—" }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.total_hours|default:"—" }}h</span>
+          </td>
+          <td>
+            {% if r.status == 'present' %}
+              <span class="status-pill s-qual">✓ Present</span>
+            {% elif r.status == 'absent' %}
+              <span class="status-pill s-lost">✕ Absent</span>
+            {% elif r.status == 'late' %}
+              <span class="status-pill s-prog">● Late</span>
+            {% elif r.status == 'on_leave' %}
+              <span class="status-pill s-new">● On Leave</span>
+            {% else %}
+              <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; letter-spacing:0.5px;">{{ r.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.is_out_of_zone %}
+              <span class="status-pill s-lost"><i class="bi bi-geo-alt-fill" style="margin-right: 4px;"></i> Out of Zone</span>
+            {% else %}
+              <span class="status-pill s-qual"><i class="bi bi-geo-alt-fill" style="margin-right: 4px;"></i> In Zone</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1 justify-content-end">
+              <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit">
+                <i class="bi bi-pencil" style="color:var(--stone);"></i>
+              </a>
+              <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this record?')" title="Delete">
+                <i class="bi bi-trash" style="color:#E53E3E;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        
+        {% empty %}
+        {# ── EMPTY STATE ── #}
+        <tr>
+          <td colspan="9">
+            <div class="grove-empty-state">
+              <i class="bi bi-clock" style="font-size:32px; color:var(--sage-lt)"></i>
+              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No attendance records found</div>
+              <div style="font-size:12px; color:var(--stone);">Punch-in records will appear here automatically or can be added manually.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </div>
-
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <input type="text" name="q" class="form-control" placeholder="Search employee..." value="{{ search }}">
-    <input type="date" name="date" class="form-control" style="max-width:160px;" value="{{ date_filter }}">
-    <select name="status" class="form-select">
-      <option value="">All Status</option>
-      <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
-      <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
-      <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Late</option>
-      <option value="half_day" {% if status_filter == 'half_day' %}selected{% endif %}>Half Day</option>
-      <option value="wfh" {% if status_filter == 'wfh' %}selected{% endif %}>WFH</option>
-      <option value="on_leave" {% if status_filter == 'on_leave' %}selected{% endif %}>On Leave</option>
-    </select>
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}<option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'attendance' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
-
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr><th>#</th><th>Employee</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Hours</th><th>Status</th><th>Zone</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      {% for r in records %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td style="font-weight:600;">{{ r.employee.user.get_full_name }}</td>
-        <td style="font-size:0.82rem;">{{ r.date|date:"d M Y" }}</td>
-        <td style="font-size:0.82rem;">{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
-        <td style="font-size:0.82rem;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
-        <td style="font-size:0.82rem;">{{ r.total_hours|default:"—" }}h</td>
-        <td>
-          <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600;
-            {% if r.status == 'present' %}background:#ecfdf5;color:#059669;
-            {% elif r.status == 'absent' %}background:#fef2f2;color:#dc2626;
-            {% elif r.status == 'late' %}background:#fff7ed;color:#ea580c;
-            {% elif r.status == 'on_leave' %}background:#faf5ff;color:#7c3aed;
-            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
-            {{ r.get_status_display }}
-          </span>
-        </td>
-        <td>
-          {% if r.is_out_of_zone %}
-            <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; background:#fef2f2; color:#dc2626; font-weight:600;">Out of Zone</span>
-          {% else %}
-            <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; background:#ecfdf5; color:#059669; font-weight:600;">In Zone</span>
-          {% endif %}
-        </td>
-        <td style="white-space:nowrap;">
-          <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
-          <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm btn-action" onclick="return confirm('Delete this record?')"><i class="bi bi-trash" style="color:#dc2626"></i></a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="9"><div class="empty-state"><i class="bi bi-clock"></i><p>No attendance records found</p></div></td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
 {% endblock %}

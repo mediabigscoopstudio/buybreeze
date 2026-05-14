@@ -1,68 +1,110 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Add Branch{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Branch — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Branches
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div>
-    <h4>Add Branch</h4>
-    <div class="sub">Create a new branch</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Add Branch</div>
+      <div style="font-size: 14px; color: var(--stone);">Create and configure a new system branch</div>
+    </div>
+    <a href="{% url 'branch' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
   </div>
-  <a href="{% url 'branch' %}" class="btn btn-sm btn-action">
-    <i class="bi bi-arrow-left me-1"></i> Back
-  </a>
-</div>
 
-<div class="card" style="max-width:680px;">
-  <div class="card-body">
-    <form method="POST">
+  {# ── MAIN FORM CARD ── #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
+    <form method="POST" action="">
       {% csrf_token %}
 
-      <div class="form-section">Basic Info</div>
-      <div class="row g-3 mb-3">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
+        Basic Info
+      </div>
+      
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">Branch Name *</label>
-          <input type="text" name="name" class="form-control" required placeholder="e.g. Kolkata North">
+          <div class="grove-field">
+            <label class="grove-label">Branch Name *</label>
+            <input type="text" name="name" class="grove-input" required placeholder="e.g. Kolkata North">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Location *</label>
-          <input type="text" name="location" class="form-control" required placeholder="City / Area">
+          <div class="grove-field">
+            <label class="grove-label">Location *</label>
+            <input type="text" name="location" class="grove-input" required placeholder="City / Area">
+          </div>
         </div>
+        
         <div class="col-12">
-          <label class="form-label">Address</label>
-          <textarea name="address" class="form-control" rows="2" placeholder="Full address"></textarea>
+          <div class="grove-field">
+            <label class="grove-label">Address</label>
+            <textarea name="address" class="grove-input" rows="2" placeholder="Full address"></textarea>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Phone</label>
-          <input type="text" name="phone" class="form-control" placeholder="+91 XXXXX XXXXX">
+          <div class="grove-field">
+            <label class="grove-label">Phone</label>
+            <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="+91 XXXXX XXXXX">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" placeholder="branch@email.com">
+          <div class="grove-field">
+            <label class="grove-label">Email</label>
+            <input type="email" name="email" class="grove-input" placeholder="branch@email.com">
+          </div>
         </div>
       </div>
 
-      <div class="form-section">HR GPS Settings</div>
-      <div class="row g-3 mb-4">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
+        HR GPS Settings
+      </div>
+      
+      <div class="row g-4 mb-4">
         <div class="col-md-4">
-          <label class="form-label">GPS Latitude</label>
-          <input type="text" name="gps_lat" class="form-control" placeholder="22.5726">
+          <div class="grove-field">
+            <label class="grove-label">GPS Latitude</label>
+            <input type="text" name="gps_lat" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="22.5726">
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">GPS Longitude</label>
-          <input type="text" name="gps_lng" class="form-control" placeholder="88.3639">
+          <div class="grove-field">
+            <label class="grove-label">GPS Longitude</label>
+            <input type="text" name="gps_lng" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="88.3639">
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">Punch-in Radius (m)</label>
-          <input type="number" name="gps_radius" class="form-control" value="100" min="50" max="1000">
+          <div class="grove-field">
+            <label class="grove-label">Punch-in Radius (m)</label>
+            <input type="number" name="gps_radius" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="100" min="50" max="1000">
+          </div>
         </div>
       </div>
+
+      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
 
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Save Branch</button>
-        <a href="{% url 'branch' %}" class="btn btn-sm btn-action">Cancel</a>
+        <button type="submit" class="btn-primary-sage px-4">
+           <i class="bi bi-check-lg" style="margin-right: 4px;"></i> Save Branch
+        </button>
+        <a href="{% url 'branch' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
+      
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

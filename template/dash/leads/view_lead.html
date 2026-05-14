@@ -1,141 +1,258 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Lead Detail{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lead Detail — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Leads
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div>
-    <h4>{{ lead.name }}</h4>
-    <div class="sub">Lead Detail — ID #{{ lead.id }}</div>
-  </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'edit_lead' lead.id %}" class="btn btn-primary btn-sm"><i class="bi bi-pencil me-1"></i> Edit</a>
-    <a href="{% url 'leads' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-  </div>
-</div>
-
-<div class="row g-3 mb-3">
-
-  <!-- LEAD INFO -->
-  <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-body">
-        <div class="form-section mb-3">Contact</div>
-        <div style="font-size:0.84rem; display:flex; flex-direction:column; gap:10px;">
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Name</span><strong>{{ lead.name }}</strong></div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Phone</span>{{ lead.phone }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Email</span>{{ lead.email|default:"—" }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Location</span>{{ lead.location|default:"—" }}</div>
-        </div>
-      </div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">{{ lead.name }}</div>
+      <div style="font-size: 14px; color: var(--stone);">Lead Detail — ID <span style="font-family: 'Geist Mono', monospace;">#{{ lead.id }}</span></div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'edit_lead' lead.id %}" class="btn-primary-sage d-flex align-items-center" style="padding: 8px 16px; text-decoration: none; border-radius: 8px;">
+        <i class="bi bi-pencil" style="margin-right: 6px; font-size: 14px;"></i> Edit
+      </a>
+      <a href="{% url 'leads' %}" class="btn grove-btn-outline d-flex align-items-center" style="padding: 8px 16px;">
+        <i class="bi bi-arrow-left" style="margin-right: 6px; font-size: 14px;"></i> Back
+      </a>
     </div>
   </div>
 
-  <!-- STATUS -->
-  <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-body">
-        <div class="form-section mb-3">Status</div>
-        <div style="font-size:0.84rem; display:flex; flex-direction:column; gap:10px;">
+  {# ── 3-COLUMN DETAILS ── #}
+  <div class="row g-4 mb-4 fade-up" style="animation-delay: 0.05s;">
+
+    <div class="col-md-4">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 100%;">
+        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--cloud); padding-bottom: 12px;">
+          <i class="bi bi-person-vcard" style="margin-right: 4px; color: var(--sage);"></i> Contact
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
           <div>
-            <span style="color:#94a3b8; font-size:0.75rem; display:block;">Temperature</span>
-            {% if lead.temperature == 'hot' %}<span class="badge-hot">🔥 Hot</span>
-            {% elif lead.temperature == 'warm' %}<span class="badge-warm">🌤 Warm</span>
-            {% else %}<span class="badge-cold">❄️ Cold</span>{% endif %}
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Name</div>
+            <div style="font-size: 14px; font-weight: 600; color: var(--ink);">{{ lead.name }}</div>
           </div>
           <div>
-            <span style="color:#94a3b8; font-size:0.75rem; display:block;">Stage</span>
-            <span class="badge-stage {{ lead.stage }}">{{ lead.get_stage_display }}</span>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Phone</div>
+            <div style="font-family: 'Geist Mono', monospace; font-size: 14px; font-weight: 600; color: var(--ink);">{{ lead.phone }}</div>
           </div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Source</span>{{ lead.get_source_display }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Assigned To</span>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Branch</span>{{ lead.branch.name|default:"—" }}</div>
+          <div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Email</div>
+            <div style="font-size: 13px; color: var(--ink);">{{ lead.email|default:"—" }}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Location</div>
+            <div style="font-size: 13px; color: var(--ink);">{{ lead.location|default:"—" }}</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- PROPERTY -->
-  <div class="col-md-4">
-    <div class="card h-100">
-      <div class="card-body">
-        <div class="form-section mb-3">Property Interest</div>
-        <div style="font-size:0.84rem; display:flex; flex-direction:column; gap:10px;">
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Type</span>{{ lead.get_property_type_display|default:"—" }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">BHK</span>{{ lead.get_bhk_preference_display|default:"—" }}</div>
+    <div class="col-md-4">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 100%;">
+        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--cloud); padding-bottom: 12px;">
+          <i class="bi bi-diagram-3" style="margin-right: 4px; color: var(--sage);"></i> Status
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
           <div>
-            <span style="color:#94a3b8; font-size:0.75rem; display:block;">Budget</span>
-            {% if lead.budget_min or lead.budget_max %}
-              ₹{{ lead.budget_min|default:"?" }} — ₹{{ lead.budget_max|default:"?" }}
-            {% else %}—{% endif %}
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 6px;">Temperature</div>
+            <div>
+              {% if lead.temperature == 'hot' %}
+                <span class="status-pill s-hot">🔥 Hot</span>
+              {% elif lead.temperature == 'warm' %}
+                <span class="status-pill s-prog">🌤 Warm</span>
+              {% else %}
+                <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; letter-spacing:0.5px;">❄️ Cold</span>
+              {% endif %}
+            </div>
           </div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Purpose</span>{{ lead.get_purpose_display|default:"—" }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Timeline</span>{{ lead.get_timeline_display|default:"—" }}</div>
-          <div><span style="color:#94a3b8; font-size:0.75rem; display:block;">Readiness</span>{{ lead.get_readiness_display|default:"—" }}</div>
+          <div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 6px;">Stage</div>
+            <div><span class="status-pill s-new">{{ lead.get_stage_display }}</span></div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Source</div>
+            <div style="font-size: 13px; color: var(--ink);">{{ lead.get_source_display }}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Assigned To</div>
+            <div style="font-size: 13px; font-weight: 500; color: var(--ink);">
+              <i class="bi bi-person-fill" style="color: var(--stone); margin-right: 4px;"></i> {{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone); margin-bottom: 4px;">Branch</div>
+            <div style="font-size: 13px; color: var(--stone);">{{ lead.branch.name|default:"—" }}</div>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="col-md-4">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 100%;">
+        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 1px solid var(--cloud); padding-bottom: 12px;">
+          <i class="bi bi-building" style="margin-right: 4px; color: var(--sage);"></i> Property Interest
+        </div>
+        
+        <div class="d-flex flex-column gap-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone);">Type</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ lead.get_property_type_display|default:"—" }}</div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone);">BHK</div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ lead.get_bhk_preference_display|default:"—" }}</div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone);">Budget</div>
+            <div style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--sage);">
+              {% if lead.budget_min or lead.budget_max %}
+                ₹{{ lead.budget_min|default:"?" }} — ₹{{ lead.budget_max|default:"?" }}
+              {% else %}
+                <span style="color: var(--stone);">—</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone);">Purpose</div>
+            <div style="font-size: 13px; color: var(--ink);">{{ lead.get_purpose_display|default:"—" }}</div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone);">Timeline</div>
+            <div style="font-size: 13px; color: var(--ink);">{{ lead.get_timeline_display|default:"—" }}</div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div style="font-size: 12px; font-weight: 500; color: var(--stone);">Readiness</div>
+            <div style="font-size: 13px; color: var(--ink);">{{ lead.get_readiness_display|default:"—" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  {# ── CALL HISTORY ── #}
+  <div class="leads-card mb-4 fade-up" style="animation-delay: 0.1s;">
+    <div class="leads-header">
+      <div class="section-title"><i class="bi bi-telephone" style="margin-right: 8px; color: var(--stone);"></i>Call History <span style="color: var(--stone); font-size: 14px; margin-left: 4px;">({{ calls.count }})</span></div>
+    </div>
+    
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Type</th>
+          <th>Outcome</th>
+          <th>Duration</th>
+          <th>Notes</th>
+          <th>Next Follow-up</th>
+          <th style="text-align: right;">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in calls %}
+        <tr>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ forloop.counter|stringformat:"02d" }}</span>
+          </td>
+          <td>
+            <span style="font-size:13px; font-weight:500; color:var(--ink);">{{ c.get_call_type_display }}</span>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--stone);">{{ c.get_call_outcome_display }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ c.duration_display }}</span>
+          </td>
+          <td>
+            <span style="font-size:12px; color:var(--stone); max-width:250px; display:inline-block;">{{ c.call_notes|default:"—"|truncatechars:60 }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--ink);">{{ c.next_followup_at|date:"d M Y g:i A"|default:"—" }}</span>
+          </td>
+          <td style="text-align: right;">
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ c.created_at|date:"d M Y" }}</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">
+            <div class="grove-empty-state" style="padding: 32px 0;">
+              <i class="bi bi-telephone-x" style="font-size:24px; color:var(--sage-lt)"></i>
+              <div style="font-size:13px; color:var(--stone); margin-top:12px;">No call logs found for this lead.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ── FOLLOW-UPS ── #}
+  <div class="leads-card fade-up" style="animation-delay: 0.15s;">
+    <div class="leads-header">
+      <div class="section-title"><i class="bi bi-calendar-check" style="margin-right: 8px; color: var(--stone);"></i>Follow-Ups <span style="color: var(--stone); font-size: 14px; margin-left: 4px;">({{ followups.count }})</span></div>
+    </div>
+    
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Type</th>
+          <th>Scheduled</th>
+          <th>Status</th>
+          <th style="text-align: right;">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in followups %}
+        <tr>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ forloop.counter|stringformat:"02d" }}</span>
+          </td>
+          <td>
+            <span style="font-size:13px; font-weight:500; color:var(--ink);">{{ f.get_followup_type_display }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--ink);">{{ f.followup_at|date:"d M Y g:i A" }}</span>
+          </td>
+          <td>
+            {% if f.followup_status == 'pending' %}
+              <span class="status-pill s-prog">● Pending</span>
+            {% elif f.followup_status == 'completed' %}
+              <span class="status-pill s-qual">✓ Completed</span>
+            {% elif f.followup_status == 'missed' %}
+              <span class="status-pill s-lost">✕ Missed</span>
+            {% else %}
+              <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px;">{{ f.get_followup_status_display }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align: right;">
+            <span style="font-size:12px; color:var(--stone); max-width:250px; display:inline-block;">{{ f.notes|default:"—"|truncatechars:60 }}</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="grove-empty-state" style="padding: 32px 0;">
+              <i class="bi bi-calendar-x" style="font-size:24px; color:var(--sage-lt)"></i>
+              <div style="font-size:13px; color:var(--stone); margin-top:12px;">No follow-ups scheduled yet.</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 
 </div>
-
-<!-- CALL HISTORY -->
-<div class="table-card mb-3">
-  <div class="table-header">
-    <h6><i class="bi bi-telephone-fill me-2" style="color:#16a34a"></i>Call History ({{ calls.count }})</h6>
-  </div>
-  <table class="crm-table">
-    <thead>
-      <tr><th>#</th><th>Type</th><th>Outcome</th><th>Duration</th><th>Notes</th><th>Next Follow-up</th><th>Date</th></tr>
-    </thead>
-    <tbody>
-      {% for c in calls %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td>{{ c.get_call_type_display }}</td>
-        <td>{{ c.get_call_outcome_display }}</td>
-        <td>{{ c.duration_display }}</td>
-        <td style="max-width:200px; font-size:0.78rem; color:#475569;">{{ c.call_notes|default:"—"|truncatechars:60 }}</td>
-        <td>{{ c.next_followup_at|date:"d M Y g:i A"|default:"—" }}</td>
-        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ c.created_at|date:"d M Y" }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="7"><div class="empty-state"><p>No call logs yet</p></div></td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
-<!-- FOLLOW-UPS -->
-<div class="table-card mb-3">
-  <div class="table-header">
-    <h6><i class="bi bi-calendar-check-fill me-2" style="color:#059669"></i>Follow-Ups ({{ followups.count }})</h6>
-  </div>
-  <table class="crm-table">
-    <thead>
-      <tr><th>#</th><th>Type</th><th>Scheduled</th><th>Status</th><th>Notes</th></tr>
-    </thead>
-    <tbody>
-      {% for f in followups %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td>{{ f.get_followup_type_display }}</td>
-        <td style="white-space:nowrap;">{{ f.followup_at|date:"d M Y g:i A" }}</td>
-        <td>
-          <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600;
-            {% if f.followup_status == 'pending' %}background:#fff7ed;color:#ea580c;
-            {% elif f.followup_status == 'completed' %}background:#ecfdf5;color:#059669;
-            {% elif f.followup_status == 'missed' %}background:#fef2f2;color:#dc2626;
-            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
-            {{ f.get_followup_status_display }}
-          </span>
-        </td>
-        <td style="font-size:0.78rem; color:#475569;">{{ f.notes|default:"—"|truncatechars:60 }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5"><div class="empty-state"><p>No follow-ups yet</p></div></td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
 {% endblock %}

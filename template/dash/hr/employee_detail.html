@@ -1,85 +1,113 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}{{ employee.user.get_full_name }}{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ employee.user.get_full_name }} — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  HR Panel
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<style>
-  .status-present { background:#ecfdf5; color:#059669; }
-  .status-absent { background:#fef2f2; color:#dc2626; }
-  .status-late { background:#fff7ed; color:#ea580c; }
-  .status-on_leave { background:#faf5ff; color:#7c3aed; }
-  .status-default { background:#f1f5f9; color:#475569; }
-  .leave-approved { background:#ecfdf5; color:#059669; }
-  .leave-rejected { background:#fef2f2; color:#dc2626; }
-  .leave-pending { background:#fff7ed; color:#ea580c; }
-  .zone-out { background:#fef2f2; color:#dc2626; }
-  .zone-in { background:#ecfdf5; color:#059669; }
-  .badge-small { font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600; }
-</style>
-
-<div class="page-header">
-  <div>
-    <h4>{{ employee.user.get_full_name }}</h4>
-    <div class="sub">{{ employee.get_role_display }} — {{ employee.branch.name|default:"No Branch" }}</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">{{ employee.user.get_full_name }}</div>
+      <div style="font-size: 14px; color: var(--stone);">{{ employee.get_role_display }} — {{ employee.branch.name|default:"No Branch" }}</div>
+    </div>
+    <a href="{% url 'hr_panel' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back to HR
+    </a>
   </div>
-  <a href="{% url 'hr_panel' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back to HR</a>
-</div>
 
-<!-- STAT CARDS -->
-<div class="row g-3 mb-4">
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#eff6ff"><i class="bi bi-clock-fill" style="color:#2563eb"></i></div>
-      <div><div class="stat-val">{{ att_records.count }}</div><div class="stat-label">Total Attendance</div></div>
+  {# ── STAT CARDS ── #}
+  <div class="row g-3 mb-4 fade-up" style="animation-delay: 0.05s;">
+    <div class="col-md-3">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--sage); font-size: 18px;">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ att_records.count }}</div>
+          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Total Attendance</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--ink); font-size: 18px;">
+          <i class="bi bi-calendar-check"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ att_records|length }}</div>
+          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Days Recorded</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 18px;">
+          <i class="bi bi-calendar-x"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ leave_records.count }}</div>
+          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Leave Requests</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-3">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
+        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--stone); font-size: 18px;">
+          <i class="bi bi-wallet2"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ payroll_records.count }}</div>
+          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Payroll Records</div>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#ecfdf5"><i class="bi bi-check-circle-fill" style="color:#059669"></i></div>
-      <div><div class="stat-val">{{ att_records|length }}</div><div class="stat-label">Days Recorded</div></div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#fff7ed"><i class="bi bi-calendar-x-fill" style="color:#ea580c"></i></div>
-      <div><div class="stat-val">{{ leave_records.count }}</div><div class="stat-label">Leave Requests</div></div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#faf5ff"><i class="bi bi-cash-stack" style="color:#7c3aed"></i></div>
-      <div><div class="stat-val">{{ payroll_records.count }}</div><div class="stat-label">Payroll Records</div></div>
-    </div>
-  </div>
-</div>
 
-<div class="row g-3">
+  <div class="row g-4 fade-up" style="animation-delay: 0.1s;">
 
-  <!-- QUICK ADD ATTENDANCE FORM -->
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body">
-        <div class="form-section">Add Attendance</div>
-        <form method="POST">
+    {# ── QUICK ADD FORM (LEFT COL) ── #}
+    <div class="col-md-4">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px;">
+        
+        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">
+          Quick Add Attendance
+        </div>
+        
+        <form method="POST" action="">
           {% csrf_token %}
-          <div class="mb-3">
-            <label class="form-label">Employee</label>
-            <input type="text" class="form-control" value="{{ employee.user.get_full_name }}" disabled>
+          
+          <div class="grove-field mb-3">
+            <label class="grove-label">Employee</label>
+            <input type="text" class="grove-input" style="background-color: var(--cloud); color: var(--stone);" value="{{ employee.user.get_full_name }}" disabled>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Date *</label>
-            <input type="date" name="date" class="form-control" required>
+          
+          <div class="grove-field mb-3">
+            <label class="grove-label">Date *</label>
+            <input type="date" name="date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Punch In</label>
-            <input type="datetime-local" name="punch_in" class="form-control">
+          
+          <div class="grove-field mb-3">
+            <label class="grove-label">Punch In</label>
+            <input type="datetime-local" name="punch_in" class="grove-input" style="font-family: 'Geist Mono', monospace;">
           </div>
-          <div class="mb-3">
-            <label class="form-label">Punch Out</label>
-            <input type="datetime-local" name="punch_out" class="form-control">
+          
+          <div class="grove-field mb-3">
+            <label class="grove-label">Punch Out</label>
+            <input type="datetime-local" name="punch_out" class="grove-input" style="font-family: 'Geist Mono', monospace;">
           </div>
-          <div class="mb-3">
-            <label class="form-label">Status *</label>
-            <select name="status" class="form-select" required>
+          
+          <div class="grove-field mb-3">
+            <label class="grove-label">Status *</label>
+            <select name="status" class="grove-input" required>
               <option value="present">Present</option>
               <option value="absent">Absent</option>
               <option value="late">Late</option>
@@ -89,131 +117,177 @@
               <option value="holiday">Holiday</option>
             </select>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Branch</label>
-            <select name="branch" class="form-select">
+          
+          <div class="grove-field mb-3">
+            <label class="grove-label">Branch</label>
+            <select name="branch" class="grove-input">
               <option value="">{{ employee.branch.name|default:"Select branch" }}</option>
               {% for b in branches %}
                 <option value="{{ b.id }}" {% if employee.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
               {% endfor %}
             </select>
           </div>
-          <div class="mb-3">
-            <div class="form-check">
-              <input type="checkbox" name="is_out_of_zone" class="form-check-input" id="ooz">
-              <label class="form-check-label" for="ooz" style="font-size:0.84rem;">Out of Zone</label>
+          
+          <div class="mb-3 d-flex align-items-center">
+            <div class="form-check d-flex align-items-center gap-2 m-0 p-0">
+              <input type="checkbox" name="is_out_of_zone" class="form-check-input m-0" id="ooz" style="width: 16px; height: 16px; accent-color: var(--sage); border-color: var(--border); cursor: pointer;">
+              <label class="form-check-label m-0" for="ooz" style="font-size: 13px; font-weight: 500; color: var(--ink); cursor: pointer;">Out of Zone</label>
             </div>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Notes</label>
-            <textarea name="notes" class="form-control" rows="2" placeholder="Any notes..."></textarea>
+          
+          <div class="grove-field mb-4">
+            <label class="grove-label">Notes</label>
+            <textarea name="notes" class="grove-input" rows="2" placeholder="Any notes..."></textarea>
           </div>
-          <button type="submit" class="btn btn-primary btn-sm w-100">Add Attendance</button>
+          
+          <button type="submit" class="btn-primary-sage w-100">Add Attendance</button>
         </form>
       </div>
     </div>
+
+    {# ── TABLES (RIGHT COL) ── #}
+    <div class="col-md-8">
+
+      <div class="leads-card mb-4">
+        <div class="leads-header">
+          <div class="section-title"><i class="bi bi-clock" style="margin-right: 8px; color: var(--stone);"></i>Attendance History</div>
+        </div>
+        
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Date</th>
+              <th>Punch In</th>
+              <th>Punch Out</th>
+              <th>Hours</th>
+              <th>Status</th>
+              <th>Zone</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in att_records %}
+            <tr>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ forloop.counter|stringformat:"02d" }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.date|date:"d M Y" }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.punch_in|date:"g:i A"|default:"—" }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.punch_out|date:"g:i A"|default:"—" }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.total_hours|default:"—" }}h</span>
+              </td>
+              <td>
+                {% if r.status == 'present' %}
+                  <span class="status-pill s-qual">✓ Present</span>
+                {% elif r.status == 'absent' %}
+                  <span class="status-pill s-lost">✕ Absent</span>
+                {% elif r.status == 'late' %}
+                  <span class="status-pill s-prog">● Late</span>
+                {% elif r.status == 'on_leave' %}
+                  <span class="status-pill s-new">● On Leave</span>
+                {% else %}
+                  <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px;">{{ r.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if r.is_out_of_zone %}
+                  <span class="status-pill s-lost">Out</span>
+                {% else %}
+                  <span class="status-pill s-qual">In</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-1 justify-content-end">
+                  <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit">
+                    <i class="bi bi-pencil" style="color:var(--stone);"></i>
+                  </a>
+                  <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this record?')">
+                    <i class="bi bi-trash" style="color:#E53E3E;"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8">
+                <div class="grove-empty-state" style="padding: 32px 0;">
+                  <div style="font-size:13px; color:var(--stone);">No attendance records yet</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="leads-card">
+        <div class="leads-header d-flex justify-content-between align-items-center">
+          <div class="section-title"><i class="bi bi-calendar-range" style="margin-right: 8px; color: var(--stone);"></i>Leave History</div>
+          <a href="{% url 'add_leave' %}" class="btn btn-sm grove-btn-outline">Add Leave</a>
+        </div>
+        
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">#</th>
+              <th>Type</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Days</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in leave_records %}
+            <tr>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ forloop.counter|stringformat:"02d" }}</span>
+              </td>
+              <td>
+                <span style="font-size:13px; font-weight:500; color:var(--ink);">{{ r.get_leave_type_display }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.from_date|date:"d M Y" }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.to_date|date:"d M Y" }}</span>
+              </td>
+              <td>
+                <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.total_days }}</span>
+              </td>
+              <td>
+                {% if r.leave_status == 'approved' %}
+                  <span class="status-pill s-qual">✓ Approved</span>
+                {% elif r.leave_status == 'rejected' %}
+                  <span class="status-pill s-lost">✕ Rejected</span>
+                {% else %}
+                  <span class="status-pill s-prog">● Pending</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="grove-empty-state" style="padding: 32px 0;">
+                  <div style="font-size:13px; color:var(--stone);">No leave records yet</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
   </div>
 
-  <!-- RIGHT COLUMN -->
-  <div class="col-md-8">
-
-    <!-- ATTENDANCE HISTORY -->
-    <div class="table-card mb-3">
-      <div class="table-header">
-        <h6><i class="bi bi-clock-fill me-2" style="color:#2563eb"></i>Attendance History</h6>
-      </div>
-      <table class="crm-table">
-        <thead>
-          <tr>
-            <th>#</th><th>Date</th><th>Punch In</th><th>Punch Out</th>
-            <th>Hours</th><th>Status</th><th>Zone</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for r in att_records %}
-          <tr>
-            <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-            <td style="font-size:0.82rem; font-weight:600;">{{ r.date|date:"d M Y" }}</td>
-            <td style="font-size:0.82rem;">{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
-            <td style="font-size:0.82rem;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
-            <td style="font-size:0.82rem;">{{ r.total_hours|default:"—" }}h</td>
-            <td>
-              {% if r.status == 'present' %}
-                <span class="badge-small status-present">Present</span>
-              {% elif r.status == 'absent' %}
-                <span class="badge-small status-absent">Absent</span>
-              {% elif r.status == 'late' %}
-                <span class="badge-small status-late">Late</span>
-              {% elif r.status == 'on_leave' %}
-                <span class="badge-small status-on_leave">On Leave</span>
-              {% else %}
-                <span class="badge-small status-default">{{ r.get_status_display }}</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if r.is_out_of_zone %}
-                <span class="badge-small zone-out">Out</span>
-              {% else %}
-                <span class="badge-small zone-in">In</span>
-              {% endif %}
-            </td>
-            <td style="white-space:nowrap;">
-              <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm btn-action me-1">
-                <i class="bi bi-pencil"></i>
-              </a>
-              <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm btn-action"
-                 onclick="return confirm('Delete this record?')">
-                <i class="bi bi-trash" style="color:#dc2626"></i>
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="8">
-            <div class="empty-state"><p>No attendance records yet</p></div>
-          </td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    <!-- LEAVE HISTORY -->
-    <div class="table-card">
-      <div class="table-header">
-        <h6><i class="bi bi-calendar-check-fill me-2" style="color:#ea580c"></i>Leave History</h6>
-        <a href="{% url 'add_leave' %}" class="btn btn-sm btn-action">Add Leave</a>
-      </div>
-      <table class="crm-table">
-        <thead>
-          <tr><th>#</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          {% for r in leave_records %}
-          <tr>
-            <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-            <td style="font-size:0.82rem;">{{ r.get_leave_type_display }}</td>
-            <td style="font-size:0.82rem;">{{ r.from_date|date:"d M Y" }}</td>
-            <td style="font-size:0.82rem;">{{ r.to_date|date:"d M Y" }}</td>
-            <td style="font-weight:700;">{{ r.total_days }}</td>
-            <td>
-              {% if r.leave_status == 'approved' %}
-                <span class="badge-small leave-approved">Approved</span>
-              {% elif r.leave_status == 'rejected' %}
-                <span class="badge-small leave-rejected">Rejected</span>
-              {% else %}
-                <span class="badge-small leave-pending">Pending</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% empty %}
-          <tr><td colspan="6">
-            <div class="empty-state"><p>No leave records yet</p></div>
-          </td></tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-  </div>
 </div>
-
 {% endblock %}

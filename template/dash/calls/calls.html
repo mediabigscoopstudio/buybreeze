@@ -1,93 +1,150 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Call Logs{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Call Logs — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Call Logs
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Call Logs</h4><div class="sub">All calls across all branches</div></div>
-  <a href="{% url 'add_call' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Log Call</a>
-</div>
-
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <input type="text" name="q" class="form-control" placeholder="Search lead name..." value="{{ search }}">
-    <select name="outcome" class="form-select">
-      <option value="">All Outcomes</option>
-      <option value="interested" {% if outcome_filter == 'interested' %}selected{% endif %}>Interested</option>
-      <option value="not_interested" {% if outcome_filter == 'not_interested' %}selected{% endif %}>Not Interested</option>
-      <option value="callback" {% if outcome_filter == 'callback' %}selected{% endif %}>Callback</option>
-      <option value="not_answered" {% if outcome_filter == 'not_answered' %}selected{% endif %}>Not Answered</option>
-      <option value="converted" {% if outcome_filter == 'converted' %}selected{% endif %}>Converted</option>
-      <option value="site_visit" {% if outcome_filter == 'site_visit' %}selected{% endif %}>Site Visit Scheduled</option>
-    </select>
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'calls' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
-
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Lead</th>
-        <th>Type</th>
-        <th>Outcome</th>
-        <th>Duration</th>
-        <th>Called By</th>
-        <th>Branch</th>
-        <th>Next F/U</th>
-        <th>Date</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for c in calls %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td style="font-weight:600;">
-          <a href="{% url 'view_lead' c.lead.id %}" style="color:#1e293b; text-decoration:none;">
-            {{ c.lead.name }}
-          </a>
-        </td>
-        <td>{{ c.get_call_type_display }}</td>
-        <td>
-          <span style="font-size:0.72rem; padding:3px 8px; border-radius:20px; font-weight:600;
-            {% if c.call_outcome == 'converted' %}background:#ecfdf5;color:#059669;
-            {% elif c.call_outcome == 'interested' %}background:#eff6ff;color:#2563eb;
-            {% elif c.call_outcome == 'not_interested' %}background:#fef2f2;color:#dc2626;
-            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
-            {{ c.get_call_outcome_display }}
-          </span>
-        </td>
-        <td>{{ c.duration_display }}</td>
-        <td style="font-size:0.78rem;">{{ c.called_by.user.get_full_name|default:"—" }}</td>
-        <td style="font-size:0.78rem;">{{ c.branch.name|default:"—" }}</td>
-        <td style="font-size:0.75rem; white-space:nowrap;">{{ c.next_followup_at|date:"d M g:i A"|default:"—" }}</td>
-        <td style="font-size:0.75rem; color:#94a3b8; white-space:nowrap;">{{ c.created_at|date:"d M Y" }}</td>
-        <td style="white-space:nowrap;">
-          <a href="{% url 'edit_call' c.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
-          <a href="{% url 'delete_call' c.id %}" class="btn btn-sm btn-action"
-             onclick="return confirm('Delete this call log?')">
-            <i class="bi bi-trash" style="color:#dc2626"></i>
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="10">
-        <div class="empty-state">
-          <i class="bi bi-telephone-fill"></i>
-          <p>No call logs found. <a href="{% url 'add_call' %}">Log a call</a></p>
+  <div class="leads-card fade-up">
+    
+    {# ── HEADER & FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="section-title">Call Logs</div>
+          <div style="font-size:12px;color:var(--stone);">All calls across all branches</div>
         </div>
-      </td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+        <a href="{% url 'add_call' %}" class="btn-primary-sage">
+          <i class="bi bi-plus-lg"></i> Log Call
+        </a>
+      </div>
 
+      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
+        <input type="text" name="q" class="grove-input" style="max-width: 220px; padding: 6px 12px; min-height: 36px;" placeholder="Search lead name..." value="{{ search }}">
+        
+        <select name="outcome" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Outcomes</option>
+          <option value="interested" {% if outcome_filter == 'interested' %}selected{% endif %}>Interested</option>
+          <option value="not_interested" {% if outcome_filter == 'not_interested' %}selected{% endif %}>Not Interested</option>
+          <option value="callback" {% if outcome_filter == 'callback' %}selected{% endif %}>Callback</option>
+          <option value="not_answered" {% if outcome_filter == 'not_answered' %}selected{% endif %}>Not Answered</option>
+          <option value="converted" {% if outcome_filter == 'converted' %}selected{% endif %}>Converted</option>
+          <option value="site_visit" {% if outcome_filter == 'site_visit' %}selected{% endif %}>Site Visit Scheduled</option>
+        </select>
+        
+        <select name="branch" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+          {% endfor %}
+        </select>
+        
+        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
+        <a href="{% url 'calls' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+      </form>
+    </div>
+
+    {# ── DATA TABLE ── #}
+    <table class="leads-table">
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Lead</th>
+          <th>Type</th>
+          <th>Outcome</th>
+          <th>Duration</th>
+          <th>Called By</th>
+          <th>Branch</th>
+          <th>Next F/U</th>
+          <th>Date</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in calls %}
+        <tr>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+              {{ forloop.counter|stringformat:"02d" }}
+            </span>
+          </td>
+          <td>
+            <a href="{% url 'view_lead' c.lead.id %}" style="font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;">
+              {{ c.lead.name }}
+            </a>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--stone);">{{ c.get_call_type_display }}</span>
+          </td>
+          <td>
+            {% if c.call_outcome == 'converted' %}
+              <span class="status-pill s-qual">✓ Converted</span>
+            {% elif c.call_outcome == 'interested' %}
+              <span class="status-pill s-hot">★ Interested</span>
+            {% elif c.call_outcome == 'not_interested' %}
+              <span class="status-pill s-lost">✕ Not Interested</span>
+            {% elif c.call_outcome == 'callback' or c.call_outcome == 'site_visit' %}
+              <span class="status-pill s-prog">● {{ c.get_call_outcome_display }}</span>
+            {% else %}
+              <span class="status-pill s-new">● {{ c.get_call_outcome_display }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">
+              {{ c.duration_display }}
+            </span>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--ink);">{{ c.called_by.user.get_full_name|default:"—" }}</span>
+          </td>
+          <td>
+            <span style="font-size:13px; color:var(--stone);">{{ c.branch.name|default:"—" }}</span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--ink);">
+              {{ c.next_followup_at|date:"d M g:i A"|default:"—" }}
+            </span>
+          </td>
+          <td>
+            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+              {{ c.created_at|date:"d M Y" }}
+            </span>
+          </td>
+          <td>
+            <div class="d-flex gap-1 justify-content-end">
+              <a href="{% url 'edit_call' c.id %}" class="btn btn-sm grove-btn-ghost" title="Edit Call">
+                <i class="bi bi-pencil" style="color:var(--stone);"></i>
+              </a>
+              <a href="{% url 'delete_call' c.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this call log?')" title="Delete Call">
+                <i class="bi bi-trash" style="color:#E53E3E;"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        
+        {% empty %}
+        {# ── EMPTY STATE ── #}
+        <tr>
+          <td colspan="10">
+            <div class="grove-empty-state">
+              <i class="bi bi-telephone" style="font-size:32px; color:var(--sage-lt)"></i>
+              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No call logs found</div>
+              <div style="font-size:12px; color:var(--stone);">Keep track of your team's communications by logging your first call.</div>
+              <a href="{% url 'add_call' %}" class="btn-primary-sage mt-3">
+                <i class="bi bi-plus-lg"></i> Log a Call
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
 {% endblock %}

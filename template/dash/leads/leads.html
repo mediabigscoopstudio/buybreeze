@@ -1,208 +1,247 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Leads{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Leads Dashboard — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Leads
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1600px;">
+<div class="main-content">
 
-    <!-- ACTION -->
-    <div class="d-flex justify-content-end mb-4">
-        <a href="/add_lead" class="btn btn-dark fw-bold px-4 rounded-3 shadow-sm">
-            + Add New Lead
-        </a>
+  {# ── PAGE HEADER & ACTION ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Lead Management</div>
+      <div style="font-size: 14px; color: var(--stone);">Overview and distribution</div>
     </div>
+    <a href="/add_lead" class="btn-primary-sage">
+      <i class="bi bi-plus-lg" style="margin-right: 4px;"></i> Add New Lead
+    </a>
+  </div>
 
-    <!-- KPI ROW -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
-        <div class="col">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
-                <h3 class="fw-bold mb-1">{{ total_leads }}</h3>
-                <span class="text-muted small fw-semibold text-uppercase">Total Leads</span>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
-                <h3 class="fw-bold text-danger mb-1">{{ hot_leads }}</h3>
-                <span class="text-muted small fw-semibold text-uppercase">Hot</span>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
-                <h3 class="fw-bold text-warning mb-1">{{ pending_followups }}</h3>
-                <span class="text-muted small fw-semibold text-uppercase">Pending</span>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
-                <h3 class="fw-bold text-primary mb-1">{{ unassigned_leads_count }}</h3>
-                <span class="text-muted small fw-semibold text-uppercase">Unassigned</span>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center">
-                <h3 class="fw-bold text-success mb-1">{{ conversion_rate }}%</h3>
-                <span class="text-muted small fw-semibold text-uppercase">Conversion</span>
-            </div>
-        </div>
+  {# ── KPI STAT CARDS ── #}
+  <div class="row g-3 mb-4 fade-up" style="animation-delay: 0.05s;">
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2;">{{ total_leads }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Total Leads</div>
+      </div>
     </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: #E53E3E; line-height: 1.2;">{{ hot_leads }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Hot</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--gold); line-height: 1.2;">{{ pending_followups }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Pending</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--sage); line-height: 1.2;">{{ unassigned_leads_count }}</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Unassigned</div>
+      </div>
+    </div>
+    
+    <div class="col">
+      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
+        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2;">{{ conversion_rate }}%</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Conversion</div>
+      </div>
+    </div>
+    
+  </div>
 
-    <!-- MAIN 2-COLUMN LAYOUT -->
-    <div class="row g-4">
+  {# ── MAIN 2-COLUMN LAYOUT ── #}
+  <div class="row g-4 fade-up" style="animation-delay: 0.1s;">
+    
+    {# ── LEFT COLUMN: WORK AREA (70%) ── #}
+    <div class="col-lg-8">
+      
+      <div class="leads-card mb-4">
         
-        <!-- ========================================== -->
-        <!-- LEFT COLUMN: WORK AREA (70%)               -->
-        <!-- ========================================== -->
-        <div class="col-lg-8">
-            
-            <!-- UNASSIGNED LEADS -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
-                <!-- Sticky Header & Assign Panel -->
-                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center flex-wrap gap-2 sticky-top z-1">
-                    <h5 class="mb-0 fw-bold text-dark">Unassigned Leads</h5>
-                    
-                    <div class="d-flex gap-2 bg-light p-1 rounded-3">
-                        <select id="managerSelect" class="form-select border-0 shadow-none bg-white fw-medium">
-                            <option value="">Select Manager...</option>
-                            {% for manager in managers %}
-                                <option value="{{ manager.id }}">{{ manager.user.username }}</option>
-                            {% endfor %}
-                        </select>
-                        <button id="btnAssign" class="btn btn-primary fw-bold px-4" disabled>Assign</button>
-                    </div>
-                </div>
-
-                <!-- Scrollable Table Body -->
-                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light sticky-top z-0" style="top: -1px;">
-                            <tr>
-                                <th class="ps-3"><input type="checkbox" class="form-check-input" id="selectAll"></th>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Source</th>
-                                <th>Campaign</th>
-                                <th>Temp</th>
-                                <th>Stage</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for lead in unassigned_leads %}
-                            <tr>
-                                <td class="ps-3"><input type="checkbox" class="form-check-input lead-checkbox" value="{{ lead.id }}"></td>
-                                <td class="fw-semibold text-dark">{{ lead.name }}</td>
-                                <td class="text-secondary small">{{ lead.phone }}</td>
-                                <td class="text-secondary small">{{ lead.source }}</td>
-                                <td class="text-secondary small">{{ lead.campaign_name }}</td>
-                                <td>
-                                    {% if lead.temperature == 'hot' %}
-                                        <span title="Hot">🔥</span>
-                                    {% elif lead.temperature == 'warm' %}
-                                        <span title="Warm">⚡</span>
-                                    {% else %}
-                                        <span title="Cold">❄️</span>
-                                    {% endif %}
-                                </td>
-                                <td><span class="badge bg-light text-dark border rounded-pill">{{ lead.stage }}</span></td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">No unassigned leads found.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- RECENT ACTIVITY -->
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-bottom p-3">
-                    <h5 class="mb-0 fw-bold text-dark">Recent Activity</h5>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Lead</th>
-                                <th>Assigned To</th>
-                                <th>Stage</th>
-                                <th>Temp</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for lead in recent_leads %}
-                            <tr>
-                                <td class="ps-3 fw-semibold text-dark">{{ lead.name }}</td>
-                                <td>
-                                    <span class="d-inline-flex align-items-center gap-1">
-                                        <span class="badge bg-secondary rounded-circle p-1">👤</span>
-                                        <span class="fw-medium">{{ lead.assigned_to.user.username }}</span>
-                                    </span>
-                                </td>
-                                <td><span class="badge bg-light text-dark border rounded-pill">{{ lead.stage }}</span></td>
-                                <td class="text-capitalize text-secondary small">{{ lead.temperature }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center text-muted py-4">No recent activity.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
+        <div class="leads-header d-flex justify-content-between align-items-center flex-wrap gap-3" style="position: sticky; top: 0; z-index: 10; background: var(--white); border-radius: 16px 16px 0 0;">
+          <div class="section-title"><i class="bi bi-inboxes" style="margin-right: 8px; color: var(--stone);"></i>Unassigned Leads</div>
+          
+          <div class="d-flex gap-2 align-items-center" style="background: var(--cloud); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
+            <select id="managerSelect" class="grove-input m-0" style="min-height: 32px; padding: 4px 12px; border: none; background: var(--white); font-weight: 500;">
+              <option value="">Select Manager...</option>
+              {% for manager in managers %}
+                <option value="{{ manager.id }}">{{ manager.user.username }}</option>
+              {% endfor %}
+            </select>
+            <button id="btnAssign" class="btn-primary-sage m-0" style="min-height: 32px; padding: 4px 16px;" disabled>Assign</button>
+          </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- RIGHT COLUMN: MONITORING PANEL (30%)       -->
-        <!-- ========================================== -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-bottom p-3">
-                    <h5 class="mb-0 fw-bold text-dark">Track Managers</h5>
-                </div>
-                
-                <div class="card-body p-3 bg-light">
-                    <div class="d-flex flex-column gap-3">
-                        {% for m in manager_stats %}
-                        <!-- Manager Stat Card -->
-                        <div class="card border-0 shadow-sm rounded-3">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                                    <h6 class="fw-bold mb-0 text-dark">{{ m.user.username }}</h6>
-                                </div>
-                                
-                                <div class="d-flex justify-content-between mb-1 small">
-                                    <span class="text-muted">Total Leads</span>
-                                    <span class="fw-bold">{{ m.total_leads }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1 small">
-                                    <span class="text-muted">Hot Leads</span>
-                                    <span class="fw-bold text-danger">{{ m.hot_leads }}</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-3 small">
-                                    <span class="text-muted">New Leads</span>
-                                    <span class="fw-bold text-primary">{{ m.new_leads }}</span>
-                                </div>
-                                
-                                <a href="/manager_performance/{{ m.id }}/" class="btn btn-sm btn-outline-dark w-100 fw-medium rounded-pill">
-                                    View Details
-                                </a>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="text-center text-muted py-4 small">
-                            No manager data available.
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+        <div style="max-height: 500px; overflow-y: auto;">
+          <table class="leads-table">
+            <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
+              <tr>
+                <th style="width: 40px; padding-left: 20px;">
+                  <input type="checkbox" class="form-check-input m-0" id="selectAll" style="cursor: pointer; accent-color: var(--sage); border-color: var(--stone);">
+                </th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Source</th>
+                <th>Campaign</th>
+                <th>Temp</th>
+                <th>Stage</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lead in unassigned_leads %}
+              <tr>
+                <td style="padding-left: 20px;">
+                  <input type="checkbox" class="form-check-input lead-checkbox m-0" value="{{ lead.id }}" style="cursor: pointer; accent-color: var(--sage); border-color: var(--border);">
+                </td>
+                <td>
+                  <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ lead.name }}</span>
+                </td>
+                <td>
+                  <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ lead.phone }}</span>
+                </td>
+                <td>
+                  <span style="font-size:12px; color:var(--stone); text-transform: capitalize;">{{ lead.source }}</span>
+                </td>
+                <td>
+                  <span style="font-size:12px; color:var(--stone);">{{ lead.campaign_name }}</span>
+                </td>
+                <td>
+                  {% if lead.temperature == 'hot' %}
+                    <span class="status-pill s-hot" title="Hot">🔥</span>
+                  {% elif lead.temperature == 'warm' %}
+                    <span class="status-pill s-prog" title="Warm">🌤</span>
+                  {% else %}
+                    <span style="font-size: 12px;" title="Cold">❄️</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="status-pill s-new">{{ lead.stage }}</span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7">
+                  <div class="grove-empty-state" style="padding: 40px 0;">
+                    <div style="font-size:13px; color:var(--stone);">No unassigned leads found.</div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      <div class="leads-card">
+        <div class="leads-header">
+          <div class="section-title"><i class="bi bi-activity" style="margin-right: 8px; color: var(--stone);"></i>Recent Activity</div>
+        </div>
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th style="padding-left: 24px;">Lead</th>
+              <th>Assigned To</th>
+              <th>Stage</th>
+              <th>Temp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lead in recent_leads %}
+            <tr>
+              <td style="padding-left: 24px;">
+                <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ lead.name }}</span>
+              </td>
+              <td>
+                <div class="d-inline-flex align-items-center gap-2">
+                  <div style="width:24px; height:24px; border-radius:50%; background:var(--cloud); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--stone);">
+                    <i class="bi bi-person-fill"></i>
+                  </div>
+                  <span style="font-size:13px; font-weight:500; color:var(--ink);">{{ lead.assigned_to.user.username }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-pill s-prog">{{ lead.stage }}</span>
+              </td>
+              <td>
+                <span style="font-size:12px; color:var(--stone); text-transform: capitalize;">{{ lead.temperature }}</span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4">
+                <div class="grove-empty-state" style="padding: 32px 0;">
+                  <div style="font-size:13px; color:var(--stone);">No recent activity.</div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
     </div>
+
+    {# ── RIGHT COLUMN: MONITORING PANEL (30%) ── #}
+    <div class="col-lg-4">
+      <div class="leads-card" style="background: var(--cloud); border: none;">
+        <div class="leads-header" style="background: transparent; border-bottom: none; padding-bottom: 0;">
+          <div class="section-title">Track Managers</div>
+        </div>
+        
+        <div style="padding: 24px;">
+          <div class="d-flex flex-column gap-3">
+            {% for m in manager_stats %}
+            
+            <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+              <div class="d-flex justify-content-between align-items-center pb-3 mb-3" style="border-bottom: 1px solid var(--cloud);">
+                <div style="font-size: 14px; font-weight: 700; color: var(--ink);">{{ m.user.username }}</div>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Total Leads</span>
+                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">{{ m.total_leads }}</span>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Hot Leads</span>
+                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: #E53E3E;">{{ m.hot_leads }}</span>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">New Leads</span>
+                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--sage);">{{ m.new_leads }}</span>
+              </div>
+              
+              <a href="/manager_performance/{{ m.id }}/" class="btn w-100 grove-btn-outline" style="font-size: 12px; padding: 8px;">
+                View Details
+              </a>
+            </div>
+            
+            {% empty %}
+            <div class="text-center py-4">
+              <div style="font-size: 13px; color: var(--stone);">No manager data available.</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
+{# ── PRESERVED JAVASCRIPT LOGIC ── #}
 <script>
 function getCookie(name) {
     let cookieValue = null;
@@ -264,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Loading state
         btn.disabled = true;
-        btn.innerHTML = 'Assigning...';
+        btn.innerHTML = '<i class="bi bi-hourglass-split" style="margin-right:4px;"></i>Assigning...';
 
         try {
             const response = await fetch('/assign-leads/', {

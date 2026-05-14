@@ -1,84 +1,126 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Edit Follow-Up{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Follow-Up — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  Follow-Ups
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Edit Follow-Up</h4><div class="sub">Update follow-up details</div></div>
-  <a href="{% url 'followups' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Follow-Up</div>
+      <div style="font-size: 14px; color: var(--stone);">Update follow-up details</div>
+    </div>
+    <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
 
-<div class="card" style="max-width:620px;">
-  <div class="card-body">
-    <form method="POST">
+  {# ── MAIN FORM CARD ── #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
+    <form method="POST" action="">
       {% csrf_token %}
 
-      <div class="row g-3 mb-3">
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
+        Schedule Details
+      </div>
+
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">Lead *</label>
-          <select name="lead" class="form-select" required>
-            <option value="">Select lead</option>
-            {% for l in all_leads %}
-              <option value="{{ l.id }}" {% if data.lead_id == l.id %}selected{% endif %}>
-                {{ l.name }} — {{ l.phone }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Lead *</label>
+            <select name="lead" class="grove-input" required>
+              <option value="">Select lead</option>
+              {% for l in all_leads %}
+                <option value="{{ l.id }}" {% if data.lead_id == l.id %}selected{% endif %}>
+                  {{ l.name }} — {{ l.phone }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Follow-Up Date & Time *</label>
-          <input type="datetime-local" name="followup_at" class="form-control" required
-            value="{{ data.followup_at|date:'Y-m-d\TH:i' }}">
+          <div class="grove-field">
+            <label class="grove-label">Follow-Up Date & Time *</label>
+            <input type="datetime-local" name="followup_at" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.followup_at|date:'Y-m-d\TH:i' }}">
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">Type *</label>
-          <select name="followup_type" class="form-select" required>
-            <option value="call" {% if data.followup_type == 'call' %}selected{% endif %}>Call</option>
-            <option value="whatsapp" {% if data.followup_type == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
-            <option value="email" {% if data.followup_type == 'email' %}selected{% endif %}>Email</option>
-            <option value="site_visit" {% if data.followup_type == 'site_visit' %}selected{% endif %}>Site Visit</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Type *</label>
+            <select name="followup_type" class="grove-input" required>
+              <option value="call" {% if data.followup_type == 'call' %}selected{% endif %}>Call</option>
+              <option value="whatsapp" {% if data.followup_type == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
+              <option value="email" {% if data.followup_type == 'email' %}selected{% endif %}>Email</option>
+              <option value="site_visit" {% if data.followup_type == 'site_visit' %}selected{% endif %}>Site Visit</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">Status</label>
-          <select name="followup_status" class="form-select">
-            <option value="pending" {% if data.followup_status == 'pending' %}selected{% endif %}>Pending</option>
-            <option value="completed" {% if data.followup_status == 'completed' %}selected{% endif %}>Completed</option>
-            <option value="rescheduled" {% if data.followup_status == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
-            <option value="missed" {% if data.followup_status == 'missed' %}selected{% endif %}>Missed</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Status</label>
+            <select name="followup_status" class="grove-input">
+              <option value="pending" {% if data.followup_status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="completed" {% if data.followup_status == 'completed' %}selected{% endif %}>Completed</option>
+              <option value="rescheduled" {% if data.followup_status == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
+              <option value="missed" {% if data.followup_status == 'missed' %}selected{% endif %}>Missed</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-4">
-          <label class="form-label">Assigned To</label>
-          <select name="assigned_to" class="form-select">
-            <option value="">Unassigned</option>
-            {% for m in members %}
-              <option value="{{ m.id }}" {% if data.assigned_to_id == m.id %}selected{% endif %}>
-                {{ m.user.get_full_name }}
-              </option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Assigned To</label>
+            <select name="assigned_to" class="grove-input">
+              <option value="">Unassigned</option>
+              {% for m in members %}
+                <option value="{{ m.id }}" {% if data.assigned_to_id == m.id %}selected{% endif %}>
+                  {{ m.user.get_full_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Branch</label>
-          <select name="branch" class="form-select">
-            <option value="">Select branch</option>
-            {% for b in branches %}
-              <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
-            {% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Branch</label>
+            <select name="branch" class="grove-input">
+              <option value="">Select branch</option>
+              {% for b in branches %}
+                <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-12">
-          <label class="form-label">Notes / Instructions</label>
-          <textarea name="notes" class="form-control" rows="3">{{ data.notes }}</textarea>
+          <div class="grove-field">
+            <label class="grove-label">Notes / Instructions</label>
+            <textarea name="notes" class="grove-input" rows="3">{{ data.notes }}</textarea>
+          </div>
         </div>
       </div>
+
+      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
 
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Update Follow-Up</button>
-        <a href="{% url 'followups' %}" class="btn btn-sm btn-action">Cancel</a>
+        <button type="submit" class="btn-primary-sage px-4">
+           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update Follow-Up
+        </button>
+        <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
+      
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

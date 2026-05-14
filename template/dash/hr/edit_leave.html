@@ -1,72 +1,124 @@
-{% extends 'dash/base.html' %}
-{% block page_title %}Edit Leave{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Leave — Buy Buzz CRM{% endblock %}
+
+{% block page_header %}
+  HR Panel
+{% endblock %}
+
 {% block content %}
+<div class="main-content">
 
-<div class="page-header">
-  <div><h4>Edit Leave Request</h4></div>
-  <a href="{% url 'leaves' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+    <div>
+      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Leave Request</div>
+      <div style="font-size: 14px; color: var(--stone);">Update employee leave application</div>
+    </div>
+    <a href="{% url 'leaves' %}" class="btn btn-sm grove-btn-outline">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
 
-<div class="card" style="max-width:580px;">
-  <div class="card-body">
-    <form method="POST">
+  {# ── MAIN FORM CARD ── #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
+    <form method="POST" action="">
       {% csrf_token %}
-      <div class="row g-3 mb-3">
+
+      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
+        Leave Details
+      </div>
+
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
-          <label class="form-label">Employee *</label>
-          <select name="employee" class="form-select" required>
-            {% for e in employees %}<option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>{{ e.user.get_full_name }}</option>{% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Employee *</label>
+            <select name="employee" class="grove-input" required>
+              {% for e in employees %}
+                <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>{{ e.user.get_full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Leave Type *</label>
-          <select name="leave_type" class="form-select" required>
-            <option value="casual" {% if data.leave_type == 'casual' %}selected{% endif %}>Casual Leave</option>
-            <option value="sick" {% if data.leave_type == 'sick' %}selected{% endif %}>Sick Leave</option>
-            <option value="annual" {% if data.leave_type == 'annual' %}selected{% endif %}>Annual Leave</option>
-            <option value="unpaid" {% if data.leave_type == 'unpaid' %}selected{% endif %}>Unpaid Leave</option>
-            <option value="maternity" {% if data.leave_type == 'maternity' %}selected{% endif %}>Maternity Leave</option>
-            <option value="compoff" {% if data.leave_type == 'compoff' %}selected{% endif %}>Comp Off</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Leave Type *</label>
+            <select name="leave_type" class="grove-input" required>
+              <option value="casual" {% if data.leave_type == 'casual' %}selected{% endif %}>Casual Leave</option>
+              <option value="sick" {% if data.leave_type == 'sick' %}selected{% endif %}>Sick Leave</option>
+              <option value="annual" {% if data.leave_type == 'annual' %}selected{% endif %}>Annual Leave</option>
+              <option value="unpaid" {% if data.leave_type == 'unpaid' %}selected{% endif %}>Unpaid Leave</option>
+              <option value="maternity" {% if data.leave_type == 'maternity' %}selected{% endif %}>Maternity Leave</option>
+              <option value="compoff" {% if data.leave_type == 'compoff' %}selected{% endif %}>Comp Off</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">From Date *</label>
-          <input type="date" name="from_date" class="form-control" required value="{{ data.from_date|date:'Y-m-d' }}">
+          <div class="grove-field">
+            <label class="grove-label">From Date *</label>
+            <input type="date" name="from_date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.from_date|date:'Y-m-d' }}">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">To Date *</label>
-          <input type="date" name="to_date" class="form-control" required value="{{ data.to_date|date:'Y-m-d' }}">
+          <div class="grove-field">
+            <label class="grove-label">To Date *</label>
+            <input type="date" name="to_date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.to_date|date:'Y-m-d' }}">
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Status</label>
-          <select name="leave_status" class="form-select">
-            <option value="pending" {% if data.leave_status == 'pending' %}selected{% endif %}>Pending</option>
-            <option value="approved" {% if data.leave_status == 'approved' %}selected{% endif %}>Approved</option>
-            <option value="rejected" {% if data.leave_status == 'rejected' %}selected{% endif %}>Rejected</option>
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Status</label>
+            <select name="leave_status" class="grove-input">
+              <option value="pending" {% if data.leave_status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="approved" {% if data.leave_status == 'approved' %}selected{% endif %}>Approved</option>
+              <option value="rejected" {% if data.leave_status == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+          </div>
         </div>
+        
         <div class="col-md-6">
-          <label class="form-label">Approved By</label>
-          <select name="approved_by" class="form-select">
-            <option value="">None</option>
-            {% for p in profiles %}<option value="{{ p.id }}" {% if data.approved_by_id == p.id %}selected{% endif %}>{{ p.user.get_full_name }}</option>{% endfor %}
-          </select>
+          <div class="grove-field">
+            <label class="grove-label">Approved By</label>
+            <select name="approved_by" class="grove-input">
+              <option value="">None</option>
+              {% for p in profiles %}
+                <option value="{{ p.id }}" {% if data.approved_by_id == p.id %}selected{% endif %}>{{ p.user.get_full_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="col-12">
-          <label class="form-label">Reason *</label>
-          <textarea name="reason" class="form-control" rows="2" required>{{ data.reason }}</textarea>
+          <div class="grove-field">
+            <label class="grove-label">Reason *</label>
+            <textarea name="reason" class="grove-input" rows="2" required>{{ data.reason }}</textarea>
+          </div>
         </div>
+        
         <div class="col-12">
-          <label class="form-label">Remarks</label>
-          <textarea name="remarks" class="form-control" rows="2" placeholder="HR remarks...">{{ data.remarks }}</textarea>
+          <div class="grove-field">
+            <label class="grove-label">Remarks</label>
+            <textarea name="remarks" class="grove-input" rows="2" placeholder="HR remarks...">{{ data.remarks }}</textarea>
+          </div>
         </div>
       </div>
+
+      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
+
       <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Update</button>
-        <a href="{% url 'leaves' %}" class="btn btn-sm btn-action">Cancel</a>
+        <button type="submit" class="btn-primary-sage px-4">
+           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update
+        </button>
+        <a href="{% url 'leaves' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
+      
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}
