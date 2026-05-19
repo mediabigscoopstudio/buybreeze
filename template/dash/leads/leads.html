@@ -1,139 +1,145 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Leads Dashboard — Buy Buzz CRM{% endblock %}
+{% block title %}Lead Management — Buy Buzz CRM{% endblock %}
 
 {% block page_header %}
-  Leads
+  Lead Management
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
-  {# ── PAGE HEADER & ACTION ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  {# ── PAGE HEADER & ACTIONS ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Lead Management</div>
-      <div style="font-size: 14px; color: var(--stone);">Overview and distribution</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Overview & Distribution</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Manage unassigned leads and track manager performance</div>
     </div>
-    <a href="/add_lead" class="btn-primary-sage">
-      <i class="bi bi-plus-lg" style="margin-right: 4px;"></i> Add New Lead
+    <a href="{% url 'add_lead' %}" class="btn-primary-sage text-decoration-none">
+      <i class="bi bi-plus-lg"></i> Add New Lead
     </a>
   </div>
 
   {# ── KPI STAT CARDS ── #}
-  <div class="row g-3 mb-4 fade-up" style="animation-delay: 0.05s;">
+  <div class="row row-cols-1 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2;">{{ total_leads }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Total Leads</div>
+    <div class="col fade-up">
+      <div class="stat-card dark" style="height: 100%;">
+        <div class="stat-icon dark"><i class="bi bi-inboxes"></i></div>
+        <div class="stat-value">{{ total_leads }}</div>
+        <div class="stat-label">Total Leads</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: #E53E3E; line-height: 1.2;">{{ hot_leads }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Hot</div>
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="stat-card gold" style="height: 100%;">
+        <div class="stat-icon gold"><i class="bi bi-fire"></i></div>
+        <div class="stat-value">{{ hot_leads }}</div>
+        <div class="stat-label">Hot Leads</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--gold); line-height: 1.2;">{{ pending_followups }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Pending</div>
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="stat-card stone" style="height: 100%;">
+        <div class="stat-icon stone"><i class="bi bi-calendar-check"></i></div>
+        <div class="stat-value">{{ pending_followups }}</div>
+        <div class="stat-label">Pending F/U</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--sage); line-height: 1.2;">{{ unassigned_leads_count }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Unassigned</div>
+    <div class="col fade-up" style="animation-delay: 0.2s;">
+      <div class="stat-card green" style="height: 100%;">
+        <div class="stat-icon green"><i class="bi bi-person-dash"></i></div>
+        <div class="stat-value">{{ unassigned_leads_count }}</div>
+        <div class="stat-label">Unassigned</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2;">{{ conversion_rate }}%</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Conversion</div>
+    <div class="col fade-up" style="animation-delay: 0.25s;">
+      <div class="stat-card dark" style="height: 100%;">
+        <div class="stat-icon dark"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="stat-value">{{ conversion_rate }}%</div>
+        <div class="stat-label">Conversion Rate</div>
       </div>
     </div>
     
   </div>
 
   {# ── MAIN 2-COLUMN LAYOUT ── #}
-  <div class="row g-4 fade-up" style="animation-delay: 0.1s;">
+  <div class="row g-4 fade-up" style="animation-delay: 0.3s;">
     
     {# ── LEFT COLUMN: WORK AREA (70%) ── #}
     <div class="col-lg-8">
       
-      <div class="leads-card mb-4">
+      <div class="leads-card mb-4" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
         
-        <div class="leads-header d-flex justify-content-between align-items-center flex-wrap gap-3" style="position: sticky; top: 0; z-index: 10; background: var(--white); border-radius: 16px 16px 0 0;">
-          <div class="section-title"><i class="bi bi-inboxes" style="margin-right: 8px; color: var(--stone);"></i>Unassigned Leads</div>
-          
-          <div class="d-flex gap-2 align-items-center" style="background: var(--cloud); padding: 4px; border-radius: 8px; border: 1px solid var(--border);">
-            <select id="managerSelect" class="grove-input m-0" style="min-height: 32px; padding: 4px 12px; border: none; background: var(--white); font-weight: 500;">
-              <option value="">Select Manager...</option>
-              {% for manager in managers %}
-                <option value="{{ manager.id }}">{{ manager.user.username }}</option>
-              {% endfor %}
-            </select>
-            <button id="btnAssign" class="btn-primary-sage m-0" style="min-height: 32px; padding: 4px 16px;" disabled>Assign</button>
+        <div class="leads-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 w-100">
+            <div>
+              <div class="section-title"><i class="bi bi-inboxes" style="color: var(--sage); margin-right: 8px;"></i>Unassigned Leads</div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 p-1" style="background: var(--cloud); border-radius: 10px; border: 1px solid var(--border);">
+              <select id="managerSelect" class="grove-input" style="min-height: 34px; padding: 4px 12px; border: none; background: transparent; font-weight: 500; font-size: 13px; width: 180px; box-shadow: none;">
+                <option value="">Select Manager...</option>
+                {% for manager in managers %}
+                  <option value="{{ manager.id }}">{{ manager.user.username }}</option>
+                {% endfor %}
+              </select>
+              <button id="btnAssign" class="btn-primary-sage" style="min-height: 34px; padding: 4px 16px; border-radius: 8px;" disabled>
+                Assign
+              </button>
+            </div>
           </div>
         </div>
 
-        <div style="max-height: 500px; overflow-y: auto;">
-          <table class="leads-table">
-            <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
+        <div style="max-height: 400px; overflow-y: auto;">
+          <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+            <thead style="background: var(--cloud); position: sticky; top: 0; z-index: 5;">
               <tr>
-                <th style="width: 40px; padding-left: 20px;">
-                  <input type="checkbox" class="form-check-input m-0" id="selectAll" style="cursor: pointer; accent-color: var(--sage); border-color: var(--stone);">
+                <th style="padding: 12px 24px; width: 40px; border-bottom: 1px solid var(--border);">
+                  <input type="checkbox" id="selectAll" style="width: 16px; height: 16px; accent-color: var(--sage); cursor: pointer;">
                 </th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Source</th>
-                <th>Campaign</th>
-                <th>Temp</th>
-                <th>Stage</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lead</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Phone</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Source / Campaign</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temp</th>
+                <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
               </tr>
             </thead>
             <tbody>
               {% for lead in unassigned_leads %}
-              <tr>
-                <td style="padding-left: 20px;">
-                  <input type="checkbox" class="form-check-input lead-checkbox m-0" value="{{ lead.id }}" style="cursor: pointer; accent-color: var(--sage); border-color: var(--border);">
+              <tr style="border-bottom: 1px solid var(--cloud);">
+                <td style="padding: 16px 24px;">
+                  <input type="checkbox" class="lead-checkbox" value="{{ lead.id }}" style="width: 16px; height: 16px; accent-color: var(--sage); cursor: pointer;">
                 </td>
-                <td>
-                  <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ lead.name }}</span>
+                <td style="padding: 16px 12px; font-weight: 600; color: var(--ink);">{{ lead.name }}</td>
+                <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--stone);">{{ lead.phone }}</td>
+                <td style="padding: 16px 12px;">
+                  <div style="font-size: 13px; color: var(--ink); text-transform: capitalize;">{{ lead.source }}</div>
+                  <div style="font-size: 11px; color: var(--stone);">{{ lead.campaign_name }}</div>
                 </td>
-                <td>
-                  <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ lead.phone }}</span>
-                </td>
-                <td>
-                  <span style="font-size:12px; color:var(--stone); text-transform: capitalize;">{{ lead.source }}</span>
-                </td>
-                <td>
-                  <span style="font-size:12px; color:var(--stone);">{{ lead.campaign_name }}</span>
-                </td>
-                <td>
+                <td style="padding: 16px 12px;">
                   {% if lead.temperature == 'hot' %}
-                    <span class="status-pill s-hot" title="Hot">🔥</span>
+                    <span class="status-pill s-hot">★ Hot</span>
                   {% elif lead.temperature == 'warm' %}
-                    <span class="status-pill s-prog" title="Warm">🌤</span>
+                    <span class="status-pill s-prog">● Warm</span>
                   {% else %}
-                    <span style="font-size: 12px;" title="Cold">❄️</span>
+                    <span class="status-pill s-new">● Cold</span>
                   {% endif %}
                 </td>
-                <td>
+                <td style="padding: 16px 24px;">
                   <span class="status-pill s-new">{{ lead.stage }}</span>
                 </td>
               </tr>
               {% empty %}
               <tr>
-                <td colspan="7">
-                  <div class="grove-empty-state" style="padding: 40px 0;">
-                    <div style="font-size:13px; color:var(--stone);">No unassigned leads found.</div>
+                <td colspan="6" style="padding: 48px 24px;">
+                  <div class="grove-empty-state">
+                    <i class="bi bi-check2-circle" style="font-size: 32px; color: var(--sage-lt)"></i>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">Inbox Zero</div>
+                    <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">All leads have been assigned.</div>
                   </div>
                 </td>
               </tr>
@@ -143,45 +149,44 @@
         </div>
       </div>
 
-      <div class="leads-card">
-        <div class="leads-header">
-          <div class="section-title"><i class="bi bi-activity" style="margin-right: 8px; color: var(--stone);"></i>Recent Activity</div>
+      <div class="leads-card" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+        <div class="leads-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+          <div class="section-title"><i class="bi bi-activity" style="color: var(--gold); margin-right: 8px;"></i>Recent Assignment Activity</div>
         </div>
-        <table class="leads-table">
-          <thead>
+        <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+          <thead style="background: var(--cloud);">
             <tr>
-              <th style="padding-left: 24px;">Lead</th>
-              <th>Assigned To</th>
-              <th>Stage</th>
-              <th>Temp</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lead</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Assigned To</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
+              <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temp</th>
             </tr>
           </thead>
           <tbody>
             {% for lead in recent_leads %}
-            <tr>
-              <td style="padding-left: 24px;">
-                <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ lead.name }}</span>
-              </td>
-              <td>
-                <div class="d-inline-flex align-items-center gap-2">
-                  <div style="width:24px; height:24px; border-radius:50%; background:var(--cloud); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--stone);">
-                    <i class="bi bi-person-fill"></i>
+            <tr style="border-bottom: 1px solid var(--cloud);">
+              <td style="padding: 16px 24px; font-weight: 600; color: var(--ink);">{{ lead.name }}</td>
+              <td style="padding: 16px 24px;">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                    {{ lead.assigned_to.user.username|make_list|first|upper }}
                   </div>
-                  <span style="font-size:13px; font-weight:500; color:var(--ink);">{{ lead.assigned_to.user.username }}</span>
+                  <span style="font-size: 13px; font-weight: 500; color: var(--ink);">{{ lead.assigned_to.user.username }}</span>
                 </div>
               </td>
-              <td>
+              <td style="padding: 16px 24px;">
                 <span class="status-pill s-prog">{{ lead.stage }}</span>
               </td>
-              <td>
-                <span style="font-size:12px; color:var(--stone); text-transform: capitalize;">{{ lead.temperature }}</span>
+              <td style="padding: 16px 24px;">
+                <span style="font-size: 12px; color: var(--stone); text-transform: capitalize;">{{ lead.temperature }}</span>
               </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="4">
-                <div class="grove-empty-state" style="padding: 32px 0;">
-                  <div style="font-size:13px; color:var(--stone);">No recent activity.</div>
+              <td colspan="4" style="padding: 48px 24px;">
+                <div class="grove-empty-state">
+                  <i class="bi bi-clock-history" style="font-size: 32px; color: var(--sage-lt)"></i>
+                  <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No recent activity</div>
                 </div>
               </td>
             </tr>
@@ -194,43 +199,38 @@
 
     {# ── RIGHT COLUMN: MONITORING PANEL (30%) ── #}
     <div class="col-lg-4">
-      <div class="leads-card" style="background: var(--cloud); border: none;">
-        <div class="leads-header" style="background: transparent; border-bottom: none; padding-bottom: 0;">
-          <div class="section-title">Track Managers</div>
+      <div class="leads-card" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; height: 100%;">
+        <div class="leads-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+          <div class="section-title"><i class="bi bi-people" style="color: var(--charcoal); margin-right: 8px;"></i>Track Managers</div>
         </div>
         
         <div style="padding: 24px;">
-          <div class="d-flex flex-column gap-3">
+          <div class="d-flex flex-column gap-2">
             {% for m in manager_stats %}
             
-            <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
-              <div class="d-flex justify-content-between align-items-center pb-3 mb-3" style="border-bottom: 1px solid var(--cloud);">
-                <div style="font-size: 14px; font-weight: 700; color: var(--ink);">{{ m.user.username }}</div>
+            <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: var(--cloud); border: 1px solid var(--border);">
+              <div class="user-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">
+                {{ m.user.username|make_list|first|upper }}
               </div>
-              
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Total Leads</span>
-                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">{{ m.total_leads }}</span>
+              <div style="flex: 1;">
+                <div style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ m.user.username }}</div>
+                <div style="font-size: 11px; color: var(--stone);">
+                  <span style="font-family: 'Geist Mono', monospace; font-weight: 600;">{{ m.total_leads }}</span> leads total
+                </div>
               </div>
-              
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Hot Leads</span>
-                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: #E53E3E;">{{ m.hot_leads }}</span>
+              <div class="text-end">
+                <div style="font-size: 11px; font-family: 'Geist Mono', monospace; font-weight: 700; color: var(--sage);">+{{ m.new_leads }} New</div>
+                <div style="font-size: 11px; font-family: 'Geist Mono', monospace; font-weight: 700; color: var(--gold);">{{ m.hot_leads }} Hot</div>
               </div>
-              
-              <div class="d-flex justify-content-between align-items-center mb-4">
-                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">New Leads</span>
-                <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--sage);">{{ m.new_leads }}</span>
-              </div>
-              
-              <a href="/manager_performance/{{ m.id }}/" class="btn w-100 grove-btn-outline" style="font-size: 12px; padding: 8px;">
-                View Details
+              <a href="{% url 'manager_performance' m.id %}" class="btn btn-sm grove-btn-ghost ms-2" style="padding: 4px 8px;" title="View Details">
+                <i class="bi bi-chevron-right"></i>
               </a>
             </div>
             
             {% empty %}
-            <div class="text-center py-4">
-              <div style="font-size: 13px; color: var(--stone);">No manager data available.</div>
+            <div class="grove-empty-state" style="padding: 48px 0;">
+              <i class="bi bi-people" style="font-size: 32px; color: var(--sage-lt)"></i>
+              <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No managers found</div>
             </div>
             {% endfor %}
           </div>
@@ -240,8 +240,9 @@
 
   </div>
 </div>
+{% endblock %}
 
-{# ── PRESERVED JAVASCRIPT LOGIC ── #}
+{% block extra_js %}
 <script>
 function getCookie(name) {
     let cookieValue = null;
@@ -318,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            // 🔥 HANDLE NON-JSON RESPONSE (your main bug)
             const contentType = response.headers.get("content-type");
 
             if (!contentType || !contentType.includes("application/json")) {
@@ -331,7 +331,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.status === 'success') {
-                alert("Leads assigned successfully ✅");
+                // To fit with standard GROVE Django Messages if possible, but alerting is fine per original logic
+                alert("Leads assigned successfully");
                 location.reload();
             } else {
                 alert("Error: " + data.message);
@@ -349,5 +350,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
-
 {% endblock %}
