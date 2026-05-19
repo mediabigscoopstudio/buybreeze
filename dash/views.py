@@ -362,22 +362,6 @@ def add_branch(request):
             gps_radius = request.POST.get('gps_radius') or 100,
         )
         messages.success(request, 'Branch added successfully.')
-        profiles = UserProfile.objects.filter(...)
-        users = [p.user for p in profiles]
-        users = User.objects.filter(
-        profile__role__in=['admin', 'hr'],
-        profile__status='Enabled'
-         )
-
-        create_notification(
-        from_user=request.user,
-        users=users,
-        title="New Branch Added",
-        description=(
-            f'Branch "{branch.name}" has been created '
-            f'by {request.user.username}.'
-        )
-        )
         return redirect('/branch')
     return render(request, 'dash/branch/add_branch.html')
 
