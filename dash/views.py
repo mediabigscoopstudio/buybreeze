@@ -23,7 +23,7 @@ from django.shortcuts import get_object_or_404
 from .otp_utils import generate_otp, send_otp
 from django.contrib.auth.decorators import login_required
 from .notification_utils import create_notification
-
+from dash.models import NotificationRecipient
 
 # ============================================================
 # AUTH GUARD
@@ -245,6 +245,62 @@ def verify_otp(request):
 def logout_view(request):
     logout(request)
     return redirect('/login/')
+
+@login_required
+def get_notifications(request):
+    notifications = NotificationRecipient.objects.filter(
+        user=request.user
+    ).select_related('notification', 'notification__from_user').order_by(
+        '-notification__created_at'
+    )[:15]
+
+    data = []
+    unread_count = 0
+
+    for item in notifications:
+        if not item.is_read:
+            unread_count += 1
+
+        data.append({
+            'id': item.id,
+            'title': item.notification.title,
+            'description': item.notification.description,
+            'created_at': item.notification.created_at.strftime('%d %b %Y %I:%M %p'),
+            'is_read': item.is_read,
+        })
+
+    return JsonResponse({
+        'notifications': data,
+        'unread_count': unread_count
+    })
+
+
+@login_required
+def mark_notification_read(request, notification_id):
+    try:
+        notification = NotificationRecipient.objects.get(
+            id=notification_id,
+            user=request.user
+        )
+
+        notification.is_read = True
+        notification.save()
+
+        unread_count = NotificationRecipient.objects.filter(
+            user=request.user,
+            is_read=False
+        ).count()
+
+        return JsonResponse({
+            'success': True,
+            'unread_count': unread_count
+        })
+
+    except NotificationRecipient.DoesNotExist:
+        return JsonResponse({
+            'success': False
+        })
+
 
 # ============================================================
 # DASHBOARD HOME
