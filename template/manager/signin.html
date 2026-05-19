@@ -3,27 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Portal — BuyBreeze</title>
+    <title>BuyBreeze — Manager Portal</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <style>
+
         :root {
-            --white: #ffffff;
-            --cloud: #f7f3f0;
-            --border: #e4e4e0;
-            --ink: #2e2e2e;
-            --stone: #6f8f9f;
-            --sage: #4f7942;
-            --sage-lt: #dce7d9;
+            --bg: #0a0f1e;
+            --card: #111827;
+            --border: #1e2d45;
+            --accent: #3b7ef6;
+            --accent2: #06d6a0;
+            --text: #f0f4ff;
+            --muted: #6b7fa3;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--cloud);
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -32,125 +38,229 @@
             position: relative;
         }
 
-        /* Abstract Subtle Background Elements */
+        /* Animated background blobs */
         .blob {
             position: fixed;
             border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.15;
-            z-index: 1;
+            filter: blur(80px);
+            opacity: 0.12;
+            animation: float 8s ease-in-out infinite;
         }
 
-        .blob-1 { width: 600px; height: 600px; background: var(--sage); top: -200px; left: -200px; }
-        .blob-2 { width: 400px; height: 400px; background: var(--stone); bottom: -100px; right: -100px; }
+        .blob-1 {
+            width: 500px;
+            height: 500px;
+            background: var(--accent);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent2);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 3s;
+        }
+
+        .blob-3 {
+            width: 300px;
+            height: 300px;
+            background: #a855f7;
+            top: 50%;
+            left: 50%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -30px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.95);
+            }
+        }
 
         .login-wrapper {
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 420px;
-            padding: 24px;
+            max-width: 460px;
+            padding: 20px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .auth-card {
-            background: var(--white);
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 48px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-        }
-
-        .role-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--sage-lt);
-            color: var(--sage);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 24px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
         }
 
         .card-title {
-            font-size: 28px;
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
             font-weight: 700;
-            color: var(--ink);
-            margin-bottom: 8px;
+            color: var(--text);
+            margin-bottom: 6px;
         }
 
         .card-subtitle {
             font-size: 14px;
-            color: var(--stone);
+            color: var(--muted);
             margin-bottom: 32px;
         }
 
-        .grove-field { margin-bottom: 20px; }
-        
-        .grove-label {
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
             display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--stone);
-            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
-        .grove-input {
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 16px;
+        }
+
+        .form-control {
             width: 100%;
+            background: #0a0f1e;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px 16px;
-            color: var(--ink);
+            border-radius: 10px;
+            padding: 13px 14px 13px 42px;
+            color: var(--text);
             font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
             transition: all 0.2s;
+            outline: none;
         }
 
-        .grove-input:focus {
-            outline: none;
-            border-color: var(--sage);
-            box-shadow: 0 0 0 4px var(--sage-lt);
+        .form-control::placeholder {
+            color: #374151;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 126, 246, 0.15);
         }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background: var(--ink);
+            background: linear-gradient(135deg, var(--accent), #5b8ef8);
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
+            font-size: 15px;
             font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-top: 12px;
+            margin-top: 28px;
+            letter-spacing: 0.3px;
         }
 
-        .btn-submit:hover { background: var(--sage); }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 126, 246, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
 
         .alert {
-            padding: 12px;
+            padding: 12px 16px;
             border-radius: 10px;
             font-size: 13px;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .footer {
-            margin-top: 32px;
-            text-align: center;
-            font-size: 11px;
-            color: var(--stone);
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
         }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 28px 0;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59, 126, 246, 0.1);
+            border: 1px solid rgba(59, 126, 246, 0.3);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .role-badge i {
+            font-size: 11px;
+        }
+
     </style>
 </head>
 
@@ -158,40 +268,80 @@
 
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
 
     <div class="login-wrapper">
-        <div class="auth-card">
+
+        <div class="brand"></div>
+
+        <div class="card">
+
             <div class="role-badge">
-                <i class="bi bi-person-workspace"></i> Manager Portal
+                <i class="bi bi-person-workspace"></i>
+                Manager Portal
             </div>
 
-            <div class="card-title">Authentication</div>
-            <div class="card-subtitle">Enter your registered phone number to receive OTP</div>
+            <div class="card-title">
+                Manager Authentication
+            </div>
+
+            <div class="card-subtitle">
+                Enter your registered phone number to receive OTP
+            </div>
 
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert">
-                        <i class="bi bi-exclamation-circle"></i> {{ message }}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-circle"></i>
+                        {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
 
             <form method="POST" action="{% url 'login_view' %}">
+
                 {% csrf_token %}
-                <div class="grove-field">
-                    <label class="grove-label">Phone Number</label>
-                    <input type="text" name="phone" class="grove-input" placeholder="+91 XXXXX XXXXX" required autofocus>
+
+                <div class="form-group">
+
+                    <label class="form-label">
+                        Phone Number
+                    </label>
+
+                    <div class="input-wrap">
+
+                        <i class="bi bi-telephone input-icon"></i>
+
+                        <input
+                            type="text"
+                            name="phone"
+                            class="form-control"
+                            placeholder="Enter your phone number"
+                            required
+                        >
+
+                    </div>
+
                 </div>
 
                 <button type="submit" class="btn-submit">
-                    Send Authentication OTP <i class="bi bi-arrow-right"></i>
+
+                    Send OTP
+
+                    <i class="bi bi-arrow-right"></i>
+
                 </button>
+
             </form>
 
-            <div class="footer">
-                © 2026 BuyBreeze Infra · Enterprise Operations
+            <div class="divider"></div>
+
+            <div class="footer-text">
+                © 2026 BuyBreeze · Real Estate CRM
             </div>
+
         </div>
+
     </div>
 
 </body>
