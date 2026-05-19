@@ -3,6 +3,91 @@
 
 {% block title %}Add Follow-Up — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Handled gracefully by container grid spacing */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Prevent layout shifts when border scales */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
   Follow-Ups
 {% endblock %}
@@ -11,112 +96,140 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Add Follow-Up</div>
-      <div style="font-size: 14px; color: var(--stone);">Schedule a follow-up action for a lead</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Add Follow-Up</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Schedule a future timeline action parameters for a pipeline lead</div>
     </div>
-    <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Tasks
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        Schedule Details
-      </div>
-
-      <div class="row g-4 mb-4">
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Lead *</label>
-            <select name="lead" class="grove-input" required>
-              <option value="">Select lead</option>
-              {% for l in all_leads %}
-                <option value="{{ l.id }}">{{ l.name }} — {{ l.phone }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Follow-Up Date & Time *</label>
-            <input type="datetime-local" name="followup_at" class="grove-input" style="font-family: 'Geist Mono', monospace;" required>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Type *</label>
-            <select name="followup_type" class="grove-input" required>
-              <option value="call">Call</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="email">Email</option>
-              <option value="site_visit">Site Visit</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Status</label>
-            <select name="followup_status" class="grove-input">
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="rescheduled">Rescheduled</option>
-              <option value="missed">Missed</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Assigned To</label>
-            <select name="assigned_to" class="grove-input">
-              <option value="">Unassigned</option>
-              {% for m in members %}
-                <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Branch</label>
-            <select name="branch" class="grove-input">
-              <option value="">Select branch</option>
-              {% for b in branches %}
-                <option value="{{ b.id }}">{{ b.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Notes / Instructions</label>
-            <textarea name="notes" class="grove-input" rows="3" placeholder="What to discuss, any specific notes..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
-
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-calendar-plus" style="margin-right: 4px;"></i> Save Follow-Up
-        </button>
-        <a href="{% url 'followups' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
-      </div>
+  {# ── TWO-COLUMN STRUCTURAL PANEL LAYOUT ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-    </form>
-  </div>
+      {# ── LEFT COLUMN: Core Timeline Parameters ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
+        
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-calendar-event"></i></div>
+            <h3 class="panel-title">Schedule Details</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-md-12">
+              <div class="grove-field">
+                <label class="grove-label">Target Lead *</label>
+                <select name="lead" class="grove-input" required>
+                  <option value="">Select an active pipeline record...</option>
+                  {% for l in all_leads %}
+                    <option value="{{ l.id }}">{{ l.name }} — {{ l.phone }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Follow-Up Date & Time *</label>
+                <input type="datetime-local" name="followup_at" class="grove-input" style="font-family: 'Geist Mono', monospace;" required>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Channel / Type *</label>
+                <select name="followup_type" class="grove-input" required>
+                  <option value="call">Call</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="email">Email</option>
+                  <option value="site_visit">Site Visit</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-journal-text"></i></div>
+            <h3 class="panel-title">Context & Objectives</h3>
+          </div>
+          <div class="grove-field">
+            <label class="grove-label">Notes / Strategic Instructions</label>
+            <textarea name="notes" class="grove-input" rows="5" placeholder="Specify follow-up goals, micro-market details to showcase, buyer objections to clear, or items to discuss..." style="resize: vertical;"></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      {# ── RIGHT COLUMN: Internal Corporate Distribution ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
+        
+        <div class="grove-panel" style="background: var(--white); border: 1px solid var(--border); height: 100%;">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: #F5F5F5; color: var(--stone);"><i class="bi bi-diagram-3"></i></div>
+            <h3 class="panel-title">Routing Matrix</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Current Action Status</label>
+                <select name="followup_status" class="grove-input">
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="rescheduled">Rescheduled</option>
+                  <option value="missed">Missed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Assigned Operator</label>
+                <select name="assigned_to" class="grove-input">
+                  <option value="">Leave Unassigned</option>
+                  {% for m in members %}
+                    <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Attributed Operational Branch</label>
+                <select name="branch" class="grove-input">
+                  <option value="">Select branch location...</option>
+                  {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {# ── BOTTOM INTERFACE ACTION BAR ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'followups' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-calendar-plus"></i> Save Follow-Up
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}
