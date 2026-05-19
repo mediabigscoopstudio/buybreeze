@@ -362,7 +362,7 @@ def add_branch(request):
             gps_radius = request.POST.get('gps_radius') or 100,
         )
         messages.success(request, 'Branch added successfully.')
-        users = User.objects.filter(
+        users = UserProfile.objects.filter(
         profile__role__in=['admin', 'hr'],
         profile__status='Enabled'
         ).exclude(id=request.user.id)
