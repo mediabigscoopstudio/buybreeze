@@ -362,10 +362,12 @@ def add_branch(request):
             gps_radius = request.POST.get('gps_radius') or 100,
         )
         messages.success(request, 'Branch added successfully.')
-        users = UserProfile.objects.filter(
-        role__in=['admin', 'hr'],
-        status='Enabled'
-        ).exclude(user=request.user)
+        profiles = UserProfile.objects.filter(...)
+        users = [p.user for p in profiles]
+        users = User.objects.filter(
+        profile__role__in=['admin', 'hr'],
+        profile__status='Enabled'
+         )
 
         create_notification(
         from_user=request.user,
