@@ -768,7 +768,7 @@ def calls(request):
 @user_passes_test(superadmin_required, login_url='/login/')
 def add_call(request):
     all_leads = Lead.objects.filter(status='Enabled').order_by('name')
-    members   = UserProfile.objects.filter(role='member', status='Enabled').select_related('user')
+    members   = UserProfile.objects.filter(role='employee', status='Enabled').select_related('user')
     branches  = Branch.objects.filter(status='Enabled')
     if request.method == 'POST':
         CallLog.objects.create(
