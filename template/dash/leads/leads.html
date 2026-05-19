@@ -127,7 +127,7 @@
               <select id="managerSelect" class="grove-input" style="min-height: 34px; padding: 4px 12px; border: none; background: transparent; font-weight: 500; font-size: 13px; width: 180px; box-shadow: none;">
                 <option value="">Select Manager...</option>
                 {% for manager in managers %}
-                  <option value="{{ manager.id }}">{{ manager.user.username }}</option>
+                  <option value="{{ manager.id }}">{{ manager.user.first_name }} {{ manager.user.last_name }}</option>
                 {% endfor %}
               </select>
               <button id="btnAssign" class="btn-primary-sage" style="min-height: 34px; padding: 4px 16px; border-radius: 8px;" disabled>
