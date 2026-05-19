@@ -12,7 +12,7 @@ import openpyxl
 from django.http import HttpResponse
 from .services import assign_lead, can_assign
 from .models import (
-    Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting
+    Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting,NotificationRecipient,Notification
 )
 from django.contrib.admin.views.decorators import staff_member_required
 from django.apps import apps  # <--- Add this at the very top of your file with your other imports!
@@ -22,7 +22,7 @@ from datetime import datetime
 from django.shortcuts import get_object_or_404
 from .otp_utils import generate_otp, send_otp
 from django.contrib.auth.decorators import login_required
-
+from .notification_utils import create_notification
 
 
 # ============================================================
@@ -36,7 +36,60 @@ def superadmin_required(user):
     )
 
 
+@login_required
+def get_notifications(request):
+    notifications = NotificationRecipient.objects.filter(
+        user=request.user
+    ).select_related('notification', 'notification__from_user').order_by(
+        '-notification__created_at'
+    )[:15]
 
+    data = []
+    unread_count = 0
+
+    for item in notifications:
+        if not item.is_read:
+            unread_count += 1
+
+        data.append({
+            'id': item.id,
+            'title': item.notification.title,
+            'description': item.notification.description,
+            'created_at': item.notification.created_at.strftime('%d %b %Y %I:%M %p'),
+            'is_read': item.is_read,
+        })
+
+    return JsonResponse({
+        'notifications': data,
+        'unread_count': unread_count
+    })
+
+
+@login_required
+def mark_notification_read(request, notification_id):
+    try:
+        notification = NotificationRecipient.objects.get(
+            id=notification_id,
+            user=request.user
+        )
+
+        notification.is_read = True
+        notification.save()
+
+        unread_count = NotificationRecipient.objects.filter(
+            user=request.user,
+            is_read=False
+        ).count()
+
+        return JsonResponse({
+            'success': True,
+            'unread_count': unread_count
+        })
+
+    except NotificationRecipient.DoesNotExist:
+        return JsonResponse({
+            'success': False
+        })
 
 # ============================================================
 # AUTH VIEWS
@@ -306,7 +359,21 @@ def add_branch(request):
             gps_radius = request.POST.get('gps_radius') or 100,
         )
         messages.success(request, 'Branch added successfully.')
-        return redirect('branch')
+        users = User.objects.filter(
+        userprofile__role__in=['admin', 'hr'],
+        userprofile__status='Enabled'
+        ).exclude(id=request.user.id)
+
+        create_notification(
+        from_user=request.user,
+        users=users,
+        title="New Branch Added",
+        description=(
+            f'Branch "{branch.name}" has been created '
+            f'by {request.user.get_full_name() or request.user.username}.'
+        )
+        )
+        return redirect('/branch')
     return render(request, 'dash/branch/add_branch.html')
 
 
@@ -323,7 +390,25 @@ def edit_branch(request, id):
         item.gps_lng    = request.POST.get('gps_lng') or None
         item.gps_radius = request.POST.get('gps_radius') or 100
         item.save()
+
         messages.success(request, 'Branch updated successfully.')
+
+        # Notify Admin + HR only
+        users = User.objects.filter(
+            userprofile__role__in=['admin', 'hr'],
+            userprofile__status='Enabled'
+        ).exclude(id=request.user.id)
+
+        create_notification(
+            from_user=request.user,
+            users=users,
+            title="Branch Updated",
+            description=(
+                f'Branch "{item.name}" has been updated '
+                f'by {request.user.get_full_name() or request.user.username}.'
+            )
+        )
+
         return redirect('branch')
     return render(request, 'dash/branch/edit_branch.html', {'data': item})
 
@@ -331,8 +416,26 @@ def edit_branch(request, id):
 @user_passes_test(superadmin_required, login_url='/login/')
 def delete_branch(request, id):
     item = get_object_or_404(Branch, id=id)
+    branch_name = item.name
     item.delete()
+
     messages.success(request, 'Branch deleted.')
+
+    users = User.objects.filter(
+        userprofile__role__in=['admin', 'hr'],
+        userprofile__status='Enabled'
+    ).exclude(id=request.user.id)
+
+    create_notification(
+        from_user=request.user,
+        users=users,
+        title="Branch Deleted",
+        description=(
+            f'Branch "{branch_name}" has been deleted '
+            f'by {request.user.get_full_name() or request.user.username}.'
+        )
+    )
+
     return redirect('branch')
 
 
@@ -341,6 +444,22 @@ def enable_branch(request, id):
     item = get_object_or_404(Branch, id=id)
     item.status = 'Enabled'
     item.save()
+
+    users = User.objects.filter(
+        userprofile__role__in=['admin', 'hr'],
+        userprofile__status='Enabled'
+    ).exclude(id=request.user.id)
+
+    create_notification(
+        from_user=request.user,
+        users=users,
+        title="Branch Enabled",
+        description=(
+            f'Branch "{item.name}" has been enabled '
+            f'by {request.user.get_full_name() or request.user.username}.'
+        )
+    )
+
     return redirect('branch')
 
 
@@ -349,6 +468,22 @@ def disable_branch(request, id):
     item = get_object_or_404(Branch, id=id)
     item.status = 'Disabled'
     item.save()
+
+    users = User.objects.filter(
+        userprofile__role__in=['admin', 'hr'],
+        userprofile__status='Enabled'
+    ).exclude(id=request.user.id)
+
+    create_notification(
+        from_user=request.user,
+        users=users,
+        title="Branch Disabled",
+        description=(
+            f'Branch "{item.name}" has been disabled '
+            f'by {request.user.get_full_name() or request.user.username}.'
+        )
+    )
+
     return redirect('branch')
 
 
@@ -413,60 +548,6 @@ def add_user(request):
         'branches': branches,
         'all_profiles': all_profiles,
     })
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def edit_user(request, id):
-    profile      = get_object_or_404(UserProfile, id=id)
-    branches     = Branch.objects.filter(status='Enabled')
-    all_profiles = UserProfile.objects.select_related('user', 'branch')\
-    .filter(
-        status='Enabled',
-        role__in=['manager', 'tl']   # 👈 IMPORTANT
-    ).exclude(id=id)
-    if request.method == 'POST':
-        profile.user.first_name = request.POST.get('first_name')
-        profile.user.last_name  = request.POST.get('last_name')
-        profile.user.email      = request.POST.get('email')
-        profile.user.save()
-        profile.role          = request.POST.get('role')
-        profile.phone         = request.POST.get('phone')
-        profile.branch_id     = request.POST.get('branch') or None
-        profile.reports_to_id = request.POST.get('reports_to') or None
-        if request.FILES.get('profile_pic'):
-            profile.userprofile_pic = request.FILES['profile_pic']
-        profile.save()
-        messages.success(request, 'User updated successfully.')
-        return redirect('users')
-    return render(request, 'dash/users/edit_user.html', {
-        'data': profile,
-        'branches': branches,
-        'all_profiles': all_profiles,
-    })
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def delete_user(request, id):
-    profile = get_object_or_404(UserProfile, id=id)
-    profile.user.delete()
-    messages.success(request, 'User deleted.')
-    return redirect('users')
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def enable_user(request, id):
-    item = get_object_or_404(UserProfile, id=id)
-    item.status = 'Enabled'
-    item.save()
-    return redirect('users')
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def disable_user(request, id):
-    item = get_object_or_404(UserProfile, id=id)
-    item.status = 'Disabled'
-    item.save()
-    return redirect('users')
 
 
 # ============================================================
@@ -716,20 +797,56 @@ def view_lead(request, id):
 @user_passes_test(superadmin_required, login_url='/login/')
 def assign_lead_to_manager(request, lead_id):
     if request.method == 'POST':
-        lead       = get_object_or_404(Lead, id=lead_id)
+        lead = get_object_or_404(Lead, id=lead_id)
         manager_id = request.POST.get('manager_id')
+
         if manager_id:
-            manager = get_object_or_404(UserProfile, id=manager_id, role='manager')
+            manager = get_object_or_404(
+                UserProfile,
+                id=manager_id,
+                role='manager'
+            )
+
             lead.assigned_to_manager = manager
-            # Clear downstream assignments when reassigning
             lead.assigned_to_tl = None
-            lead.assigned_to    = None
+            lead.assigned_to = None
             lead.save()
-            messages.success(request, f'Lead "{lead.name}" assigned to Manager {manager.user.get_full_name()}.')
+
+            # Admin + Assigned Manager
+            users = list(
+                User.objects.filter(
+                    userprofile__role='admin',
+                    userprofile__status='Enabled'
+                ).exclude(id=request.user.id)
+            )
+
+            users.append(manager.user)
+            users = list(set(users))
+
+            manager_total_leads = Lead.objects.filter(
+                assigned_to_manager=manager
+            ).count()
+
+            create_notification(
+                from_user=request.user,
+                users=users,
+                title="Lead Assigned To Manager",
+                description=(
+                    f'Lead "{lead.name}" has been assigned to '
+                    f'{manager.user.get_full_name() or manager.user.username}. '
+                    f'Total assigned leads: {manager_total_leads}.'
+                )
+            )
+
+            messages.success(
+                request,
+                f'Lead "{lead.name}" assigned to Manager '
+                f'{manager.user.get_full_name()}.'
+            )
         else:
             messages.error(request, 'Please select a Manager.')
-    return redirect('leads')
 
+    return redirect('leads')
 
 @user_passes_test(superadmin_required, login_url='/login/')
 def unassign_lead_from_manager(request, lead_id):

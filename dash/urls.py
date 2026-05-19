@@ -8,6 +8,9 @@ from dash import meta_views
 urlpatterns = [
     # Admin 
     path('django-admin/', admin.site.urls),
+    #notifications
+    path('notifications/', views.get_notifications, name='get_notifications'),
+    path('notifications/read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),
     # Auth
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),
