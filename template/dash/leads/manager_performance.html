@@ -3,161 +3,213 @@
 
 {% block title %}Manager Performance — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── DASHBOARD SPECIFIC LAYOUT UTILITIES ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS (Temp & Stage) ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-hot  { background: var(--gold-lt); color: #8B6914; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+  .s-cold { background: var(--cloud); color: var(--stone); }
+</style>
+{% endblock %}
+
 {% block page_header %}
-  Performance
+  Manager Performance
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
-  {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  {# ── PAGE HEADER & ACTIONS ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">
         <span style="color: var(--stone); font-weight: 500;">Manager /</span> {{ manager.user.username }}
-      </div>
-      <div style="font-size: 14px; color: var(--stone);">Performance overview and lead tracking</div>
+      </h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Performance overview and lead tracking</div>
     </div>
-    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">
+    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
       <i class="bi bi-arrow-left"></i> Back to Leads
     </a>
   </div>
 
   {# ── KPI STAT CARDS ── #}
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4 fade-up" style="animation-delay: 0.05s;">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2;">{{ total_leads }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Total Leads</div>
+    <div class="col fade-up">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-inboxes"></i></div>
+        <div class="stat-value">{{ total_leads }}</div>
+        <div class="stat-label">Total Leads</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: #E53E3E; line-height: 1.2;">{{ hot_leads }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Hot Leads</div>
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-fire"></i></div>
+        <div class="stat-value">{{ hot_leads }}</div>
+        <div class="stat-label">Hot Leads</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--sage); line-height: 1.2;">{{ new_leads }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">New Leads</div>
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-person-plus"></i></div>
+        <div class="stat-value">{{ new_leads }}</div>
+        <div class="stat-label">New Leads</div>
       </div>
     </div>
     
-    <div class="col">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center;">
-        <div style="font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--gold); line-height: 1.2;">{{ closed_leads }}</div>
-        <div style="font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; margin-top: 8px;">Closed Leads</div>
+    <div class="col fade-up" style="animation-delay: 0.2s;">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-check2-circle"></i></div>
+        <div class="stat-value">{{ closed_leads }}</div>
+        <div class="stat-label">Closed Leads</div>
       </div>
     </div>
     
   </div>
 
   {# ── MAIN DATA TABLE ── #}
-  <div class="leads-card fade-up" style="animation-delay: 0.1s;">
-    <div class="leads-header">
-      <div class="section-title"><i class="bi bi-diagram-3" style="margin-right: 8px; color: var(--stone);"></i>Leads Under Manager</div>
+  <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.25s;">
+    
+    <div class="leads-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+      <div class="section-title"><i class="bi bi-diagram-3" style="color: var(--sage); margin-right: 8px;"></i>Leads Under Manager</div>
     </div>
 
     <div style="max-height: 600px; overflow-y: auto;">
-      <table class="leads-table">
-        <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
+      <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--cloud); position: sticky; top: 0; z-index: 5;">
           <tr>
-            <th style="padding-left: 24px;">Lead</th>
-            <th>Phone</th>
-            <th>Source</th>
-            <th>Campaign</th>
-            <th>Manager</th>
-            <th>Team Leader</th>
-            <th>Employee</th>
-            <th>Stage</th>
-            <th>Temp</th>
-            <th style="text-align: right; padding-right: 24px;">Date</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lead</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Phone</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Source</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Campaign</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Manager</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Team Leader</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Employee</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temp</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Date</th>
           </tr>
         </thead>
         <tbody>
           {% for lead in leads %}
-          <tr>
-            <td style="padding-left: 24px;">
-              <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ lead.name }}</span>
-            </td>
-            <td>
-              <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ lead.phone|default:"—" }}</span>
-            </td>
-            <td>
-              <span style="font-size:12px; color:var(--stone); text-transform: capitalize;">{{ lead.source|default:"—" }}</span>
-            </td>
-            <td>
-              <span style="font-size:12px; color:var(--stone);">{{ lead.campaign_name|default:"—" }}</span>
-            </td>
+          <tr style="border-bottom: 1px solid var(--cloud);">
+            <td style="padding: 16px 24px; font-weight: 600; color: var(--ink);">{{ lead.name }}</td>
+            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--stone);">{{ lead.phone|default:"—" }}</td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone); text-transform: capitalize;">{{ lead.source|default:"—" }}</td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);">{{ lead.campaign_name|default:"—" }}</td>
             
-            <td>
-              <span style="font-size:12px; color:var(--ink); font-weight:500;">
+            <td style="padding: 16px 12px;">
+              <span style="font-size: 13px; color: var(--ink); font-weight: 500;">
                 {% if lead.assigned_to.role == 'manager' %}
                   {{ lead.assigned_to.user.username }}
                 {% elif lead.assigned_to.reports_to and lead.assigned_to.reports_to.reports_to %}
                   {{ lead.assigned_to.reports_to.reports_to.user.username }}
                 {% else %}
-                  <span style="color:var(--stone);">—</span>
+                  <span style="color: var(--stone);">—</span>
                 {% endif %}
               </span>
             </td>
 
-            <td>
-              <span style="font-size:12px; color:var(--ink); font-weight:500;">
+            <td style="padding: 16px 12px;">
+              <span style="font-size: 13px; color: var(--ink); font-weight: 500;">
                 {% if lead.assigned_to.role == 'tl' %}
                   {{ lead.assigned_to.user.username }}
                 {% elif lead.assigned_to.role == 'employee' and lead.assigned_to.reports_to %}
                   {{ lead.assigned_to.reports_to.user.username }}
                 {% else %}
-                  <span style="color:var(--stone);">—</span>
+                  <span style="color: var(--stone);">—</span>
                 {% endif %}
               </span>
             </td>
 
-            <td>
-              <span style="font-size:12px; color:var(--ink); font-weight:500;">
+            <td style="padding: 16px 12px;">
+              <span style="font-size: 13px; color: var(--ink); font-weight: 500;">
                 {% if lead.assigned_to.role == 'employee' %}
                   {{ lead.assigned_to.user.username }}
                 {% else %}
-                  <span style="color:var(--stone);">—</span>
+                  <span style="color: var(--stone);">—</span>
                 {% endif %}
               </span>
             </td>
 
-            <td>
-              <span class="status-pill s-new">{{ lead.stage }}</span>
+            <td style="padding: 16px 12px;">
+              {% if lead.stage|lower == 'new' or lead.stage|lower == 'new lead' %}
+                <span class="status-pill s-new">● {{ lead.stage }}</span>
+              {% elif lead.stage|lower == 'qualified' %}
+                <span class="status-pill s-qual">✓ {{ lead.stage }}</span>
+              {% elif lead.stage|lower == 'lost' %}
+                <span class="status-pill s-lost">✕ {{ lead.stage }}</span>
+              {% else %}
+                <span class="status-pill s-prog">● {{ lead.stage }}</span>
+              {% endif %}
             </td>
 
-            <td>
-              {% if lead.temperature == 'hot' %}
-                <span class="status-pill s-hot">🔥 Hot</span>
-              {% elif lead.temperature == 'warm' %}
-                <span class="status-pill s-prog">🌤 Warm</span>
-              {% elif lead.temperature == 'cold' %}
-                <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px;">❄️ Cold</span>
+            <td style="padding: 16px 12px;">
+              {% if lead.temperature|lower == 'hot' %}
+                <span class="status-pill s-hot"><i class="bi bi-fire"></i> Hot</span>
+              {% elif lead.temperature|lower == 'warm' %}
+                <span class="status-pill s-prog"><i class="bi bi-thermometer-half"></i> Warm</span>
+              {% elif lead.temperature|lower == 'cold' %}
+                <span class="status-pill s-cold"><i class="bi bi-snow"></i> Cold</span>
               {% else %}
                 <span style="font-size: 12px; color: var(--stone);">—</span>
               {% endif %}
             </td>
 
-            <td style="text-align: right; padding-right: 24px;">
-              <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
-                {{ lead.created_at|date:"M d, Y" }}
-              </span>
+            <td style="padding: 16px 24px; text-align: right; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--stone);">
+              {{ lead.created_at|date:"M d, Y" }}
             </td>
           </tr>
           
           {% empty %}
           <tr>
-            <td colspan="10">
-              <div class="grove-empty-state" style="padding: 40px 0;">
-                <i class="bi bi-diagram-3" style="font-size:32px; color:var(--sage-lt)"></i>
-                <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No leads found</div>
-                <div style="font-size:12px; color:var(--stone);">This manager currently has no assigned pipeline.</div>
+            <td colspan="10" style="padding: 64px 24px;">
+              <div class="grove-empty-state text-center">
+                <i class="bi bi-diagram-3" style="font-size: 32px; color: var(--sage-lt);"></i>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No leads found</div>
+                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">This manager currently has no assigned pipeline.</div>
               </div>
             </td>
           </tr>
