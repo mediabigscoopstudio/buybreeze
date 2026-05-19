@@ -3,285 +3,425 @@
 
 {% block title %}Add Lead — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Handled by grid gaps */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Compensate for border width change to prevent layout shift */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .input-icon-wrapper .grove-input {
+    padding-left: 40px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
-  Leads
+  Lead Management
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Add Lead</div>
-      <div style="font-size: 14px; color: var(--stone);">Create a new pipeline record</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Add New Lead</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Create a new pipeline record</div>
     </div>
-    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back to Leads
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Leads
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 900px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        <i class="bi bi-person-vcard" style="margin-right: 4px; color: var(--sage);"></i> Contact Identity
-      </div>
+  {# ── TWO-COLUMN FORM LAYOUT ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-      <div class="row g-4 mb-4">
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Full Name *</label>
-            <input type="text" name="name" class="grove-input" required placeholder="Enter lead name">
-          </div>
-        </div>
+      {# ── LEFT COLUMN: Core Details & Preferences ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
         
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Phone *</label>
-            <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" required placeholder="+91 XXXXX XXXXX">
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-person-vcard"></i></div>
+            <h3 class="panel-title">Contact Identity</h3>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Email</label>
-            <input type="email" name="email" class="grove-input" placeholder="name@example.com">
-          </div>
-        </div>
-        
-        <div class="col-md-12">
-          <div class="grove-field">
-            <label class="grove-label">Location (City / Area)</label>
-            <div style="position: relative;">
-              <i class="bi bi-geo-alt" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
-              <input type="text" name="location" class="grove-input" style="padding-left: 44px;" placeholder="e.g. Salt Lake, Kolkata">
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Full Name *</label>
+                <input type="text" name="name" class="grove-input" required placeholder="Enter lead name">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Phone Number *</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-telephone"></i>
+                  <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" required placeholder="+91 XXXXX XXXXX">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Email Address</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-envelope"></i>
+                  <input type="email" name="email" class="grove-input" placeholder="name@example.com">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Current Location (City / Area)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-geo-alt"></i>
+                  <input type="text" name="location" class="grove-input" placeholder="e.g. Salt Lake, Kolkata">
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        <i class="bi bi-magnet" style="margin-right: 4px; color: var(--sage);"></i> Acquisition Source
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Source *</label>
-            <select name="source" class="grove-input" required>
-              <option value="">Select origin</option>
-              <option value="meta">Meta Ads (FB/IG)</option>
-              <option value="google">Google Ads</option>
-              <option value="website">Website Form</option>
-              <option value="social">Social Media (Organic)</option>
-              <option value="campaign">Direct Campaign</option>
-              <option value="referral">Referral</option>
-              <option value="walkin">Walk-in</option>
-              <option value="whatsapp">WhatsApp Inbound</option>
-              <option value="other">Other</option>
-            </select>
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-buildings"></i></div>
+            <h3 class="panel-title">Real Estate Preferences</h3>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Campaign Name</label>
-            <input type="text" name="campaign_name" class="grove-input" placeholder="UTM / Campaign ID">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Ad Set</label>
-            <input type="text" name="ad_set" class="grove-input" placeholder="Targeting group">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Ad Creative</label>
-            <input type="text" name="ad_creative" class="grove-input" placeholder="Asset name">
-          </div>
-        </div>
-        
-        <div class="col-md-8">
-          <div class="grove-field">
-            <label class="grove-label">Landing Page URL</label>
-            <div style="position: relative;">
-              <i class="bi bi-link-45deg" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 16px;"></i>
-              <input type="url" name="landing_page_url" class="grove-input" style="padding-left: 44px;" placeholder="https://...">
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Property Type</label>
+                <select name="property_type" class="grove-input">
+                  <option value="">Select format</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">Villa</option>
+                  <option value="plot">Plot</option>
+                  <option value="commercial">Commercial</option>
+                  <option value="studio">Studio</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Configuration</label>
+                <select name="bhk_preference" class="grove-input">
+                  <option value="">Select BHK</option>
+                  <option value="1bhk">1 BHK</option>
+                  <option value="2bhk">2 BHK</option>
+                  <option value="3bhk">3 BHK</option>
+                  <option value="4bhk+">4 BHK+</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Min Budget (₹)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-currency-rupee"></i>
+                  <input type="number" name="budget_min" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="e.g. 3000000">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Max Budget (₹)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-currency-rupee"></i>
+                  <input type="number" name="budget_max" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="e.g. 6000000">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Preferred Micro-Market</label>
+                <input type="text" name="property_location" class="grove-input" placeholder="Area preference">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Investment Purpose</label>
+                <select name="purpose" class="grove-input">
+                  <option value="">Select goal</option>
+                  <option value="investment">Investment (Capital Gain)</option>
+                  <option value="selfuse">Self Use</option>
+                  <option value="rental">Rental Yield</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Buying Timeline</label>
+                <select name="timeline" class="grove-input">
+                  <option value="">Select urgency</option>
+                  <option value="immediate">Immediate</option>
+                  <option value="3months">Within 3 Months</option>
+                  <option value="6months">Within 6 Months</option>
+                  <option value="1year">1 Year+</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Construction Status</label>
+                <select name="readiness" class="grove-input">
+                  <option value="">Select status</option>
+                  <option value="ready">Ready to Move</option>
+                  <option value="underconstruction">Under Construction</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        <i class="bi bi-building" style="margin-right: 4px; color: var(--sage);"></i> Real Estate Preferences
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Property Type</label>
-            <select name="property_type" class="grove-input">
-              <option value="">Select format</option>
-              <option value="apartment">Apartment</option>
-              <option value="villa">Villa</option>
-              <option value="plot">Plot</option>
-              <option value="commercial">Commercial</option>
-              <option value="studio">Studio</option>
-            </select>
-          </div>
-        </div>
+      {# ── RIGHT COLUMN: Meta, Routing, Source ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
         
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Configuration</label>
-            <select name="bhk_preference" class="grove-input">
-              <option value="">Select BHK</option>
-              <option value="1bhk">1 BHK</option>
-              <option value="2bhk">2 BHK</option>
-              <option value="3bhk">3 BHK</option>
-              <option value="4bhk+">4 BHK+</option>
-            </select>
+        <div class="grove-panel" style="background: var(--cloud); border: none;">
+          <div class="panel-header" style="border-bottom-color: var(--border);">
+            <div class="panel-icon" style="background: var(--white); color: var(--charcoal); border: 1px solid var(--border);"><i class="bi bi-diagram-3"></i></div>
+            <h3 class="panel-title">Routing & Status</h3>
           </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Min Budget (₹)</label>
-            <input type="number" name="budget_min" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="e.g. 3000000">
-          </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Max Budget (₹)</label>
-            <input type="number" name="budget_max" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="e.g. 6000000">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Preferred Micro-Market</label>
-            <input type="text" name="property_location" class="grove-input" placeholder="Area preference">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Investment Purpose</label>
-            <select name="purpose" class="grove-input">
-              <option value="">Select goal</option>
-              <option value="investment">Investment (Capital Gain)</option>
-              <option value="selfuse">Self Use</option>
-              <option value="rental">Rental Yield</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Buying Timeline</label>
-            <select name="timeline" class="grove-input">
-              <option value="">Select urgency</option>
-              <option value="immediate">Immediate</option>
-              <option value="3months">Within 3 Months</option>
-              <option value="6months">Within 6 Months</option>
-              <option value="1year">1 Year+</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Construction Status</label>
-            <select name="readiness" class="grove-input">
-              <option value="">Select status</option>
-              <option value="ready">Ready to Move</option>
-              <option value="underconstruction">Under Construction</option>
-            </select>
-          </div>
-        </div>
-      </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Pipeline Stage</label>
+                <select name="stage" class="grove-input">
+                  <option value="new">New Lead</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="interested">Interested</option>
+                  <option value="site_visit">Site Visit</option>
+                  <option value="negotiation">Negotiation</option>
+                  <option value="closed">Closed / Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+            </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        <i class="bi bi-diagram-3" style="margin-right: 4px; color: var(--sage);"></i> Routing & Status
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Temperature</label>
-            <select name="temperature" class="grove-input">
-              <option value="cold">❄️ Cold</option>
-              <option value="warm">🌤 Warm</option>
-              <option value="hot">🔥 Hot</option>
-            </select>
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Temperature</label>
+                <select name="temperature" class="grove-input">
+                  <option value="cold">❄️ Cold</option>
+                  <option value="warm">🌤 Warm</option>
+                  <option value="hot">🔥 Hot</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Branch Routing</label>
+                <select name="branch" class="grove-input">
+                  <option value="">Select branch</option>
+                  {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Assign To</label>
+                <select name="assigned_to" class="grove-input">
+                  <option value="">Leave Unassigned</option>
+                  {% for m in members %}
+                    <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Pipeline Stage</label>
-            <select name="stage" class="grove-input">
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="interested">Interested</option>
-              <option value="site_visit">Site Visit</option>
-              <option value="negotiation">Negotiation</option>
-              <option value="closed">Closed / Won</option>
-              <option value="lost">Lost</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Branch Routing</label>
-            <select name="branch" class="grove-input">
-              <option value="">Select branch</option>
-              {% for b in branches %}
-                <option value="{{ b.id }}">{{ b.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Assign To</label>
-            <select name="assigned_to" class="grove-input">
-              <option value="">Leave Unassigned</option>
-              {% for m in members %}
-                <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Initial Context / Notes</label>
-            <textarea name="notes" class="grove-input" rows="3" placeholder="Enter any specific requirements, objections, or context gathered during acquisition..."></textarea>
-          </div>
-        </div>
-      </div>
 
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: #F5F5F5; color: var(--stone);"><i class="bi bi-magnet"></i></div>
+            <h3 class="panel-title">Acquisition Source</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Lead Source *</label>
+                <select name="source" class="grove-input" required>
+                  <option value="">Select origin</option>
+                  <option value="meta">Meta Ads (FB/IG)</option>
+                  <option value="google">Google Ads</option>
+                  <option value="website">Website Form</option>
+                  <option value="social">Social Media (Organic)</option>
+                  <option value="campaign">Direct Campaign</option>
+                  <option value="referral">Referral</option>
+                  <option value="walkin">Walk-in</option>
+                  <option value="whatsapp">WhatsApp Inbound</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Campaign Name</label>
+                <input type="text" name="campaign_name" class="grove-input" placeholder="UTM / Campaign ID">
+              </div>
+            </div>
 
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-check-lg" style="margin-right: 4px;"></i> Save Lead Record
-        </button>
-        <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
+            <div class="col-6">
+              <div class="grove-field">
+                <label class="grove-label">Ad Set</label>
+                <input type="text" name="ad_set" class="grove-input" placeholder="Target group">
+              </div>
+            </div>
+            
+            <div class="col-6">
+              <div class="grove-field">
+                <label class="grove-label">Ad Creative</label>
+                <input type="text" name="ad_creative" class="grove-input" placeholder="Asset name">
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Landing Page URL</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-link-45deg" style="font-size: 18px; left: 12px;"></i>
+                  <input type="url" name="landing_page_url" class="grove-input" placeholder="https://...">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--cloud); color: var(--stone);"><i class="bi bi-journal-text"></i></div>
+            <h3 class="panel-title">Initial Context</h3>
+          </div>
+          <div class="grove-field">
+            <textarea name="notes" class="grove-input" rows="4" placeholder="Enter specific requirements, objections, or context gathered during acquisition..." style="resize: vertical;"></textarea>
+          </div>
+        </div>
+
       </div>
-      
-    </form>
-  </div>
+    </div>
+
+    {# ── BOTTOM ACTION BAR ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'leads' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-check-lg"></i> Save Lead Record
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}
