@@ -3,6 +3,99 @@
 
 {% block title %}Add Branch — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Handled beautifully by row grid gaps */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Layout stabilization during expanding pixel widths */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .input-icon-wrapper .grove-input {
+    padding-left: 40px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
   Branches
 {% endblock %}
@@ -11,100 +104,130 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Add Branch</div>
-      <div style="font-size: 14px; color: var(--stone);">Create and configure a new system branch</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Add Branch</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Create and configure a new system operational branch outhouse</div>
     </div>
-    <a href="{% url 'branch' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'branch' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Branches
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        Basic Info
-      </div>
+  {# ── TWO-COLUMN FORM GRID LAYOUT ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-      <div class="row g-4 mb-4">
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Branch Name *</label>
-            <input type="text" name="name" class="grove-input" required placeholder="e.g. Kolkata North">
-          </div>
-        </div>
+      {# ── LEFT STRUCTURAL PANEL: Core Infrastructure & Logistics ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
         
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Location *</label>
-            <input type="text" name="location" class="grove-input" required placeholder="City / Area">
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-building"></i></div>
+            <h3 class="panel-title">Basic Info</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Branch Name *</label>
+                <input type="text" name="name" class="grove-input" required placeholder="e.g. Kolkata North">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Location Territory *</label>
+                <input type="text" name="location" class="grove-input" required placeholder="City / Area">
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Full Physical Mailing Address</label>
+                <textarea name="address" class="grove-input" rows="3" placeholder="Enter complete branch physical footprint address coordinates..." style="resize: vertical;"></textarea>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Operational Contact Phone</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-telephone"></i>
+                  <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="+91 XXXXX XXXXX">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Operational Inbox Email</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-envelope"></i>
+                  <input type="email" name="email" class="grove-input" placeholder="branch@email.com">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Address</label>
-            <textarea name="address" class="grove-input" rows="2" placeholder="Full address"></textarea>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Phone</label>
-            <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="+91 XXXXX XXXXX">
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Email</label>
-            <input type="email" name="email" class="grove-input" placeholder="branch@email.com">
-          </div>
-        </div>
+
       </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        HR GPS Settings
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">GPS Latitude</label>
-            <input type="text" name="gps_lat" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="22.5726">
-          </div>
-        </div>
+      {# ── RIGHT STRUCTURAL PANEL: Proximity Mapping Geofences ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
         
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">GPS Longitude</label>
-            <input type="text" name="gps_lng" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="88.3639">
+        <div class="grove-panel" style="background: var(--white); border: 1px solid var(--border); height: 100%;">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-pin-map"></i></div>
+            <h3 class="panel-title">HR GPS Settings</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">GPS Latitude</label>
+                <input type="text" name="gps_lat" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="22.5726">
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">GPS Longitude</label>
+                <input type="text" name="gps_lng" class="grove-input" style="font-family: 'Geist Mono', monospace;" placeholder="88.3639">
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Punch-in Radius Validation Threshold (m)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-geo"></i>
+                  <input type="number" name="gps_radius" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="100" min="50" max="1000">
+                </div>
+                <div style="font-size: 11px; color: var(--stone); margin-top: 8px; line-height: 1.4;">
+                  Attributed geofence fencing radius limit in meters for mobile proximity login matching.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Punch-in Radius (m)</label>
-            <input type="number" name="gps_radius" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="100" min="50" max="1000">
-          </div>
-        </div>
-      </div>
 
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
-
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-check-lg" style="margin-right: 4px;"></i> Save Branch
-        </button>
-        <a href="{% url 'branch' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
       </div>
-      
-    </form>
-  </div>
+    </div>
+
+    {# ── BOTTOM DISPATCH INTERFACE ACTION BAR ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'branch' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-check-lg"></i> Save Branch Record
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}
