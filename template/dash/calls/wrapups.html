@@ -3,126 +3,235 @@
 
 {% block title %}Wrap-Ups — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS (Temp, Stage & Lock) ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-hot  { background: var(--gold-lt); color: #8B6914; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+  .s-cold { background: var(--cloud); color: var(--stone); }
+
+  /* ── LINK STYLES ── */
+  .lead-link {
+    color: var(--ink);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .lead-link:hover {
+    color: var(--sage);
+    text-decoration: underline;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
-  Wrap-Ups
+  Operational Audit
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
-  <div class="leads-card fade-up">
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Call Wrap-Ups</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Post-call absolute summaries and pipeline operational audit logs</div>
+    </div>
+  </div>
+
+  {# ── KPI STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-clipboard-check"></i></div>
+        <div class="stat-value">{{ total_wrapups|default:"0" }}</div>
+        <div class="stat-label">Total Summaries</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-lock"></i></div>
+        <div class="stat-value">{{ locked_wrapups_count|default:"0" }}</div>
+        <div class="stat-label">Locked Records</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-unlock"></i></div>
+        <div class="stat-value">{{ active_wrapups_count|default:"0" }}</div>
+        <div class="stat-label">Open / Modifiable</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.2s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-arrow-right-circle"></i></div>
+        <div class="stat-value">{{ ongoing_actions_count|default:"0" }}</div>
+        <div class="stat-label">Next Action Outlines</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── DATA PANEL & TABLES ── #}
+  <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.25s;">
     
-    {# ── HEADER & FILTERS ── #}
-    <div class="leads-header flex-column gap-3 align-items-stretch">
-      <div class="d-flex justify-content-between align-items-center">
+    {# ── HEADER & SEARCH FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+      <div class="d-flex justify-content-between align-items-center w-100">
         <div>
-          <div class="section-title">Call Wrap-Ups</div>
-          <div style="font-size:12px;color:var(--stone);">Post-call summaries — all branches</div>
+          <div class="section-title"><i class="bi bi-journal-check" style="color: var(--sage); margin-right: 8px;"></i>Audit Logs</div>
         </div>
       </div>
 
-      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
-        <select name="branch" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
-          <option value="">All Branches</option>
+      <form method="GET" class="d-flex align-items-center gap-3 flex-wrap pt-3" style="border-top: 1px dashed var(--cloud);">
+        <select name="branch" class="grove-input m-0" style="width: auto; min-width: 180px; min-height: 38px;">
+          <option value="">All Operational Branches</option>
           {% for b in branches %}
             <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
           {% endfor %}
         </select>
         
-        <select name="locked" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
-          <option value="">All Statuses</option>
+        <select name="locked" class="grove-input m-0" style="width: auto; min-width: 180px; min-height: 38px;">
+          <option value="">All Lock Statuses</option>
           <option value="1" {% if locked_filter == '1' %}selected{% endif %}>Locked Only</option>
           <option value="0" {% if locked_filter == '0' %}selected{% endif %}>Unlocked Only</option>
         </select>
         
-        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
-        <a href="{% url 'wrapups' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn-primary-sage m-0" style="padding: 6px 20px; min-height: 38px; border-radius: 8px;">Filter</button>
+          <a href="{% url 'wrapups' %}" class="btn grove-btn-outline m-0" style="padding: 6px 16px; min-height: 38px;">Clear</a>
+        </div>
       </form>
     </div>
 
-    {# ── DATA TABLE ── #}
-    <table class="leads-table">
-      <thead>
-        <tr>
-          <th style="width: 40px;">#</th>
-          <th>Lead</th>
-          <th>Outcome</th>
-          <th>Temperature</th>
-          <th>Stage</th>
-          <th>Next Action</th>
-          <th>Follow-up At</th>
-          <th>Submitted By</th>
-          <th>Lock Status</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for w in wrapups %}
-        <tr>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+    {# ── DATA TABLE DATASET ── #}
+    <div class="table-responsive">
+      <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--cloud);">
+          <tr>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lead</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Outcome</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temperature</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Next Action</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Follow-up At</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Submitted By</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lock Status</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for w in wrapups %}
+          <tr style="border-bottom: 1px solid var(--cloud);">
+            <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
               {{ forloop.counter|stringformat:"02d" }}
-            </span>
-          </td>
-          <td>
-            <a href="{% url 'view_lead' w.lead.id %}" style="font-size:14px; font-weight:600; color:var(--ink); text-decoration:none;">
-              {{ w.lead.name }}
-            </a>
-          </td>
-          <td>
-            <span style="font-size:13px; color:var(--stone);">{{ w.get_call_outcome_display }}</span>
-          </td>
-          <td>
-            {% if w.temperature_update == 'hot' %}
-              <span class="status-pill s-hot">🔥 Hot</span>
-            {% elif w.temperature_update == 'warm' %}
-              <span class="status-pill s-prog">🌤 Warm</span>
-            {% else %}
-              <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; letter-spacing:0.5px;">❄️ Cold</span>
-            {% endif %}
-          </td>
-          <td>
-            <span class="status-pill s-qual">{{ w.get_stage_update_display }}</span>
-          </td>
-          <td>
-            <span style="font-size:13px; color:var(--ink);">{{ w.get_next_action_display }}</span>
-          </td>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--ink);">
+            </td>
+            <td style="padding: 16px 12px; font-weight: 600;">
+              <a href="{% url 'view_lead' w.lead.id %}" class="lead-link">{{ w.lead.name }}</a>
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--ink); font-weight: 500;">
+              {{ w.get_call_outcome_display }}
+            </td>
+            <td style="padding: 16px 12px;">
+              {% if w.temperature_update|lower == 'hot' %}
+                <span class="status-pill s-hot"><i class="bi bi-fire"></i> Hot</span>
+              {% elif w.temperature_update|lower == 'warm' %}
+                <span class="status-pill s-prog"><i class="bi bi-thermometer-half"></i> Warm</span>
+              {% else %}
+                <span class="status-pill s-cold"><i class="bi bi-snow"></i> Cold</span>
+              {% endif %}
+            </td>
+            <td style="padding: 16px 12px;">
+              {% if w.get_stage_update_display|lower == 'new' or w.get_stage_update_display|lower == 'new lead' %}
+                <span class="status-pill s-new">● {{ w.get_stage_update_display }}</span>
+              {% elif w.get_stage_update_display|lower == 'qualified' %}
+                <span class="status-pill s-qual">✓ {{ w.get_stage_update_display }}</span>
+              {% elif w.get_stage_update_display|lower == 'lost' %}
+                <span class="status-pill s-lost">✕ {{ w.get_stage_update_display }}</span>
+              {% else %}
+                <span class="status-pill s-prog">● {{ w.get_stage_update_display }}</span>
+              {% endif %}
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);">
+              {{ w.get_next_action_display }}
+            </td>
+            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink);">
               {{ w.followup_at|date:"d M g:i A"|default:"—" }}
-            </span>
-          </td>
-          <td>
-            <span style="font-size:13px; color:var(--stone);">{{ w.submitted_by.user.get_full_name|default:"—" }}</span>
-          </td>
-          <td>
-            {% if w.is_locked %}
-              <span class="status-pill s-lost"><i class="bi bi-lock-fill" style="margin-right:4px;"></i> Locked</span>
-            {% else %}
-              <span class="status-pill s-new"><i class="bi bi-unlock-fill" style="margin-right:4px;"></i> Open</span>
-            {% endif %}
-          </td>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+            </td>
+            <td style="padding: 16px 12px;">
+              <div class="d-flex align-items-center gap-2">
+                <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                  {{ w.submitted_by.user.get_full_name|default:"U"|make_list|first|upper }}
+                </div>
+                <span style="font-size: 13px; color: var(--ink); font-weight: 500;">{{ w.submitted_by.user.get_full_name|default:"—" }}</span>
+              </div>
+            </td>
+            <td style="padding: 16px 12px;">
+              {% if w.is_locked %}
+                <span class="status-pill s-lost"><i class="bi bi-lock-fill"></i> Locked</span>
+              {% else %}
+                <span class="status-pill s-new"><i class="bi bi-unlock-fill"></i> Open</span>
+              {% endif %}
+            </td>
+            <td style="padding: 16px 24px; text-align: right; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
               {{ w.created_at|date:"d M Y" }}
-            </span>
-          </td>
-        </tr>
-        
-        {% empty %}
-        {# ── EMPTY STATE ── #}
-        <tr>
-          <td colspan="10">
-            <div class="grove-empty-state">
-              <i class="bi bi-clipboard-check" style="font-size:32px; color:var(--sage-lt)"></i>
-              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No wrap-ups submitted yet</div>
-              <div style="font-size:12px; color:var(--stone);">Post-call summaries will appear here.</div>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+          </tr>
+          
+          {% empty %}
+          {# ── EMPTY STATE ── #}
+          <tr>
+            <td colspan="10" style="padding: 64px 24px;">
+              <div class="grove-empty-state text-center">
+                <i class="bi bi-clipboard-check" style="font-size: 32px; color: var(--sage-lt);"></i>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No wrap-ups submitted yet</div>
+                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Post-call summary items and structural adjustments will populate this interface automatically.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
 </div>
