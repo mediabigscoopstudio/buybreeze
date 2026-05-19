@@ -351,7 +351,7 @@ def branch(request):
 @user_passes_test(superadmin_required, login_url='/login/')
 def add_branch(request):
     if request.method == 'POST':
-        Branch.objects.create(
+        branch = Branch.objects.create(
             name       = request.POST.get('name'),
             location   = request.POST.get('location'),
             address    = request.POST.get('address'),
@@ -373,7 +373,7 @@ def add_branch(request):
         title="New Branch Added",
         description=(
             f'Branch "{branch.name}" has been created '
-            f'by {request.user.get_full_name() or request.user.username}.'
+            f'by {request.user.username}.'
         )
         )
         return redirect('/branch')
