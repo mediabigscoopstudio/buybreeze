@@ -3,6 +3,107 @@
 
 {% block title %}Add Attendance — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Managed neatly by row grid container gaps */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Offsets border expansion expansion layout shift values */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .input-icon-wrapper .grove-input {
+    padding-left: 40px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
   HR Panel
 {% endblock %}
@@ -11,112 +112,143 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Add Attendance</div>
-      <div style="font-size: 14px; color: var(--stone);">Log a manual punch record</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Add Attendance</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Log a manual chronometer punch record configuration override</div>
     </div>
-    <a href="{% url 'attendance' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'attendance' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Ledger
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        Punch Details
-      </div>
-
-      <div class="row g-4 mb-4">
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Employee *</label>
-            <select name="employee" class="grove-input" required>
-              <option value="">Select employee</option>
-              {% for e in employees %}
-                <option value="{{ e.id }}">{{ e.user.get_full_name }} ({{ e.get_role_display }})</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Branch</label>
-            <select name="branch" class="grove-input">
-              <option value="">Select branch</option>
-              {% for b in branches %}
-                <option value="{{ b.id }}">{{ b.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Date *</label>
-            <input type="date" name="date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Punch In</label>
-            <input type="datetime-local" name="punch_in" class="grove-input" style="font-family: 'Geist Mono', monospace;">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Punch Out</label>
-            <input type="datetime-local" name="punch_out" class="grove-input" style="font-family: 'Geist Mono', monospace;">
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Status *</label>
-            <select name="status" class="grove-input" required>
-              <option value="present">Present</option>
-              <option value="absent">Absent</option>
-              <option value="late">Late</option>
-              <option value="half_day">Half Day</option>
-              <option value="wfh">Work From Home</option>
-              <option value="on_leave">On Leave</option>
-              <option value="holiday">Holiday</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6 d-flex align-items-center" style="padding-top: 28px;">
-          <div class="form-check d-flex align-items-center gap-2 m-0 p-0">
-            <input type="checkbox" name="is_out_of_zone" class="form-check-input m-0" id="outofzone" style="width: 18px; height: 18px; accent-color: var(--sage); border-color: var(--border); cursor: pointer;">
-            <label class="form-check-label m-0" for="outofzone" style="font-size: 14px; font-weight: 500; color: var(--ink); cursor: pointer;">Out of Zone</label>
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Notes</label>
-            <textarea name="notes" class="grove-input" rows="2" placeholder="Any notes..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
-
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-person-check" style="margin-right: 4px;"></i> Save Record
-        </button>
-        <a href="{% url 'attendance' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
-      </div>
+  {# ── TWO-COLUMN FORM PANELS GRID ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-    </form>
-  </div>
+      {# ── LEFT PANEL: Core Lifecycle Punch Metrics ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
+        
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-clock-history"></i></div>
+            <h3 class="panel-title">Punch Details</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Target Employee Profile *</label>
+                <select name="employee" class="grove-input" required>
+                  <option value="">Select organizational corporate employee...</option>
+                  {% for e in employees %}
+                    <option value="{{ e.id }}">{{ e.user.get_full_name }} ({{ e.get_role_display }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Attributed Branch Location</label>
+                <select name="branch" class="grove-input">
+                  <option value="">Select branch operational house...</option>
+                  {% for b in branches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="grove-field">
+                <label class="grove-label">Log Date *</label>
+                <input type="date" name="date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="grove-field">
+                <label class="grove-label">Punch-In Timestamp</label>
+                <input type="datetime-local" name="punch_in" class="grove-input" style="font-family: 'Geist Mono', monospace;">
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="grove-field">
+                <label class="grove-label">Punch-Out Timestamp</label>
+                <input type="datetime-local" name="punch_out" class="grove-input" style="font-family: 'Geist Mono', monospace;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-journal-text"></i></div>
+            <h3 class="panel-title">Audit Logs Context</h3>
+          </div>
+          <div class="grove-field">
+            <label class="grove-label">Manual Adjustment Narrative / Explanatory Notes</label>
+            <textarea name="notes" class="grove-input" rows="4" placeholder="Specify corporate narrative reasons for manual shift overrides, missing punch adjustments, or location validations..." style="resize: vertical;"></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      {# ── RIGHT STRUCTURAL PANEL: Metrics Attribution Status ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
+        
+        <div class="grove-panel" style="background: var(--white); border: 1px solid var(--border); height: 100%;">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: #F5F5F5; color: var(--stone);"><i class="bi bi-diagram-3"></i></div>
+            <h3 class="panel-title">System Status Allocation</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Attendance Paradigm Status *</label>
+                <select name="status" class="grove-input" required>
+                  <option value="present">Present</option>
+                  <option value="absent">Absent</option>
+                  <option value="late">Late</option>
+                  <option value="half_day">Half Day</option>
+                  <option value="wfh">Work From Home (WFH)</option>
+                  <option value="on_leave">On Leave</option>
+                  <option value="holiday">Holiday</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12 pt-2">
+              <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background: var(--cloud); border: 1px dashed var(--border);">
+                <input type="checkbox" name="is_out_of_zone" id="outofzone" style="width: 18px; height: 18px; accent-color: var(--sage); cursor: pointer;">
+                <div>
+                  <label for="outofzone" style="font-size: 13px; font-weight: 700; color: var(--ink); cursor: pointer; display: block; margin-bottom: 2px;">Out of Zone Override</label>
+                  <span style="font-size: 11px; color: var(--stone); display: block; line-height: 1.3;">Check if this timeline record bypasses localized radius fencing limits.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {# ── BOTTOM FORM TIMELINE DISPATCH INTERFACE ACTION BAR ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'attendance' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-person-check"></i> Save Record
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}

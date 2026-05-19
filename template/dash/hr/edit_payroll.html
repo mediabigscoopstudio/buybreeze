@@ -3,6 +3,107 @@
 
 {% block title %}Edit Payroll — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Managed cleanly by grid layout gaps */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Stabilizes rendering boundaries during focus expansions */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .input-icon-wrapper .grove-input {
+    padding-left: 40px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
   HR Panel
 {% endblock %}
@@ -11,106 +112,143 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Payroll Record</div>
-      <div style="font-size: 14px; color: var(--stone);">Update salary entry for an employee</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Edit Payroll Record</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Update ledger valuations and compensation elements for a ledger entry</div>
     </div>
-    <a href="{% url 'payroll' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'payroll' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Ledger
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        Compensation Details
-      </div>
-
-      <div class="row g-4 mb-4">
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Employee *</label>
-            <select name="employee" class="grove-input" required>
-              {% for e in employees %}
-                <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>
-                  {{ e.user.get_full_name }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Month *</label>
-            <select name="month" class="grove-input" required>
-              <option value="January" {% if data.month == 'January' %}selected{% endif %}>January</option>
-              <option value="February" {% if data.month == 'February' %}selected{% endif %}>February</option>
-              <option value="March" {% if data.month == 'March' %}selected{% endif %}>March</option>
-              <option value="April" {% if data.month == 'April' %}selected{% endif %}>April</option>
-              <option value="May" {% if data.month == 'May' %}selected{% endif %}>May</option>
-              <option value="June" {% if data.month == 'June' %}selected{% endif %}>June</option>
-              <option value="July" {% if data.month == 'July' %}selected{% endif %}>July</option>
-              <option value="August" {% if data.month == 'August' %}selected{% endif %}>August</option>
-              <option value="September" {% if data.month == 'September' %}selected{% endif %}>September</option>
-              <option value="October" {% if data.month == 'October' %}selected{% endif %}>October</option>
-              <option value="November" {% if data.month == 'November' %}selected{% endif %}>November</option>
-              <option value="December" {% if data.month == 'December' %}selected{% endif %}>December</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Year *</label>
-            <input type="number" name="year" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.year }}">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Base Salary (₹) *</label>
-            <input type="number" name="base_salary" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.base_salary }}" step="0.01">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Bonus (₹)</label>
-            <input type="number" name="bonus" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.bonus }}" step="0.01">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Deductions (₹)</label>
-            <input type="number" name="deductions" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.deductions }}" step="0.01">
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Notes</label>
-            <textarea name="notes" class="grove-input" rows="2">{{ data.notes }}</textarea>
-          </div>
-        </div>
-      </div>
-
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
-
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update Payroll
-        </button>
-        <a href="{% url 'payroll' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
-      </div>
+  {# ── TWO-COLUMN FORM PANELS GRID LAYOUT ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-    </form>
-  </div>
+      {# ── LEFT STRUCTURAL PANEL: Financial Specifications ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
+        
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-wallet2"></i></div>
+            <h3 class="panel-title">Compensation Details</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Target Employee Account *</label>
+                <select name="employee" class="grove-input" required>
+                  {% for e in employees %}
+                    <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>
+                      {{ e.user.get_full_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="grove-field">
+                <label class="grove-label">Base Salary (₹) *</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-currency-rupee"></i>
+                  <input type="number" name="base_salary" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.base_salary }}" step="0.01">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="grove-field">
+                <label class="grove-label">Performance Bonus (₹)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-graph-up-arrow" style="font-size: 14px; color: var(--sage);"></i>
+                  <input type="number" name="bonus" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.bonus }}" step="0.01">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="grove-field">
+                <label class="grove-label">Statutory Deductions (₹)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-patch-minus" style="font-size: 14px; color: #E53E3E;"></i>
+                  <input type="number" name="deductions" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.deductions }}" step="0.01">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-journal-text"></i></div>
+            <h3 class="panel-title">Statement Notes Context</h3>
+          </div>
+          <div class="grove-field">
+            <label class="grove-label">Disbursement Comments / Variable Breakdown Notes</label>
+            <textarea name="notes" class="grove-input" rows="4" style="resize: vertical;">{{ data.notes }}</textarea>
+          </div>
+        </div>
+
+      </div>
+
+      {# ── RIGHT STRUCTURAL PANEL: Settlement Periods ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
+        
+        <div class="grove-panel" style="background: var(--white); border: 1px solid var(--border); height: 100%;">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: #F5F5F5; color: var(--stone);"><i class="bi bi-calendar3"></i></div>
+            <h3 class="panel-title">Disbursement Period</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Billing Cycle Month *</label>
+                <select name="month" class="grove-input" required>
+                  <option value="January" {% if data.month == 'January' %}selected{% endif %}>January</option>
+                  <option value="February" {% if data.month == 'February' %}selected{% endif %}>February</option>
+                  <option value="March" {% if data.month == 'March' %}selected{% endif %}>March</option>
+                  <option value="April" {% if data.month == 'April' %}selected{% endif %}>April</option>
+                  <option value="May" {% if data.month == 'May' %}selected{% endif %}>May</option>
+                  <option value="June" {% if data.month == 'June' %}selected{% endif %}>June</option>
+                  <option value="July" {% if data.month == 'July' %}selected{% endif %}>July</option>
+                  <option value="August" {% if data.month == 'August' %}selected{% endif %}>August</option>
+                  <option value="September" {% if data.month == 'September' %}selected{% endif %}>September</option>
+                  <option value="October" {% if data.month == 'October' %}selected{% endif %}>October</option>
+                  <option value="November" {% if data.month == 'November' %}selected{% endif %}>November</option>
+                  <option value="December" {% if data.month == 'December' %}selected{% endif %}>December</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Billing Statement Year *</label>
+                <input type="number" name="year" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.year }}">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {# ── BOTTOM INTERFACE INTERACTION BAR DISPATCH ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'payroll' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-arrow-repeat"></i> Update Payroll Record
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}

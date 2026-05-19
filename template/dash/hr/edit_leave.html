@@ -3,6 +3,107 @@
 
 {% block title %}Edit Leave — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Handled gracefully by container grid layout row gaps */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Offsets border expansion to isolate layout changes */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .input-icon-wrapper .grove-input {
+    padding-left: 40px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
   HR Panel
 {% endblock %}
@@ -11,114 +112,153 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Leave Request</div>
-      <div style="font-size: 14px; color: var(--stone);">Update employee leave application</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Edit Leave Request</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Update timeframe configurations and application status for an employee leave request</div>
     </div>
-    <a href="{% url 'leaves' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'leaves' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Ledger
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 800px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        Leave Details
-      </div>
-
-      <div class="row g-4 mb-4">
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Employee *</label>
-            <select name="employee" class="grove-input" required>
-              {% for e in employees %}
-                <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>{{ e.user.get_full_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Leave Type *</label>
-            <select name="leave_type" class="grove-input" required>
-              <option value="casual" {% if data.leave_type == 'casual' %}selected{% endif %}>Casual Leave</option>
-              <option value="sick" {% if data.leave_type == 'sick' %}selected{% endif %}>Sick Leave</option>
-              <option value="annual" {% if data.leave_type == 'annual' %}selected{% endif %}>Annual Leave</option>
-              <option value="unpaid" {% if data.leave_type == 'unpaid' %}selected{% endif %}>Unpaid Leave</option>
-              <option value="maternity" {% if data.leave_type == 'maternity' %}selected{% endif %}>Maternity Leave</option>
-              <option value="compoff" {% if data.leave_type == 'compoff' %}selected{% endif %}>Comp Off</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">From Date *</label>
-            <input type="date" name="from_date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.from_date|date:'Y-m-d' }}">
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">To Date *</label>
-            <input type="date" name="to_date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.to_date|date:'Y-m-d' }}">
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Status</label>
-            <select name="leave_status" class="grove-input">
-              <option value="pending" {% if data.leave_status == 'pending' %}selected{% endif %}>Pending</option>
-              <option value="approved" {% if data.leave_status == 'approved' %}selected{% endif %}>Approved</option>
-              <option value="rejected" {% if data.leave_status == 'rejected' %}selected{% endif %}>Rejected</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-6">
-          <div class="grove-field">
-            <label class="grove-label">Approved By</label>
-            <select name="approved_by" class="grove-input">
-              <option value="">None</option>
-              {% for p in profiles %}
-                <option value="{{ p.id }}" {% if data.approved_by_id == p.id %}selected{% endif %}>{{ p.user.get_full_name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Reason *</label>
-            <textarea name="reason" class="grove-input" rows="2" required>{{ data.reason }}</textarea>
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Remarks</label>
-            <textarea name="remarks" class="grove-input" rows="2" placeholder="HR remarks...">{{ data.remarks }}</textarea>
-          </div>
-        </div>
-      </div>
-
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
-
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update
-        </button>
-        <a href="{% url 'leaves' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
-      </div>
+  {# ── TWO-COLUMN FORM PANELS GRID ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-    </form>
-  </div>
+      {# ── LEFT PANEL: Timeframe Parameters & Statements ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
+        
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-calendar-range"></i></div>
+            <h3 class="panel-title">Leave Details</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Target Employee Profile *</label>
+                <select name="employee" class="grove-input" required>
+                  {% for e in employees %}
+                    <option value="{{ e.id }}" {% if data.employee_id == e.id %}selected{% endif %}>{{ e.user.get_full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Leave Framework Category *</label>
+                <select name="leave_type" class="grove-input" required>
+                  <option value="casual" {% if data.leave_type == 'casual' %}selected{% endif %}>Casual Leave</option>
+                  <option value="sick" {% if data.leave_type == 'sick' %}selected{% endif %}>Sick Leave</option>
+                  <option value="annual" {% if data.leave_type == 'annual' %}selected{% endif %}>Annual Leave</option>
+                  <option value="unpaid" {% if data.leave_type == 'unpaid' %}selected{% endif %}>Unpaid Leave</option>
+                  <option value="maternity" {% if data.leave_type == 'maternity' %}selected{% endif %}>Maternity Leave</option>
+                  <option value="compoff" {% if data.leave_type == 'compoff' %}selected{% endif %}>Comp Off</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">From Date *</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-calendar-plus"></i>
+                  <input type="date" name="from_date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.from_date|date:'Y-m-d' }}">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">To Date *</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-calendar-minus"></i>
+                  <input type="date" name="to_date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.to_date|date:'Y-m-d' }}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-journal-text"></i></div>
+            <h3 class="panel-title">Statement Arguments</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Reason for Leave Application *</label>
+                <textarea name="reason" class="grove-input" rows="4" required style="resize: vertical;">{{ data.reason }}</textarea>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Administrative Auditor Remarks</label>
+                <textarea name="remarks" class="grove-input" rows="3" placeholder="Enter HR audit notes, internal comments or documentation remarks..." style="resize: vertical;">{{ data.remarks }}</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {# ── RIGHT STRUCTURAL PANEL: Audit Allocations ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
+        
+        <div class="grove-panel" style="background: var(--white); border: 1px solid var(--border); height: 100%;">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: #F5F5F5; color: var(--stone);"><i class="bi bi-diagram-3"></i></div>
+            <h3 class="panel-title">Workflow State Allocation</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Application Status Matrix</label>
+                <select name="leave_status" class="grove-input">
+                  <option value="pending" {% if data.leave_status == 'pending' %}selected{% endif %}>Pending Audit</option>
+                  <option value="approved" {% if data.leave_status == 'approved' %}selected{% endif %}>Approved / Authorized</option>
+                  <option value="rejected" {% if data.leave_status == 'rejected' %}selected{% endif %}>Rejected / Denied</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Authorized Reviewing Auditor</label>
+                <select name="approved_by" class="grove-input">
+                  <option value="">None (Unassigned Reviewer)</option>
+                  {% for p in profiles %}
+                    <option value="{{ p.id }}" {% if data.approved_by_id == p.id %}selected{% endif %}>{{ p.user.get_full_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    {# ── BOTTOM INTERFACE INTERACTION ACTION BAR ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'leaves' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-arrow-repeat"></i> Update Leave Details
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}

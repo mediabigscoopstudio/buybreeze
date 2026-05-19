@@ -3,6 +3,53 @@
 
 {% block title %}Leave Management — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+</style>
+{% endblock %}
+
 {% block page_header %}
   HR Panel
 {% endblock %}
@@ -10,127 +57,183 @@
 {% block content %}
 <div class="main-content">
 
-  <div class="leads-card fade-up">
+  {# ── PAGE HEADER & ACTIONS ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Leave Management</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Review, audit, and authorize cross-branch employee leave framework applications</div>
+    </div>
+    <a href="{% url 'add_leave' %}" class="btn-primary-sage text-decoration-none d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+      <i class="bi bi-plus-lg"></i> Add Leave
+    </a>
+  </div>
+
+  {# ── KPI STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
     
-    {# ── HEADER & FILTERS ── #}
-    <div class="leads-header flex-column gap-3 align-items-stretch">
-      <div class="d-flex justify-content-between align-items-center">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-calendar-range"></i></div>
+        <div class="stat-value">{{ records.count|default:"0" }}</div>
+        <div class="stat-label">Total Applications</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.05s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-value">{{ pending_leaves_count|default:"0" }}</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-calendar-check-fill"></i></div>
+        <div class="stat-value">{{ approved_leaves_count|default:"0" }}</div>
+        <div class="stat-label">Authorized Grants</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone" style="background: #F8D7DA; color: #721C24;"><i class="bi bi-calendar-x-fill"></i></div>
+        <div class="stat-value" style="color: #721C24;">{{ rejected_leaves_count|default:"0" }}</div>
+        <div class="stat-label">Denied Row Items</div>
+      </div>
+    </div>
+    
+  </div>
+
+  {# ── MAIN DATA PANEL & FILTERS ── #}
+  <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.2s;">
+    
+    {# ── HEADER & SEARCH FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+      <div class="d-flex justify-content-between align-items-center w-100">
         <div>
-          <div class="section-title">Leave Management</div>
-          <div style="font-size:12px;color:var(--stone);">All leave requests across all branches</div>
+          <div class="section-title"><i class="bi bi-journal-text" style="color: var(--sage); margin-right: 8px;"></i>Application Statements</div>
         </div>
-        <a href="{% url 'add_leave' %}" class="btn-primary-sage">
-          <i class="bi bi-plus-lg"></i> Add Leave
-        </a>
       </div>
 
-      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
-        <input type="text" name="q" class="grove-input" style="max-width: 220px; padding: 6px 12px; min-height: 36px;" placeholder="Search employee..." value="{{ search }}">
+      <form method="GET" class="d-flex align-items-center gap-3 flex-wrap pt-3" style="border-top: 1px dashed var(--cloud);">
         
-        <select name="status" class="grove-input" style="max-width: 150px; padding: 6px 12px; min-height: 36px;">
+        <div style="position: relative; flex: 1; min-width: 180px; max-width: 240px;">
+          <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
+          <input type="text" name="q" class="grove-input m-0" style="padding-left: 40px; min-height: 38px;" placeholder="Search employee..." value="{{ search }}">
+        </div>
+        
+        <select name="status" class="grove-input m-0" style="width: auto; min-width: 150px; min-height: 38px;">
           <option value="">All Statuses</option>
           <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
           <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
           <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
         </select>
         
-        <select name="branch" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
-          <option value="">All Branches</option>
+        <select name="branch" class="grove-input m-0" style="width: auto; min-width: 180px; min-height: 38px;">
+          <option value="">All Active Branches</option>
           {% for b in branches %}
             <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
           {% endfor %}
         </select>
         
-        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
-        <a href="{% url 'leaves' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn-primary-sage m-0" style="padding: 6px 20px; min-height: 38px; border-radius: 8px;">Filter</button>
+          <a href="{% url 'leaves' %}" class="btn grove-btn-outline m-0" style="padding: 6px 16px; min-height: 38px;">Clear</a>
+        </div>
       </form>
     </div>
 
     {# ── DATA TABLE ── #}
-    <table class="leads-table">
-      <thead>
-        <tr>
-          <th style="width: 40px;">#</th>
-          <th>Employee</th>
-          <th>Leave Type</th>
-          <th>From</th>
-          <th>To</th>
-          <th>Days</th>
-          <th>Reason</th>
-          <th>Status</th>
-          <th style="text-align: right;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in records %}
-        <tr>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+    <div class="table-responsive">
+      <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--cloud);">
+          <tr>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Employee</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Leave Type</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">From</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">To</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Days</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Reason</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Status</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr style="border-bottom: 1px solid var(--cloud);">
+            <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
               {{ forloop.counter|stringformat:"02d" }}
-            </span>
-          </td>
-          <td>
-            <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ r.employee.user.get_full_name }}</span>
-          </td>
-          <td>
-            <span style="font-size:13px; color:var(--ink);">{{ r.get_leave_type_display }}</span>
-          </td>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.from_date|date:"d M Y" }}</span>
-          </td>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.to_date|date:"d M Y" }}</span>
-          </td>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.total_days }}</span>
-          </td>
-          <td>
-            <span style="font-size:12px; color:var(--stone);">{{ r.reason|truncatechars:50 }}</span>
-          </td>
-          <td>
-            {% if r.leave_status == 'approved' %}
-              <span class="status-pill s-qual">✓ Approved</span>
-            {% elif r.leave_status == 'rejected' %}
-              <span class="status-pill s-lost">✕ Rejected</span>
-            {% else %}
-              <span class="status-pill s-prog">● Pending</span>
-            {% endif %}
-          </td>
-          <td>
-            <div class="d-flex gap-1 justify-content-end">
-              {% if r.leave_status == 'pending' %}
-                <a href="{% url 'approve_leave' r.id %}" class="btn btn-sm grove-btn-ghost" title="Approve">
-                  <i class="bi bi-check-lg" style="color: var(--sage);"></i>
-                </a>
-                <a href="{% url 'reject_leave' r.id %}" class="btn btn-sm grove-btn-ghost" title="Reject">
-                  <i class="bi bi-x-lg" style="color: #E53E3E;"></i>
-                </a>
+            </td>
+            <td style="padding: 16px 12px; font-weight: 600; color: var(--ink); font-size: 14px;">
+              <div class="d-flex align-items-center gap-2">
+                <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                  {{ r.employee.user.get_full_name|default:"U"|make_list|first|upper }}
+                </div>
+                <span style="font-size: 13px; color: var(--ink); font-weight: 500;">{{ r.employee.user.get_full_name }}</span>
+              </div>
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--ink); font-weight: 500;">
+              {{ r.get_leave_type_display }}
+            </td>
+            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+              {{ r.from_date|date:"d M Y" }}
+            </td>
+            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+              {{ r.to_date|date:"d M Y" }}
+            </td>
+            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">
+              {{ r.total_days }}
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);" title="{{ r.reason }}">
+              {{ r.reason|truncatechars:45 }}
+            </td>
+            <td style="padding: 16px 12px;">
+              {% if r.leave_status == 'approved' %}
+                <span class="status-pill s-qual">✓ Approved</span>
+              {% elif r.leave_status == 'rejected' %}
+                <span class="status-pill s-lost">✕ Rejected</span>
+              {% else %}
+                <span class="status-pill s-prog">● Pending</span>
               {% endif %}
-              
-              <a href="{% url 'edit_leave' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit">
-                <i class="bi bi-pencil" style="color:var(--stone);"></i>
-              </a>
-              <a href="{% url 'delete_leave' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this leave request?')" title="Delete">
-                <i class="bi bi-trash" style="color:#E53E3E;"></i>
-              </a>
-            </div>
-          </td>
-        </tr>
-        
-        {% empty %}
-        {# ── EMPTY STATE ── #}
-        <tr>
-          <td colspan="9">
-            <div class="grove-empty-state">
-              <i class="bi bi-calendar-x" style="font-size:32px; color:var(--sage-lt)"></i>
-              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No leave requests found</div>
-              <div style="font-size:12px; color:var(--stone);">Employee leave applications will appear here.</div>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+            <td style="padding: 16px 24px; text-align: right;">
+              <div class="d-flex gap-1 justify-content-end align-items-center">
+                {% if r.leave_status == 'pending' %}
+                  <a href="{% url 'approve_leave' r.id %}" class="btn btn-sm grove-btn-ghost" title="Authorize Grant" style="padding: 6px 10px;">
+                    <i class="bi bi-check-lg" style="color: var(--sage); font-weight: 800;"></i>
+                  </a>
+                  <a href="{% url 'reject_leave' r.id %}" class="btn btn-sm grove-btn-ghost" title="Deny Request" style="padding: 6px 10px;">
+                    <i class="bi bi-x-lg" style="color: #E53E3E; font-weight: 800;"></i>
+                  </a>
+                {% endif %}
+                
+                <a href="{% url 'edit_leave' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit Parameters" style="padding: 6px 10px;">
+                  <i class="bi bi-pencil" style="color: var(--stone);"></i>
+                </a>
+                <a href="{% url 'delete_leave' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this application record permanently?')" title="Delete Application" style="padding: 6px 10px;">
+                  <i class="bi bi-trash" style="color: #E53E3E;"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          
+          {% empty %}
+          {# ── EMPTY STATE ── #}
+          <tr>
+            <td colspan="9" style="padding: 64px 24px;">
+              <div class="grove-empty-state text-center">
+                <i class="bi bi-calendar-x" style="font-size: 32px; color: var(--sage-lt);"></i>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No leave requests found</div>
+                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Employee framework leave application records will populate inside this system table log automatically.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
 </div>

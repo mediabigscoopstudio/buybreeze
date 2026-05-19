@@ -3,6 +3,132 @@
 
 {% block title %}{{ employee.user.get_full_name }} — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  /* ── STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── FORM ELEMENTS ── */
+  .grove-field {
+    margin-bottom: 0;
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px;
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  /* ── PILLS ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+  .s-cold { background: var(--cloud); color: var(--stone); }
+</style>
+{% endblock %}
+
 {% block page_header %}
   HR Panel
 {% endblock %}
@@ -11,279 +137,273 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">{{ employee.user.get_full_name }}</div>
-      <div style="font-size: 14px; color: var(--stone);">{{ employee.get_role_display }} — {{ employee.branch.name|default:"No Branch" }}</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">{{ employee.user.get_full_name }}</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">{{ employee.get_role_display }} — {{ employee.branch.name|default:"No Operational Branch Assigned" }}</div>
     </div>
-    <a href="{% url 'hr_panel' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back to HR
+    <a href="{% url 'hr_panel' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+      <i class="bi bi-arrow-left"></i> Back to HR Panel
     </a>
   </div>
 
   {# ── STAT CARDS ── #}
-  <div class="row g-3 mb-4 fade-up" style="animation-delay: 0.05s;">
-    <div class="col-md-3">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--sage); font-size: 18px;">
-          <i class="bi bi-clock-history"></i>
-        </div>
-        <div>
-          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ att_records.count }}</div>
-          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Total Attendance</div>
-        </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-clock-history"></i></div>
+        <div class="stat-value">{{ att_records.count }}</div>
+        <div class="stat-label">Total Attendance Logs</div>
       </div>
     </div>
     
-    <div class="col-md-3">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--ink); font-size: 18px;">
-          <i class="bi bi-calendar-check"></i>
-        </div>
-        <div>
-          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ att_records|length }}</div>
-          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Days Recorded</div>
-        </div>
+    <div class="col fade-up" style="animation-delay: 0.05s;">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-calendar-check"></i></div>
+        <div class="stat-value">{{ att_records|length }}</div>
+        <div class="stat-label">Days Recorded</div>
       </div>
     </div>
     
-    <div class="col-md-3">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 18px;">
-          <i class="bi bi-calendar-x"></i>
-        </div>
-        <div>
-          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ leave_records.count }}</div>
-          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Leave Requests</div>
-        </div>
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-calendar-x"></i></div>
+        <div class="stat-value">{{ leave_records.count }}</div>
+        <div class="stat-label">Leave Applications</div>
       </div>
     </div>
     
-    <div class="col-md-3">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 16px;">
-        <div style="width: 42px; height: 42px; border-radius: 8px; background: var(--cloud); display: flex; align-items: center; justify-content: center; color: var(--stone); font-size: 18px;">
-          <i class="bi bi-wallet2"></i>
-        </div>
-        <div>
-          <div style="font-family: 'Geist Mono', monospace; font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1;">{{ payroll_records.count }}</div>
-          <div style="font-size: 12px; color: var(--stone); font-weight: 500; margin-top: 4px;">Payroll Records</div>
-        </div>
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-wallet2"></i></div>
+        <div class="stat-value">{{ payroll_records.count }}</div>
+        <div class="stat-label">Payroll Statements</div>
       </div>
     </div>
   </div>
 
-  <div class="row g-4 fade-up" style="animation-delay: 0.1s;">
+  <div class="row g-4 fade-up" style="animation-delay: 0.2s;">
 
     {# ── QUICK ADD FORM (LEFT COL) ── #}
-    <div class="col-md-4">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px;">
-        
-        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px;">
-          Quick Add Attendance
+    <div class="col-lg-4">
+      <div class="grove-panel">
+        <div class="panel-header">
+          <div class="panel-icon"><i class="bi bi-fingerprint"></i></div>
+          <h3 class="panel-title">Quick Add Attendance</h3>
         </div>
         
-        <form method="POST" action="">
+        <form method="POST" action="" class="d-flex flex-column gap-3">
           {% csrf_token %}
           
-          <div class="grove-field mb-3">
-            <label class="grove-label">Employee</label>
-            <input type="text" class="grove-input" style="background-color: var(--cloud); color: var(--stone);" value="{{ employee.user.get_full_name }}" disabled>
+          <div class="grove-field">
+            <label class="grove-label">Target Employee</label>
+            <input type="text" class="grove-input" style="background-color: var(--cloud); color: var(--stone); border-color: var(--border);" value="{{ employee.user.get_full_name }}" disabled>
           </div>
           
-          <div class="grove-field mb-3">
-            <label class="grove-label">Date *</label>
+          <div class="grove-field">
+            <label class="grove-label">Log Date *</label>
             <input type="date" name="date" class="grove-input" style="font-family: 'Geist Mono', monospace;" required>
           </div>
           
-          <div class="grove-field mb-3">
-            <label class="grove-label">Punch In</label>
+          <div class="grove-field">
+            <label class="grove-label">Punch In Timestamp</label>
             <input type="datetime-local" name="punch_in" class="grove-input" style="font-family: 'Geist Mono', monospace;">
           </div>
           
-          <div class="grove-field mb-3">
-            <label class="grove-label">Punch Out</label>
+          <div class="grove-field">
+            <label class="grove-label">Punch Out Timestamp</label>
             <input type="datetime-local" name="punch_out" class="grove-input" style="font-family: 'Geist Mono', monospace;">
           </div>
           
-          <div class="grove-field mb-3">
-            <label class="grove-label">Status *</label>
+          <div class="grove-field">
+            <label class="grove-label">Attendance Status *</label>
             <select name="status" class="grove-input" required>
               <option value="present">Present</option>
               <option value="absent">Absent</option>
               <option value="late">Late</option>
               <option value="half_day">Half Day</option>
-              <option value="wfh">Work From Home</option>
+              <option value="wfh">Work From Home (WFH)</option>
               <option value="on_leave">On Leave</option>
               <option value="holiday">Holiday</option>
             </select>
           </div>
           
-          <div class="grove-field mb-3">
-            <label class="grove-label">Branch</label>
+          <div class="grove-field">
+            <label class="grove-label">Operational Branch</label>
             <select name="branch" class="grove-input">
-              <option value="">{{ employee.branch.name|default:"Select branch" }}</option>
+              <option value="">{{ employee.branch.name|default:"Select branch location..." }}</option>
               {% for b in branches %}
                 <option value="{{ b.id }}" {% if employee.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
               {% endfor %}
             </select>
           </div>
           
-          <div class="mb-3 d-flex align-items-center">
-            <div class="form-check d-flex align-items-center gap-2 m-0 p-0">
-              <input type="checkbox" name="is_out_of_zone" class="form-check-input m-0" id="ooz" style="width: 16px; height: 16px; accent-color: var(--sage); border-color: var(--border); cursor: pointer;">
-              <label class="form-check-label m-0" for="ooz" style="font-size: 13px; font-weight: 500; color: var(--ink); cursor: pointer;">Out of Zone</label>
+          <div class="p-2 rounded-3" style="background: var(--cloud); border: 1px dashed var(--border);">
+            <div class="form-check d-flex align-items-center gap-2 m-0 p-1">
+              <input type="checkbox" name="is_out_of_zone" class="form-check-input m-0" id="ooz" style="width: 16px; height: 16px; accent-color: var(--sage); cursor: pointer;">
+              <label class="form-check-label m-0" for="ooz" style="font-size: 13px; font-weight: 700; color: var(--ink); cursor: pointer;">Out of Zone Override</label>
             </div>
           </div>
           
-          <div class="grove-field mb-4">
-            <label class="grove-label">Notes</label>
-            <textarea name="notes" class="grove-input" rows="2" placeholder="Any notes..."></textarea>
+          <div class="grove-field">
+            <label class="grove-label">Audit Remarks</label>
+            <textarea name="notes" class="grove-input" rows="2" placeholder="Specify optional shift metrics remarks..."></textarea>
           </div>
           
-          <button type="submit" class="btn-primary-sage w-100">Add Attendance</button>
+          <button type="submit" class="btn-primary-sage w-100 d-inline-flex align-items-center justify-content-center gap-2" style="padding: 11px; font-weight: 600;">
+            <i class="bi bi-plus-circle"></i> Add Punch Log
+          </button>
         </form>
       </div>
     </div>
 
     {# ── TABLES (RIGHT COL) ── #}
-    <div class="col-md-8">
+    <div class="col-lg-8 d-flex flex-column gap-4">
 
-      <div class="leads-card mb-4">
-        <div class="leads-header">
-          <div class="section-title"><i class="bi bi-clock" style="margin-right: 8px; color: var(--stone);"></i>Attendance History</div>
+      <div class="leads-card" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+        <div class="leads-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+          <div class="section-title"><i class="bi bi-clock" style="margin-right: 8px; color: var(--sage);"></i>Attendance History</div>
         </div>
         
-        <table class="leads-table">
-          <thead>
-            <tr>
-              <th style="width: 40px;">#</th>
-              <th>Date</th>
-              <th>Punch In</th>
-              <th>Punch Out</th>
-              <th>Hours</th>
-              <th>Status</th>
-              <th>Zone</th>
-              <th style="text-align: right;">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in att_records %}
-            <tr>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ forloop.counter|stringformat:"02d" }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.date|date:"d M Y" }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.punch_in|date:"g:i A"|default:"—" }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.punch_out|date:"g:i A"|default:"—" }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.total_hours|default:"—" }}h</span>
-              </td>
-              <td>
-                {% if r.status == 'present' %}
-                  <span class="status-pill s-qual">✓ Present</span>
-                {% elif r.status == 'absent' %}
-                  <span class="status-pill s-lost">✕ Absent</span>
-                {% elif r.status == 'late' %}
-                  <span class="status-pill s-prog">● Late</span>
-                {% elif r.status == 'on_leave' %}
-                  <span class="status-pill s-new">● On Leave</span>
-                {% else %}
-                  <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px;">{{ r.get_status_display }}</span>
-                {% endif %}
-              </td>
-              <td>
-                {% if r.is_out_of_zone %}
-                  <span class="status-pill s-lost">Out</span>
-                {% else %}
-                  <span class="status-pill s-qual">In</span>
-                {% endif %}
-              </td>
-              <td>
-                <div class="d-flex gap-1 justify-content-end">
-                  <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit">
-                    <i class="bi bi-pencil" style="color:var(--stone);"></i>
-                  </a>
-                  <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this record?')">
-                    <i class="bi bi-trash" style="color:#E53E3E;"></i>
-                  </a>
-                </div>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="8">
-                <div class="grove-empty-state" style="padding: 32px 0;">
-                  <div style="font-size:13px; color:var(--stone);">No attendance records yet</div>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-responsive" style="max-height: 340px; overflow-y: auto;">
+          <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+            <thead style="background: var(--cloud); position: sticky; top: 0; z-index: 5;">
+              <tr>
+                <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Date</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Punch In</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Punch Out</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Hours</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Status</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Zone</th>
+                <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in att_records %}
+              <tr style="border-bottom: 1px solid var(--cloud);">
+                <td style="padding: 14px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+                  {{ forloop.counter|stringformat:"02d" }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">
+                  {{ r.date|date:"d M Y" }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+                  {{ r.punch_in|date:"g:i A"|default:"—" }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+                  {{ r.punch_out|date:"g:i A"|default:"—" }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">
+                  {{ r.total_hours|default:"—" }}h
+                </td>
+                <td style="padding: 14px 12px;">
+                  {% if r.status == 'present' %}
+                    <span class="status-pill s-qual">✓ Present</span>
+                  {% elif r.status == 'absent' %}
+                    <span class="status-pill s-lost">✕ Absent</span>
+                  {% elif r.status == 'late' %}
+                    <span class="status-pill s-prog">● Late</span>
+                  {% elif r.status == 'on_leave' %}
+                    <span class="status-pill s-new">● On Leave</span>
+                  {% else %}
+                    <span class="status-pill s-cold">{{ r.get_status_display }}</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 14px 12px;">
+                  {% if r.is_out_of_zone %}
+                    <span class="status-pill s-lost">Out</span>
+                  {% else %}
+                    <span class="status-pill s-qual">In</span>
+                  {% endif %}
+                </td>
+                <td style="padding: 14px 24px; text-align: right;">
+                  <div class="d-flex gap-1 justify-content-end">
+                    <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" title="Edit Parameters" style="padding: 4px 8px;">
+                      <i class="bi bi-pencil" style="color: var(--stone);"></i>
+                    </a>
+                    <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this attendance timeline record permanently?')" style="padding: 4px 8px;">
+                      <i class="bi bi-trash" style="color: #E53E3E;"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" style="padding: 48px 24px;">
+                  <div class="grove-empty-state text-center">
+                    <i class="bi bi-fingerprint" style="font-size: 28px; color: var(--sage-lt);"></i>
+                    <div style="font-size: 13px; color: var(--stone); margin-top: 8px;">No attendance framework records mapped yet.</div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="leads-card">
-        <div class="leads-header d-flex justify-content-between align-items-center">
-          <div class="section-title"><i class="bi bi-calendar-range" style="margin-right: 8px; color: var(--stone);"></i>Leave History</div>
-          <a href="{% url 'add_leave' %}" class="btn btn-sm grove-btn-outline">Add Leave</a>
+      <div class="leads-card" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+        <div class="leads-header d-flex justify-content-between align-items-center" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+          <div class="section-title"><i class="bi bi-calendar-range" style="margin-right: 8px; color: var(--gold);"></i>Leave History</div>
+          <a href="{% url 'add_leave' %}" class="btn btn-sm grove-btn-outline d-inline-flex align-items-center gap-1" style="padding: 6px 12px; font-weight: 600;">
+            <i class="bi bi-plus-lg"></i> Apply Leave
+          </a>
         </div>
         
-        <table class="leads-table">
-          <thead>
-            <tr>
-              <th style="width: 40px;">#</th>
-              <th>Type</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Days</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in leave_records %}
-            <tr>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ forloop.counter|stringformat:"02d" }}</span>
-              </td>
-              <td>
-                <span style="font-size:13px; font-weight:500; color:var(--ink);">{{ r.get_leave_type_display }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.from_date|date:"d M Y" }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">{{ r.to_date|date:"d M Y" }}</span>
-              </td>
-              <td>
-                <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ r.total_days }}</span>
-              </td>
-              <td>
-                {% if r.leave_status == 'approved' %}
-                  <span class="status-pill s-qual">✓ Approved</span>
-                {% elif r.leave_status == 'rejected' %}
-                  <span class="status-pill s-lost">✕ Rejected</span>
-                {% else %}
-                  <span class="status-pill s-prog">● Pending</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="6">
-                <div class="grove-empty-state" style="padding: 32px 0;">
-                  <div style="font-size:13px; color:var(--stone);">No leave records yet</div>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+          <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+            <thead style="background: var(--cloud); position: sticky; top: 0; z-index: 5;">
+              <tr>
+                <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Type</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">From</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">To</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Days</th>
+                <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in leave_records %}
+              <tr style="border-bottom: 1px solid var(--cloud);">
+                <td style="padding: 14px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+                  {{ forloop.counter|stringformat:"02d" }}
+                </td>
+                <td style="padding: 14px 12px; font-size: 13px; font-weight: 600; color: var(--ink);">
+                  {{ r.get_leave_type_display }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+                  {{ r.from_date|date:"d M Y" }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
+                  {{ r.to_date|date:"d M Y" }}
+                </td>
+                <td style="padding: 14px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">
+                  {{ r.total_days }}
+                </td>
+                <td style="padding: 14px 24px; text-align: right;">
+                  {% if r.leave_status == 'approved' %}
+                    <span class="status-pill s-qual">✓ Approved</span>
+                  {% elif r.leave_status == 'rejected' %}
+                    <span class="status-pill s-lost">✕ Rejected</span>
+                  {% else %}
+                    <span class="status-pill s-prog">● Pending</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" style="padding: 48px 24px;">
+                  <div class="grove-empty-state text-center">
+                    <i class="bi bi-calendar-x" style="font-size: 28px; color: var(--sage-lt);"></i>
+                    <div style="font-size: 13px; color: var(--stone); margin-top: 8px;">No historical leave metrics submitted yet.</div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
