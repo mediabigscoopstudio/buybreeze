@@ -1,260 +1,382 @@
+Got it—you need the full standalone page code, fully responsive, containing all your script integrations, custom colors, and structured cleanly around the luxury enterprise aesthetics we established.
+
+Here is your complete, self-contained **Manager Dashboard Index** file:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Dashboard | CRM</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
+    <title>Manager Dashboard — Buy Buzz CRM</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
     <style>
-        body { background-color: #f8f9fa; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        /* ── GROVE SYSTEM SPECIFIC BRAND KIT ── */
+        :root {
+            --white: #ffffff;
+            --cloud: #f7f3f0;
+            --border: #e4e4e0;
+            --ink: #2e2e2e;
+            --stone: #6f8f9f;
+            --sage: #4f7942;
+            --sage-lt: #dce7d9;
+            --charcoal: #333333;
+            --gold: #b8860b;
+            --gold-lt: #fdf5e6;
+        }
+
+        body {
+            background-color: var(--cloud);
+            font-family: 'Inter', sans-serif;
+            color: var(--ink);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ── STRUCTURAL WRAPPERS & UTILITIES ── */
+        .grove-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .grove-stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            height: 100%;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .grove-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+        }
+        .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+        .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+        .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+        .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+
+        .stat-icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+        .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+        .stat-icon-box.stone { background: #eff6ff; color: var(--stone); }
+        .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+        .stat-icon-box.charcoal { background: #f5f5f5; color: var(--charcoal); }
+
+        .stat-value {
+            font-family: 'Geist Mono', monospace;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--ink);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: var(--stone);
+            font-weight: 500;
+        }
+
+        /* ── INTERFACE COMPONENT STYLES ── */
+        .grove-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: var(--ink);
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
+        .grove-input:focus {
+            outline: none;
+            border: 1.8px solid var(--sage);
+            box-shadow: 0 0 0 4px var(--sage-lt);
+        }
+
+        select.grove-input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .btn-primary-sage {
+            background: var(--sage);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity 0.2s ease;
+        }
+        .btn-primary-sage:hover:not([disabled]) {
+            opacity: 0.9;
+            color: white;
+        }
+        .btn-primary-sage[disabled] {
+            background: var(--border);
+            color: var(--stone);
+            cursor: not-allowed;
+        }
+
+        .grove-btn-outline {
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--ink);
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 10px 16px;
+            transition: all 0.2s;
+        }
+        .grove-btn-outline:hover {
+            background: var(--cloud);
+            border-color: var(--stone);
+            color: var(--ink);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .s-hot { background: #f8d7da; color: #721c24; }
+        .s-warm { background: #fff3cd; color: #856404; }
+        .s-cold { background: var(--cloud); color: var(--stone); }
+
+        .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            accent-color: var(--sage);
+            cursor: pointer;
+            border-color: var(--border);
+        }
+
+        /* Responsive utilities */
         .table-responsive { scrollbar-width: thin; }
-        /* Make checkboxes slightly larger for touch */
-        .form-check-input { width: 1.25em; height: 1.25em; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR (TOP) -->
-    <nav class="navbar navbar-expand bg-white border-bottom shadow-sm sticky-top px-2 px-md-4 py-2">
-        <div class="container-fluid">
-            <!-- Brand -->
-            <a class="navbar-brand fw-bold text-dark d-flex align-items-center gap-2" href="#">
-                <div class="bg-primary text-white rounded p-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+    {# ── NAVIGATION MANAGEMENT BAR ── #}
+    <nav class="navbar navbar-expand bg-white border-bottom sticky-top px-4 py-2" style="z-index: 100;">
+        <div class="container-fluid p-0">
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#" style="color: var(--ink);">
+                <div class="stat-icon-box sage m-0" style="width: 32px; height: 32px; border-radius: 8px; font-size: 14px;">
                     <i class="bi bi-briefcase-fill"></i>
                 </div>
-                <span class="d-none d-sm-inline">Manager Dashboard</span>
+                <span>BuyBuzz Infra</span>
             </a>
 
-            <!-- Right Actions -->
-            <ul class="navbar-nav ms-auto align-items-center gap-2">
-            <li class="nav-item me-3">
-            <a href="/apr-report/" class="btn btn-primary btn-sm fw-medium rounded-pill px-3 shadow-sm d-flex align-items-center">
-                <i class="bi bi-bar-chart-fill me-2"></i> Employee APR Reports
-            </a>
-        </li>    
-                <!-- Notifications -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link text-dark position-relative p-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bell fs-5"></i>
-                        <span class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            <ul class="navbar-nav ms-auto align-items-center gap-3">
+                <li class="nav-item">
+                    <a href="/apr-report/" class="btn grove-btn-outline d-flex align-items-center gap-2" style="padding: 8px 16px; font-size: 13px;">
+                        <i class="bi bi-bar-chart-fill" style="color: var(--sage);"></i> Employee APR Reports
                     </a>
-                    <div class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" style="width: 300px;">
-                        <h6 class="dropdown-header text-dark fw-bold border-bottom pb-2">Notifications</h6>
-                        <div class="px-0 py-1" style="max-height: 300px; overflow-y: auto;">
-                            <a class="dropdown-item py-2 border-bottom" href="#">
-                                <div class="small fw-semibold text-dark">New leads assigned</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">10 mins ago</div>
-                            </a>
-                            <a class="dropdown-item py-2 border-bottom" href="#">
-                                <div class="small fw-semibold text-dark">TL Alex updated status</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">1 hour ago</div>
-                            </a>
-                            <a class="dropdown-item py-2" href="#">
-                                <div class="small fw-semibold text-dark">Weekly report ready</div>
-                                <div class="text-muted" style="font-size: 0.75rem;">2 hours ago</div>
-                            </a>
-                        </div>
-                        <a href="#" class="dropdown-item text-center text-primary fw-medium border-top pt-2 small">View All</a>
-                    </div>
-                </li>
+                </li>    
 
-                <!-- Profile -->
                 <li class="nav-item dropdown">
                     <a class="nav-link d-flex align-items-center gap-2 p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 36px; height: 36px;">
+                        <div class="user-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 1px solid var(--border);">
                             {{ user.username|make_list|first|upper|default:"M" }}
                         </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border mt-2 rounded-3" style="background: var(--white); border-color: var(--border);">
                         <li class="px-3 py-2 border-bottom">
-                            <span class="d-block fw-bold text-dark">{{ user.username|default:"Manager Name" }}</span>
-                            <span class="d-block text-muted small">manager@crm.com</span>
+                            <span class="d-block fw-bold" style="color: var(--ink);">{{ user.username|default:"Manager Account" }}</span>
+                            <span class="d-block small text-muted" style="font-size: 11px;">manager@buybuzz.infra</span>
                         </li>
-                        <li><a class="dropdown-item py-2 mt-1" href="#"><i class="bi bi-person me-2 text-secondary"></i>Profile</a></li>
-                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2 text-secondary"></i>Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider" style="border-color: var(--border);"></li>
+                        <li><a class="dropdown-item py-2 text-danger small" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <!-- MAIN DASHBOARD CONTENT -->
-    <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+    {# ── MAIN WORKSPACE PLATFORM ── #}
+    <div class="container-fluid py-4 px-4" style="max-width: 1400px;">
 
-        <!-- SECTION 1: KPI CARDS -->
-        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
-            <!-- Total Leads -->
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
             <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Total Leads</div>
-                    <h2 class="display-6 fw-bold text-dark mb-0">{{ total_leads|default:"0" }}</h2>
+                <div class="grove-stat-card top-charcoal">
+                    <div class="stat-icon-box charcoal"><i class="bi bi-layer-forward"></i></div>
+                    <div class="stat-value">{{ total_leads|default:"0" }}</div>
+                    <div class="stat-label">Total Assigned Leads</div>
                 </div>
             </div>
-            <!-- Hot Leads -->
             <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Hot Leads</div>
-                    <h2 class="display-6 fw-bold text-danger mb-0">{{ hot_leads|default:"0" }}</h2>
+                <div class="grove-stat-card top-stone">
+                    <div class="stat-icon-box stone"><i class="bi bi-fire"></i></div>
+                    <div class="stat-value" style="color: #721c24;">{{ hot_leads|default:"0" }}</div>
+                    <div class="stat-label">Hot Opportunities</div>
                 </div>
             </div>
-            <!-- New Leads -->
             <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">New Leads</div>
-                    <h2 class="display-6 fw-bold text-primary mb-0">{{ new_leads|default:"0" }}</h2>
+                <div class="grove-stat-card top-sage">
+                    <div class="stat-icon-box sage"><i class="bi bi-plus-circle"></i></div>
+                    <div class="stat-value" style="color: var(--sage);">{{ new_leads|default:"0" }}</div>
+                    <div class="stat-label">New Pipeline Entries</div>
                 </div>
             </div>
-            <!-- Closed Leads -->
             <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 p-md-4">
-                    <div class="text-muted small fw-semibold text-uppercase mb-1">Closed Leads</div>
-                    <h2 class="display-6 fw-bold text-success mb-0">{{ closed_leads|default:"0" }}</h2>
+                <div class="grove-stat-card top-gold">
+                    <div class="stat-icon-box gold"><i class="bi bi-check2-circle"></i></div>
+                    <div class="stat-value" style="color: var(--gold);">{{ closed_leads|default:"0" }}</div>
+                    <div class="stat-label">Closed Transactions</div>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2: LEADS (MAIN WORK AREA) -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="grove-panel mb-5 p-0" style="overflow: hidden;">
             
-            <!-- Header & Bulk Assign Controls -->
-            <div class="card-header bg-white border-bottom p-3 p-md-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
-                    <i class="bi bi-list-task text-primary"></i> Your Leads
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+                <h5 class="mb-0 fw-bold" style="font-size: 16px; color: var(--ink);">
+                    <i class="bi bi-list-task" style="color: var(--sage); margin-right: 8px;"></i> Lead Distribution Matrix
                 </h5>
                 
-                <!-- Bulk Assign Panel -->
-                <div class="d-flex flex-column flex-sm-row gap-2 bg-light p-2 rounded-3 w-100" style="max-width: 500px;">
-                    <select id="tlSelect" class="form-select border-0 shadow-none fw-medium text-dark py-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap" style="max-width: 500px;">
+                    <select id="tlSelect" class="grove-input m-0" style="width: auto; min-width: 200px; min-height: 38px;">
                         <option value="">Select Team Leader...</option>
                         {% for tl in team_leaders %}
                             <option value="{{ tl.id }}">{{ tl.user.username }}</option>
                         {% endfor %}
                     </select>
-                    <button id="btnAssign" class="btn btn-primary fw-bold px-4 py-2 text-nowrap" disabled>
+                    <button id="btnAssign" class="btn-primary-sage text-nowrap m-0" style="min-height: 38px;" disabled>
                         Assign to TL
                     </button>
                 </div>
             </div>
 
-            <!-- Leads Table -->
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-nowrap">
-                        <thead class="table-light text-secondary">
-                            <tr>
-                                <th scope="col" class="py-3 ps-4" style="width: 40px;">
-                                    <input class="form-check-input" type="checkbox" id="selectAll">
-                                </th>
-                                <th scope="col" class="py-3">Name</th>
-                                <th scope="col" class="py-3">Phone</th>
-                                <th scope="col" class="py-3">Source</th>
-                                <th scope="col" class="py-3">Campaign</th>
-                                <th scope="col" class="py-3">Temp</th>
-                                <th scope="col" class="py-3">Stage</th>
-                                <th scope="col" class="py-3 pe-4">Assigned TL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for lead in leads %}
-                            <tr>
-                                <td class="ps-4">
-                                    <input class="form-check-input lead-checkbox" type="checkbox" value="{{ lead.id }}">
-                                </td>
-                                <td class="fw-bold text-dark">{{ lead.name }}</td>
-                                <td class="text-secondary">{{ lead.phone }}</td>
-                                <td class="text-secondary">{{ lead.source }}</td>
-                                <td class="text-secondary">{{ lead.campaign_name|default:"-" }}</td>
-                                <td>
-                                    {% if lead.temperature|lower == 'hot' %}
-                                        <span class="badge bg-danger rounded-pill px-3 py-2 fw-medium">Hot</span>
-                                    {% elif lead.temperature|lower == 'warm' %}
-                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-medium">Warm</span>
-                                    {% else %}
-                                        <span class="badge bg-info text-dark rounded-pill px-3 py-2 fw-medium">Cold</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">{{ lead.stage }}</span>
-                                </td>
-                                <td class="pe-4">
-                                    {% if lead.assigned_tl %}
-                                        <span class="d-inline-flex align-items-center gap-2">
-                                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 10px;">
-                                                {{ lead.assigned_tl.user.username|make_list|first|upper }}
-                                            </div>
-                                            <span class="fw-medium text-dark small">{{ lead.assigned_tl.user.username }}</span>
-                                        </span>
-                                    {% else %}
-                                        <span class="text-muted small fst-italic">Unassigned</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-5">
-                                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
-                                    <span class="fw-medium text-dark">No leads available</span>
-                                    <p class="small mb-0 mt-1">You currently have no leads to manage.</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-nowrap text-start" style="width: 100%;">
+                    <thead style="background: var(--cloud);">
+                        <tr>
+                            <th scope="col" class="py-3 ps-4" style="width: 60px; border-bottom: 1px solid var(--border);">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                            </th>
+                            <th scope="col" class="py-3" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Name</th>
+                            <th scope="col" class="py-3" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Phone</th>
+                            <th scope="col" class="py-3" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Source</th>
+                            <th scope="col" class="py-3" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Campaign</th>
+                            <th scope="col" class="py-3" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temp</th>
+                            <th scope="col" class="py-3" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
+                            <th scope="col" class="py-3 pe-4" style="font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Assigned TL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lead in leads %}
+                        <tr style="border-bottom: 1px solid var(--cloud);">
+                            <td class="ps-4">
+                                <input class="form-check-input lead-checkbox" type="checkbox" value="{{ lead.id }}">
+                            </td>
+                            <td class="fw-bold" style="font-size: 14px; color: var(--ink);">{{ lead.name }}</td>
+                            <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--ink);">{{ lead.phone }}</td>
+                            <td style="font-size: 13px; color: var(--stone);">{{ lead.source }}</td>
+                            <td style="font-size: 13px; color: var(--stone);">{{ lead.campaign_name|default:"—" }}</td>
+                            <td>
+                                {% if lead.temperature|lower == 'hot' %}
+                                    <span class="status-pill s-hot">Hot</span>
+                                {% elif lead.temperature|lower == 'warm' %}
+                                    <span class="status-pill s-warm">Warm</span>
+                                {% else %}
+                                    <span class="status-pill s-cold">Cold</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-pill s-cold" style="border: 1px solid var(--border);">{{ lead.stage }}</span>
+                            </td>
+                            <td class="pe-4 text-end">
+                                {% if lead.assigned_tl %}
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                                            {{ lead.assigned_tl.user.username|make_list|first|upper }}
+                                        </div>
+                                        <span style="font-size: 13px; font-weight: 500; color: var(--ink);">{{ lead.assigned_tl.user.username }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small fst-italic">Unassigned</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-3 d-block mb-2" style="color: var(--stone);"></i>
+                                <div style="font-size: 14px; font-weight: 600; color: var(--ink);">No operational leads available</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- SECTION 3: TRACK TEAM LEADERS -->
         <div class="mb-3 d-flex align-items-center gap-2">
-            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-people-fill text-primary"></i> My Team Leaders</h5>
+            <h5 class="fw-bold" style="font-size: 16px; color: var(--ink);"><i class="bi bi-people-fill" style="color: var(--sage); margin-right: 4px;"></i> Hierarchical Chain Nodes</h5>
         </div>
         
-        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-3">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-5">
             {% for tl in team_leaders %}
             <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100">
-                    <div class="card-body p-4">
-                        <!-- TL Header -->
-                        <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3">
-                            <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center fs-4 fw-bold text-secondary" style="width: 48px; height: 48px;">
-                                {{ tl.name|make_list|first|upper }}
+                <div class="grove-panel h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3" style="border-color: var(--cloud) !important;">
+                            <div class="user-avatar" style="width: 44px; height: 44px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; border: 1px solid var(--border);">
+                                {{ tl.user.username|make_list|first|upper }}
                             </div>
                             <div>
-                                <h6 class="fw-bold text-dark mb-0">{{ tl.user.username }}</h6>
-                                <span class="badge bg-light text-secondary border fw-normal mt-1">My Team Leader</span>
+                                <h6 class="fw-bold mb-0" style="font-size: 14px; color: var(--ink);">{{ tl.user.username }}</h6>
+                                <span class="status-pill s-cold mt-1" style="font-size: 10px; padding: 2px 8px;">Supervisor Node</span>
                             </div>
                         </div>
                         
-                        <!-- TL Stats -->
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted small">Total Leads</span>
-                            <span class="fw-bold text-dark">{{ tl.total_leads|default:"0" }}</span>
+                            <span style="font-size: 12px; color: var(--stone);">Total Pool Leads</span>
+                            <span style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ tl.total_leads|default:"0" }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted small">Hot Leads</span>
-                            <span class="fw-bold text-danger">{{ tl.hot_leads|default:"0" }}</span>
+                            <span style="font-size: 12px; color: var(--stone);">Hot Leads Vector</span>
+                            <span style="font-size: 13px; font-weight: 600; color: #721c24;">{{ tl.hot_leads|default:"0" }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-4">
-                            <span class="text-muted small">New Leads</span>
-                            <span class="fw-bold text-primary">{{ tl.new_leads|default:"0" }}</span>
+                            <span style="font-size: 12px; color: var(--stone);">New Unprocessed Logs</span>
+                            <span style="font-size: 13px; font-weight: 600; color: var(--sage);">{{ tl.new_leads|default:"0" }}</span>
                         </div>
-                        
-                        <!-- Action -->
-                        <a href="/tl_performance/{{ tl.id }}" class="btn btn-light border text-dark fw-semibold w-100 rounded-pill py-2 text-nowrap">
-                            View Performance <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
                     </div>
+                    
+                    <a href="/tl_performance/{{ tl.id }}" class="grove-btn-outline text-center text-decoration-none small py-2 d-block">
+                        View Performance Parameters <i class="bi bi-arrow-right ms-1" style="font-size: 11px;"></i>
+                    </a>
                 </div>
             </div>
             {% empty %}
             <div class="col-12">
                 <div class="text-center text-muted py-5 bg-white shadow-sm rounded-4 border-0">
-                    <p class="mb-0">No Team Leaders found in your hierarchy.</p>
+                    <p class="mb-0">No corporate team leaders compiled inside your branch routing tree.</p>
                 </div>
             </div>
             {% endfor %}
@@ -262,140 +384,97 @@
 
     </div>
 
-    <!-- Bootstrap Bundle with Popper (Required for Dropdowns) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- UI Logic JS -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectAll = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.lead-checkbox');
-            const assignBtn = document.getElementById('btnAssign');
-            const tlSelect = document.getElementById('tlSelect');
+        function getCookie(name) {
+            let cookieValue = null;
+            document.cookie.split(';').forEach(cookie => {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                }
+            });
+            return cookieValue;
+        }
 
-            // Evaluate state to enable/disable button
-            function checkState() {
-                const checkedCount = document.querySelectorAll('.lead-checkbox:checked').length;
-                const hasTlSelected = tlSelect.value.trim() !== '';
-                assignBtn.disabled = !(checkedCount > 0 && hasTlSelected);
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('btnAssign');
+            const tl = document.getElementById('tlSelect');
+            const checkboxes = document.querySelectorAll('.lead-checkbox');
+            const selectAll = document.getElementById('selectAll');
+
+            function getSelected() {
+                return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
             }
 
-            // Select All Toggle
+            function update() {
+                const selectedCount = getSelected().length;
+                btn.disabled = !(selectedCount && tl.value);
+            }
+
             if (selectAll) {
-                selectAll.addEventListener('change', function() {
-                    checkboxes.forEach(cb => cb.checked = selectAll.checked);
-                    checkState();
+                selectAll.addEventListener('change', e => {
+                    checkboxes.forEach(cb => cb.checked = e.target.checked);
+                    update();
                 });
             }
 
-            // Individual Checkbox Toggle
             checkboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
+                cb.addEventListener('change', () => {
                     const allChecked = Array.from(checkboxes).every(c => c.checked);
                     const someChecked = Array.from(checkboxes).some(c => c.checked);
-                    
-                    selectAll.checked = allChecked;
-                    selectAll.indeterminate = someChecked && !allChecked;
-                    
-                    checkState();
+                    if(selectAll) {
+                        selectAll.checked = allChecked;
+                        selectAll.indeterminate = someChecked && !allChecked;
+                    }
+                    update();
                 });
             });
 
-            // TL Dropdown Change
-            if (tlSelect) {
-                tlSelect.addEventListener('change', checkState);
-            }
+            tl.addEventListener('change', update);
 
-            // Simple UI confirmation (Form submission logic handled by Django later)
-            if (assignBtn) {
-                assignBtn.addEventListener('click', function(e) {
-                    const count = document.querySelectorAll('.lead-checkbox:checked').length;
-                    const tlName = tlSelect.options[tlSelect.selectedIndex].text;
-                    
-                    if(!confirm(`Assign ${count} lead(s) to ${tlName}?`)) {
-                        e.preventDefault();
+            btn.addEventListener('click', async () => {
+                const selected = getSelected();
+                const tlName = tl.options[tl.selectedIndex].text;
+
+                if (!confirm(`Assign ${selected.length} lead(s) across to ${tlName}?`)) return;
+
+                btn.disabled = true;
+                btn.innerText = "Assigning Subsystem Data...";
+
+                try {
+                    const res = await fetch('/assign-to-tl/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            lead_ids: selected,
+                            tl_id: tl.value
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                        btn.disabled = false;
+                        btn.innerText = "Assign to TL";
                     }
-                });
-            }
+                } catch (err) {
+                    console.error("Matrix assignment fatal failure exception:", err);
+                    alert("System exception mapping distribution pipelines.");
+                    btn.disabled = false;
+                    btn.innerText = "Assign to TL";
+                }
+            });
         });
     </script>
-    <script>
-function getCookie(name) {
-    let cookieValue = null;
-    document.cookie.split(';').forEach(cookie => {
-        cookie = cookie.trim();
-        if (cookie.startsWith(name + '=')) {
-            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        }
-    });
-    return cookieValue;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    const btn = document.getElementById('btnAssign');
-    const tl = document.getElementById('tlSelect');
-    const checkboxes = document.querySelectorAll('.lead-checkbox');
-    const selectAll = document.getElementById('selectAll');
-
-    function getSelected() {
-        return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
-    }
-
-    function update() {
-        btn.disabled = !(getSelected().length && tl.value);
-    }
-
-    // select all
-    selectAll?.addEventListener('change', e => {
-        checkboxes.forEach(cb => cb.checked = e.target.checked);
-        update();
-    });
-
-    checkboxes.forEach(cb => cb.addEventListener('change', update));
-    tl.addEventListener('change', update);
-
-    btn.addEventListener('click', async () => {
-
-        const selected = getSelected();
-
-        if (!confirm(`Assign ${selected.length} lead(s)?`)) return;
-
-        btn.disabled = true;
-        btn.innerText = "Assigning...";
-
-        try {
-            const res = await fetch('/assign-to-tl/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify({
-                    lead_ids: selected,
-                    tl_id: tl.value
-                })
-            });
-
-            const data = await res.json();
-
-            if (data.status === 'success') {
-                location.reload();
-            } else {
-                alert(data.message);
-                btn.disabled = false;
-                btn.innerText = "Assign";
-            }
-
-        } catch (err) {
-            console.error(err);
-            alert("Error occurred");
-            btn.disabled = false;
-            btn.innerText = "Assign";
-        }
-    });
-
-});
-</script>
 </body>
 </html>
+
+```
