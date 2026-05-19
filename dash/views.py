@@ -363,9 +363,9 @@ def add_branch(request):
         )
         messages.success(request, 'Branch added successfully.')
         users = UserProfile.objects.filter(
-        profile__role__in=['admin', 'hr'],
-        profile__status='Enabled'
-        ).exclude(id=request.user.id)
+        role__in=['admin', 'hr'],
+        status='Enabled'
+        ).exclude(user=request.user)
 
         create_notification(
         from_user=request.user,
