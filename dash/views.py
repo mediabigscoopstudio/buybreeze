@@ -792,7 +792,7 @@ def add_call(request):
 def edit_call(request, id):
     item      = get_object_or_404(CallLog, id=id)
     all_leads = Lead.objects.filter(status='Enabled').order_by('name')
-    members   = UserProfile.objects.filter(role='member', status='Enabled').select_related('user')
+    members   = UserProfile.objects.filter(role='employee', status='Enabled').select_related('user')
     branches  = Branch.objects.filter(status='Enabled')
     if request.method == 'POST':
         item.lead_id          = request.POST.get('lead')
