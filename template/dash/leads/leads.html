@@ -3,6 +3,55 @@
 
 {% block title %}Lead Management — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── DASHBOARD SPECIFIC LAYOUT UTILITIES ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS (Temp & Stage) ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-hot  { background: var(--gold-lt); color: #8B6914; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+  .s-cold { background: var(--cloud); color: var(--stone); }
+</style>
+{% endblock %}
+
 {% block page_header %}
   Lead Management
 {% endblock %}
@@ -23,47 +72,41 @@
 
   {# ── KPI STAT CARDS ── #}
   <div class="row row-cols-1 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
-    
     <div class="col fade-up">
-      <div class="stat-card dark" style="height: 100%;">
-        <div class="stat-icon dark"><i class="bi bi-inboxes"></i></div>
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-inboxes"></i></div>
         <div class="stat-value">{{ total_leads }}</div>
         <div class="stat-label">Total Leads</div>
       </div>
     </div>
-    
     <div class="col fade-up" style="animation-delay: 0.1s;">
-      <div class="stat-card gold" style="height: 100%;">
-        <div class="stat-icon gold"><i class="bi bi-fire"></i></div>
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-fire"></i></div>
         <div class="stat-value">{{ hot_leads }}</div>
         <div class="stat-label">Hot Leads</div>
       </div>
     </div>
-    
     <div class="col fade-up" style="animation-delay: 0.15s;">
-      <div class="stat-card stone" style="height: 100%;">
-        <div class="stat-icon stone"><i class="bi bi-calendar-check"></i></div>
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-calendar-check"></i></div>
         <div class="stat-value">{{ pending_followups }}</div>
         <div class="stat-label">Pending F/U</div>
       </div>
     </div>
-    
     <div class="col fade-up" style="animation-delay: 0.2s;">
-      <div class="stat-card green" style="height: 100%;">
-        <div class="stat-icon green"><i class="bi bi-person-dash"></i></div>
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-person-dash"></i></div>
         <div class="stat-value">{{ unassigned_leads_count }}</div>
         <div class="stat-label">Unassigned</div>
       </div>
     </div>
-    
     <div class="col fade-up" style="animation-delay: 0.25s;">
-      <div class="stat-card dark" style="height: 100%;">
-        <div class="stat-icon dark"><i class="bi bi-graph-up-arrow"></i></div>
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-graph-up-arrow"></i></div>
         <div class="stat-value">{{ conversion_rate }}%</div>
         <div class="stat-label">Conversion Rate</div>
       </div>
     </div>
-    
   </div>
 
   {# ── MAIN 2-COLUMN LAYOUT ── #}
@@ -103,7 +146,7 @@
                 </th>
                 <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lead</th>
                 <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Phone</th>
-                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Source / Campaign</th>
+                <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Source</th>
                 <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temp</th>
                 <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
               </tr>
@@ -121,16 +164,24 @@
                   <div style="font-size: 11px; color: var(--stone);">{{ lead.campaign_name }}</div>
                 </td>
                 <td style="padding: 16px 12px;">
-                  {% if lead.temperature == 'hot' %}
-                    <span class="status-pill s-hot">★ Hot</span>
-                  {% elif lead.temperature == 'warm' %}
-                    <span class="status-pill s-prog">● Warm</span>
+                  {% if lead.temperature|lower == 'hot' %}
+                    <span class="status-pill s-hot"><i class="bi bi-fire"></i> Hot</span>
+                  {% elif lead.temperature|lower == 'warm' %}
+                    <span class="status-pill s-prog"><i class="bi bi-thermometer-half"></i> Warm</span>
                   {% else %}
-                    <span class="status-pill s-new">● Cold</span>
+                    <span class="status-pill s-cold"><i class="bi bi-snow"></i> Cold</span>
                   {% endif %}
                 </td>
                 <td style="padding: 16px 24px;">
-                  <span class="status-pill s-new">{{ lead.stage }}</span>
+                  {% if lead.stage|lower == 'new' or lead.stage|lower == 'new lead' %}
+                    <span class="status-pill s-new">● {{ lead.stage }}</span>
+                  {% elif lead.stage|lower == 'qualified' %}
+                    <span class="status-pill s-qual">✓ {{ lead.stage }}</span>
+                  {% elif lead.stage|lower == 'lost' %}
+                    <span class="status-pill s-lost">✕ {{ lead.stage }}</span>
+                  {% else %}
+                    <span class="status-pill s-prog">● {{ lead.stage }}</span>
+                  {% endif %}
                 </td>
               </tr>
               {% empty %}
@@ -175,10 +226,24 @@
                 </div>
               </td>
               <td style="padding: 16px 24px;">
-                <span class="status-pill s-prog">{{ lead.stage }}</span>
+                {% if lead.stage|lower == 'new' or lead.stage|lower == 'new lead' %}
+                  <span class="status-pill s-new">● {{ lead.stage }}</span>
+                {% elif lead.stage|lower == 'qualified' %}
+                  <span class="status-pill s-qual">✓ {{ lead.stage }}</span>
+                {% elif lead.stage|lower == 'lost' %}
+                  <span class="status-pill s-lost">✕ {{ lead.stage }}</span>
+                {% else %}
+                  <span class="status-pill s-prog">● {{ lead.stage }}</span>
+                {% endif %}
               </td>
               <td style="padding: 16px 24px;">
-                <span style="font-size: 12px; color: var(--stone); text-transform: capitalize;">{{ lead.temperature }}</span>
+                {% if lead.temperature|lower == 'hot' %}
+                  <span class="status-pill s-hot"><i class="bi bi-fire"></i> Hot</span>
+                {% elif lead.temperature|lower == 'warm' %}
+                  <span class="status-pill s-prog"><i class="bi bi-thermometer-half"></i> Warm</span>
+                {% else %}
+                  <span class="status-pill s-cold"><i class="bi bi-snow"></i> Cold</span>
+                {% endif %}
               </td>
             </tr>
             {% empty %}
@@ -207,7 +272,6 @@
         <div style="padding: 24px;">
           <div class="d-flex flex-column gap-2">
             {% for m in manager_stats %}
-            
             <div class="d-flex align-items-center gap-2 p-3 rounded-3" style="background: var(--cloud); border: 1px solid var(--border);">
               <div class="user-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">
                 {{ m.user.username|make_list|first|upper }}
@@ -226,7 +290,6 @@
                 <i class="bi bi-chevron-right"></i>
               </a>
             </div>
-            
             {% empty %}
             <div class="grove-empty-state" style="padding: 48px 0;">
               <i class="bi bi-people" style="font-size: 32px; color: var(--sage-lt)"></i>
@@ -331,7 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.status === 'success') {
-                // To fit with standard GROVE Django Messages if possible, but alerting is fine per original logic
                 alert("Leads assigned successfully");
                 location.reload();
             } else {
