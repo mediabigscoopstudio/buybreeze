@@ -3,286 +3,426 @@
 
 {% block title %}Edit Lead — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE FORM COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+
+  .grove-field {
+    margin-bottom: 0; /* Handled by grid gaps */
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; /* Compensate for border width change to prevent layout shift */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .input-icon-wrapper .grove-input {
+    padding-left: 40px;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
-  Leads
+  Lead Management
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Edit Lead</div>
-      <div style="font-size: 14px; color: var(--stone);">{{ data.name }}</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Edit Lead</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Update details for <span style="font-weight: 600; color: var(--ink);">{{ data.name }}</span></div>
     </div>
-    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">
-      <i class="bi bi-arrow-left"></i> Back
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Back to Leads
+      </a>
+    </div>
   </div>
 
-  {# ── MAIN FORM CARD ── #}
-  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; max-width: 900px; animation-delay: 0.05s;">
-    <form method="POST" action="">
-      {% csrf_token %}
-
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px;">
-        <i class="bi bi-person-vcard" style="margin-right: 4px; color: var(--sage);"></i> Contact Info
-      </div>
+  {# ── TWO-COLUMN FORM LAYOUT ── #}
+  <form method="POST" action="" class="fade-up" style="animation-delay: 0.1s;">
+    {% csrf_token %}
+    
+    <div class="row g-4">
       
-      <div class="row g-4 mb-4">
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Full Name *</label>
-            <input type="text" name="name" class="grove-input" required value="{{ data.name }}">
-          </div>
-        </div>
+      {# ── LEFT COLUMN: Core Details & Preferences ── #}
+      <div class="col-lg-8 d-flex flex-column gap-4">
         
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Phone *</label>
-            <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.phone }}">
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon"><i class="bi bi-person-vcard"></i></div>
+            <h3 class="panel-title">Contact Identity</h3>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Email</label>
-            <input type="email" name="email" class="grove-input" value="{{ data.email }}">
-          </div>
-        </div>
-        
-        <div class="col-md-12">
-          <div class="grove-field">
-            <label class="grove-label">Location</label>
-            <div style="position: relative;">
-              <i class="bi bi-geo-alt" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
-              <input type="text" name="location" class="grove-input" style="padding-left: 44px;" value="{{ data.location }}">
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Full Name *</label>
+                <input type="text" name="name" class="grove-input" required value="{{ data.name }}">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Phone Number *</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-telephone"></i>
+                  <input type="text" name="phone" class="grove-input" style="font-family: 'Geist Mono', monospace;" required value="{{ data.phone }}">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Email Address</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-envelope"></i>
+                  <input type="email" name="email" class="grove-input" value="{{ data.email }}">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Current Location (City / Area)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-geo-alt"></i>
+                  <input type="text" name="location" class="grove-input" value="{{ data.location }}">
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        <i class="bi bi-magnet" style="margin-right: 4px; color: var(--sage);"></i> Lead Source
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Source *</label>
-            <select name="source" class="grove-input" required>
-              <option value="meta" {% if data.source == 'meta' %}selected{% endif %}>Meta Ads</option>
-              <option value="google" {% if data.source == 'google' %}selected{% endif %}>Google Ads</option>
-              <option value="website" {% if data.source == 'website' %}selected{% endif %}>Website Form</option>
-              <option value="social" {% if data.source == 'social' %}selected{% endif %}>Social Media</option>
-              <option value="campaign" {% if data.source == 'campaign' %}selected{% endif %}>Campaign</option>
-              <option value="referral" {% if data.source == 'referral' %}selected{% endif %}>Referral</option>
-              <option value="walkin" {% if data.source == 'walkin' %}selected{% endif %}>Walk-in</option>
-              <option value="whatsapp" {% if data.source == 'whatsapp' %}selected{% endif %}>WhatsApp</option>
-              <option value="other" {% if data.source == 'other' %}selected{% endif %}>Other</option>
-            </select>
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--gold-lt); color: var(--gold);"><i class="bi bi-buildings"></i></div>
+            <h3 class="panel-title">Real Estate Preferences</h3>
           </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Campaign Name</label>
-            <input type="text" name="campaign_name" class="grove-input" value="{{ data.campaign_name }}">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Ad Set</label>
-            <input type="text" name="ad_set" class="grove-input" value="{{ data.ad_set }}">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Ad Creative</label>
-            <input type="text" name="ad_creative" class="grove-input" value="{{ data.ad_creative }}">
-          </div>
-        </div>
-        
-        <div class="col-md-8">
-          <div class="grove-field">
-            <label class="grove-label">Landing Page URL</label>
-            <div style="position: relative;">
-              <i class="bi bi-link-45deg" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 16px;"></i>
-              <input type="url" name="landing_page_url" class="grove-input" style="padding-left: 44px;" value="{{ data.landing_page_url }}">
+          
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Property Type</label>
+                <select name="property_type" class="grove-input">
+                  <option value="">Select format</option>
+                  <option value="apartment" {% if data.property_type == 'apartment' %}selected{% endif %}>Apartment</option>
+                  <option value="villa" {% if data.property_type == 'villa' %}selected{% endif %}>Villa</option>
+                  <option value="plot" {% if data.property_type == 'plot' %}selected{% endif %}>Plot</option>
+                  <option value="commercial" {% if data.property_type == 'commercial' %}selected{% endif %}>Commercial</option>
+                  <option value="studio" {% if data.property_type == 'studio' %}selected{% endif %}>Studio</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Configuration</label>
+                <select name="bhk_preference" class="grove-input">
+                  <option value="">Select BHK</option>
+                  <option value="1bhk" {% if data.bhk_preference == '1bhk' %}selected{% endif %}>1 BHK</option>
+                  <option value="2bhk" {% if data.bhk_preference == '2bhk' %}selected{% endif %}>2 BHK</option>
+                  <option value="3bhk" {% if data.bhk_preference == '3bhk' %}selected{% endif %}>3 BHK</option>
+                  <option value="4bhk+" {% if data.bhk_preference == '4bhk+' %}selected{% endif %}>4 BHK+</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Min Budget (₹)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-currency-rupee"></i>
+                  <input type="number" name="budget_min" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.budget_min|default:'' }}">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Max Budget (₹)</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-currency-rupee"></i>
+                  <input type="number" name="budget_max" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.budget_max|default:'' }}">
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Preferred Micro-Market</label>
+                <input type="text" name="property_location" class="grove-input" value="{{ data.property_location }}">
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Investment Purpose</label>
+                <select name="purpose" class="grove-input">
+                  <option value="">Select goal</option>
+                  <option value="investment" {% if data.purpose == 'investment' %}selected{% endif %}>Investment (Capital Gain)</option>
+                  <option value="selfuse" {% if data.purpose == 'selfuse' %}selected{% endif %}>Self Use</option>
+                  <option value="rental" {% if data.purpose == 'rental' %}selected{% endif %}>Rental Yield</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Buying Timeline</label>
+                <select name="timeline" class="grove-input">
+                  <option value="">Select urgency</option>
+                  <option value="immediate" {% if data.timeline == 'immediate' %}selected{% endif %}>Immediate</option>
+                  <option value="3months" {% if data.timeline == '3months' %}selected{% endif %}>Within 3 Months</option>
+                  <option value="6months" {% if data.timeline == '6months' %}selected{% endif %}>Within 6 Months</option>
+                  <option value="1year" {% if data.timeline == '1year' %}selected{% endif %}>1 Year+</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-md-6">
+              <div class="grove-field">
+                <label class="grove-label">Construction Status</label>
+                <select name="readiness" class="grove-input">
+                  <option value="">Select status</option>
+                  <option value="ready" {% if data.readiness == 'ready' %}selected{% endif %}>Ready to Move</option>
+                  <option value="underconstruction" {% if data.readiness == 'underconstruction' %}selected{% endif %}>Under Construction</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        <i class="bi bi-building" style="margin-right: 4px; color: var(--sage);"></i> Property Interest
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Property Type</label>
-            <select name="property_type" class="grove-input">
-              <option value="">Select</option>
-              <option value="apartment" {% if data.property_type == 'apartment' %}selected{% endif %}>Apartment</option>
-              <option value="villa" {% if data.property_type == 'villa' %}selected{% endif %}>Villa</option>
-              <option value="plot" {% if data.property_type == 'plot' %}selected{% endif %}>Plot</option>
-              <option value="commercial" {% if data.property_type == 'commercial' %}selected{% endif %}>Commercial</option>
-              <option value="studio" {% if data.property_type == 'studio' %}selected{% endif %}>Studio</option>
-            </select>
-          </div>
-        </div>
+      {# ── RIGHT COLUMN: Meta, Routing, Source ── #}
+      <div class="col-lg-4 d-flex flex-column gap-4">
         
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">BHK Preference</label>
-            <select name="bhk_preference" class="grove-input">
-              <option value="">Select</option>
-              <option value="1bhk" {% if data.bhk_preference == '1bhk' %}selected{% endif %}>1 BHK</option>
-              <option value="2bhk" {% if data.bhk_preference == '2bhk' %}selected{% endif %}>2 BHK</option>
-              <option value="3bhk" {% if data.bhk_preference == '3bhk' %}selected{% endif %}>3 BHK</option>
-              <option value="4bhk+" {% if data.bhk_preference == '4bhk+' %}selected{% endif %}>4 BHK+</option>
-            </select>
+        <div class="grove-panel" style="background: var(--cloud); border: none;">
+          <div class="panel-header" style="border-bottom-color: var(--border);">
+            <div class="panel-icon" style="background: var(--white); color: var(--charcoal); border: 1px solid var(--border);"><i class="bi bi-diagram-3"></i></div>
+            <h3 class="panel-title">Routing & Status</h3>
           </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Budget Min (₹)</label>
-            <input type="number" name="budget_min" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.budget_min }}">
-          </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Budget Max (₹)</label>
-            <input type="number" name="budget_max" class="grove-input" style="font-family: 'Geist Mono', monospace;" value="{{ data.budget_max }}">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Preferred Location</label>
-            <input type="text" name="property_location" class="grove-input" value="{{ data.property_location }}">
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Purpose</label>
-            <select name="purpose" class="grove-input">
-              <option value="">Select</option>
-              <option value="investment" {% if data.purpose == 'investment' %}selected{% endif %}>Investment</option>
-              <option value="selfuse" {% if data.purpose == 'selfuse' %}selected{% endif %}>Self Use</option>
-              <option value="rental" {% if data.purpose == 'rental' %}selected{% endif %}>Rental</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Timeline</label>
-            <select name="timeline" class="grove-input">
-              <option value="">Select</option>
-              <option value="immediate" {% if data.timeline == 'immediate' %}selected{% endif %}>Immediate</option>
-              <option value="3months" {% if data.timeline == '3months' %}selected{% endif %}>Within 3 Months</option>
-              <option value="6months" {% if data.timeline == '6months' %}selected{% endif %}>Within 6 Months</option>
-              <option value="1year" {% if data.timeline == '1year' %}selected{% endif %}>1 Year+</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-4">
-          <div class="grove-field">
-            <label class="grove-label">Property Readiness</label>
-            <select name="readiness" class="grove-input">
-              <option value="">Select</option>
-              <option value="ready" {% if data.readiness == 'ready' %}selected{% endif %}>Ready to Move</option>
-              <option value="underconstruction" {% if data.readiness == 'underconstruction' %}selected{% endif %}>Under Construction</option>
-            </select>
-          </div>
-        </div>
-      </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Pipeline Stage</label>
+                <select name="stage" class="grove-input">
+                  <option value="new" {% if data.stage == 'new' %}selected{% endif %}>New Lead</option>
+                  <option value="contacted" {% if data.stage == 'contacted' %}selected{% endif %}>Contacted</option>
+                  <option value="interested" {% if data.stage == 'interested' %}selected{% endif %}>Interested</option>
+                  <option value="site_visit" {% if data.stage == 'site_visit' %}selected{% endif %}>Site Visit</option>
+                  <option value="negotiation" {% if data.stage == 'negotiation' %}selected{% endif %}>Negotiation</option>
+                  <option value="closed" {% if data.stage == 'closed' %}selected{% endif %}>Closed / Won</option>
+                  <option value="lost" {% if data.stage == 'lost' %}selected{% endif %}>Lost</option>
+                </select>
+              </div>
+            </div>
 
-      <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-top: 32px; margin-bottom: 16px;">
-        <i class="bi bi-diagram-3" style="margin-right: 4px; color: var(--sage);"></i> Assignment & Status
-      </div>
-      
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Temperature</label>
-            <select name="temperature" class="grove-input">
-              <option value="cold" {% if data.temperature == 'cold' %}selected{% endif %}>❄️ Cold</option>
-              <option value="warm" {% if data.temperature == 'warm' %}selected{% endif %}>🌤 Warm</option>
-              <option value="hot" {% if data.temperature == 'hot' %}selected{% endif %}>🔥 Hot</option>
-            </select>
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Temperature</label>
+                <select name="temperature" class="grove-input">
+                  <option value="cold" {% if data.temperature == 'cold' %}selected{% endif %}>❄️ Cold</option>
+                  <option value="warm" {% if data.temperature == 'warm' %}selected{% endif %}>🌤 Warm</option>
+                  <option value="hot" {% if data.temperature == 'hot' %}selected{% endif %}>🔥 Hot</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Branch Routing</label>
+                <select name="branch" class="grove-input">
+                  <option value="">None</option>
+                  {% for b in branches %}
+                    <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Assign To</label>
+                <select name="assigned_to" class="grove-input">
+                  <option value="">Unassigned</option>
+                  {% for m in members %}
+                    <option value="{{ m.id }}" {% if data.assigned_to_id == m.id %}selected{% endif %}>
+                      {{ m.user.get_full_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Stage</label>
-            <select name="stage" class="grove-input">
-              <option value="new" {% if data.stage == 'new' %}selected{% endif %}>New</option>
-              <option value="contacted" {% if data.stage == 'contacted' %}selected{% endif %}>Contacted</option>
-              <option value="interested" {% if data.stage == 'interested' %}selected{% endif %}>Interested</option>
-              <option value="site_visit" {% if data.stage == 'site_visit' %}selected{% endif %}>Site Visit</option>
-              <option value="negotiation" {% if data.stage == 'negotiation' %}selected{% endif %}>Negotiation</option>
-              <option value="closed" {% if data.stage == 'closed' %}selected{% endif %}>Closed</option>
-              <option value="lost" {% if data.stage == 'lost' %}selected{% endif %}>Lost</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Branch Routing</label>
-            <select name="branch" class="grove-input">
-              <option value="">None</option>
-              {% for b in branches %}
-                <option value="{{ b.id }}" {% if data.branch_id == b.id %}selected{% endif %}>{{ b.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-md-3">
-          <div class="grove-field">
-            <label class="grove-label">Assign To</label>
-            <select name="assigned_to" class="grove-input">
-              <option value="">Unassigned</option>
-              {% for m in members %}
-                <option value="{{ m.id }}" {% if data.assigned_to_id == m.id %}selected{% endif %}>
-                  {{ m.user.get_full_name }}
-                </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-12">
-          <div class="grove-field">
-            <label class="grove-label">Notes</label>
-            <textarea name="notes" class="grove-input" rows="2">{{ data.notes }}</textarea>
-          </div>
-        </div>
-      </div>
 
-      <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: #F5F5F5; color: var(--stone);"><i class="bi bi-magnet"></i></div>
+            <h3 class="panel-title">Acquisition Source</h3>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Lead Source *</label>
+                <select name="source" class="grove-input" required>
+                  <option value="meta" {% if data.source == 'meta' %}selected{% endif %}>Meta Ads (FB/IG)</option>
+                  <option value="google" {% if data.source == 'google' %}selected{% endif %}>Google Ads</option>
+                  <option value="website" {% if data.source == 'website' %}selected{% endif %}>Website Form</option>
+                  <option value="social" {% if data.source == 'social' %}selected{% endif %}>Social Media (Organic)</option>
+                  <option value="campaign" {% if data.source == 'campaign' %}selected{% endif %}>Direct Campaign</option>
+                  <option value="referral" {% if data.source == 'referral' %}selected{% endif %}>Referral</option>
+                  <option value="walkin" {% if data.source == 'walkin' %}selected{% endif %}>Walk-in</option>
+                  <option value="whatsapp" {% if data.source == 'whatsapp' %}selected{% endif %}>WhatsApp Inbound</option>
+                  <option value="other" {% if data.source == 'other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Campaign Name</label>
+                <input type="text" name="campaign_name" class="grove-input" value="{{ data.campaign_name }}">
+              </div>
+            </div>
 
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn-primary-sage px-4">
-           <i class="bi bi-arrow-repeat" style="margin-right: 4px;"></i> Update Lead
-        </button>
-        <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
+            <div class="col-6">
+              <div class="grove-field">
+                <label class="grove-label">Ad Set</label>
+                <input type="text" name="ad_set" class="grove-input" value="{{ data.ad_set }}">
+              </div>
+            </div>
+            
+            <div class="col-6">
+              <div class="grove-field">
+                <label class="grove-label">Ad Creative</label>
+                <input type="text" name="ad_creative" class="grove-input" value="{{ data.ad_creative }}">
+              </div>
+            </div>
+            
+            <div class="col-12">
+              <div class="grove-field">
+                <label class="grove-label">Landing Page URL</label>
+                <div class="input-icon-wrapper">
+                  <i class="bi bi-link-45deg" style="font-size: 18px; left: 12px;"></i>
+                  <input type="url" name="landing_page_url" class="grove-input" value="{{ data.landing_page_url }}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grove-panel">
+          <div class="panel-header">
+            <div class="panel-icon" style="background: var(--cloud); color: var(--stone);"><i class="bi bi-journal-text"></i></div>
+            <h3 class="panel-title">Initial Context / Notes</h3>
+          </div>
+          <div class="grove-field">
+            <textarea name="notes" class="grove-input" rows="4" style="resize: vertical;">{{ data.notes }}</textarea>
+          </div>
+        </div>
+
       </div>
-      
-    </form>
-  </div>
+    </div>
+
+    {# ── BOTTOM ACTION BAR ── #}
+    <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5 pt-4" style="border-top: 1px solid var(--border);">
+      <a href="{% url 'leads' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
+      <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+        <i class="bi bi-arrow-repeat"></i> Update Lead Details
+      </button>
+    </div>
+    
+  </form>
 
 </div>
 {% endblock %}

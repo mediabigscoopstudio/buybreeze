@@ -3,53 +3,195 @@
 
 {% block title %}Bulk Upload Leads — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE COMPONENTS ── */
+  .grove-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    height: 100%;
+  }
+  
+  .grove-panel-dark {
+    background: var(--ink);
+    border: 1px solid var(--charcoal);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cloud);
+  }
+  
+  .panel-header.dark-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .panel-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--sage-lt);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  
+  .panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
+  
+  .panel-title.dark-text {
+    color: var(--white);
+  }
+
+  .grove-field {
+    margin-bottom: 0;
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 9.2px 13.2px; 
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  select.grove-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+  }
+
+  /* File input styling normalization */
+  input[type="file"].grove-input::file-selector-button {
+    background: var(--cloud);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    margin-right: 12px;
+    font-family: 'Geist', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  input[type="file"].grove-input::file-selector-button:hover {
+    background: #E4E4E0;
+  }
+
+  /* ── STATUS PILLS ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 10px; font-weight: 700; white-space: nowrap; letter-spacing: 0.5px;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+  
+  .ref-row {
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--cloud);
+  }
+  .ref-row:last-child {
+    border-bottom: none;
+  }
+</style>
+{% endblock %}
+
 {% block page_header %}
-  Leads
+  Lead Management
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Bulk Lead Upload</div>
-      <div style="font-size: 14px; color: var(--stone);">Import pipeline data from CSV or Excel</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Bulk Lead Upload</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Import pipeline data securely from CSV or Excel</div>
     </div>
-    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline">
+    <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
       <i class="bi bi-arrow-left"></i> Back to Leads
     </a>
   </div>
 
-  <div class="row g-4 fade-up" style="animation-delay: 0.05s;">
+  <div class="row g-4 fade-up" style="animation-delay: 0.1s;">
     
     {# ── LEFT COL: UPLOAD FORM ── #}
-    <div class="col-md-7">
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 100%;">
-        
-        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 24px;">
-          <i class="bi bi-filetype-csv" style="margin-right: 4px; color: var(--sage);"></i> Import Data
+    <div class="col-lg-7 d-flex flex-column gap-4">
+      
+      <div class="grove-panel">
+        <div class="panel-header">
+          <div class="panel-icon"><i class="bi bi-filetype-csv"></i></div>
+          <h3 class="panel-title">Data Import Configuration</h3>
         </div>
         
         <form method="POST" enctype="multipart/form-data">
           {% csrf_token %}
           
           <div class="row g-4 mb-4">
+            
             <div class="col-12">
               <div class="grove-field">
-                <label class="grove-label">Select File *</label>
-                <input type="file" name="bulk_file" class="grove-input" accept=".csv,.xlsx,.xls" style="padding: 8px 16px; line-height: 1.5; font-family: 'Geist Mono', monospace; font-size: 13px;" required>
-                <div style="font-size: 12px; color: var(--stone); margin-top: 8px; display: flex; align-items: center; gap: 6px;">
-                  <i class="bi bi-info-circle-fill" style="color: var(--sage);"></i> Max recommended: 5,000 rows per upload (.xlsx or .csv)
+                <label class="grove-label">Select Source File *</label>
+                <input type="file" name="bulk_file" class="grove-input" accept=".csv,.xlsx,.xls" required style="padding: 6px 14px; font-family: 'Geist Mono', monospace; font-size: 13px;">
+                <div style="font-size: 12px; color: var(--stone); margin-top: 10px; display: flex; align-items: flex-start; gap: 8px;">
+                  <i class="bi bi-info-circle-fill" style="color: var(--sage); margin-top: 2px;"></i> 
+                  <span>Max recommended: <strong>5,000 rows</strong> per upload. Supported formats: <strong>.csv, .xlsx, .xls</strong></span>
                 </div>
               </div>
             </div>
             
+            <div class="col-12 pt-2 pb-2">
+              <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--cloud); padding-bottom: 8px;">
+                <i class="bi bi-diagram-3" style="margin-right: 4px; color: var(--charcoal);"></i> Bulk Routing Rules
+              </div>
+            </div>
+
             <div class="col-md-6">
               <div class="grove-field">
-                <label class="grove-label">Bulk Assign to Branch</label>
+                <label class="grove-label">Assign to Branch</label>
                 <select name="branch" class="grove-input">
-                  <option value="">Select branch (optional)</option>
+                  <option value="">Leave Unassigned (Optional)</option>
                   {% for b in branches %}
                     <option value="{{ b.id }}">{{ b.name }}</option>
                   {% endfor %}
@@ -59,9 +201,9 @@
             
             <div class="col-md-6">
               <div class="grove-field">
-                <label class="grove-label">Bulk Assign to Member</label>
+                <label class="grove-label">Assign to Member</label>
                 <select name="assigned_to" class="grove-input">
-                  <option value="">Unassigned (optional)</option>
+                  <option value="">Leave Unassigned (Optional)</option>
                   {% for m in members %}
                     <option value="{{ m.id }}">{{ m.user.get_full_name }}</option>
                   {% endfor %}
@@ -72,11 +214,11 @@
           
           <hr style="border-color: var(--border); margin: 32px 0 24px 0;">
           
-          <div class="d-flex align-items-center gap-2">
-            <button type="submit" class="btn-primary-sage px-4">
-              <i class="bi bi-cloud-arrow-up" style="margin-right: 4px;"></i> Upload & Process
+          <div class="d-flex align-items-center gap-3">
+            <button type="submit" class="btn-primary-sage d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+              <i class="bi bi-cloud-arrow-up"></i> Upload & Process
             </button>
-            <a href="{% url 'leads' %}" class="btn btn-sm grove-btn-outline" style="padding: 10px 16px;">Cancel</a>
+            <a href="{% url 'leads' %}" class="btn grove-btn-ghost" style="font-weight: 600; padding: 10px 20px;">Cancel</a>
           </div>
         </form>
         
@@ -84,87 +226,89 @@
     </div>
 
     {# ── RIGHT COL: TEMPLATE & REFERENCE ── #}
-    <div class="col-md-5">
+    <div class="col-lg-5 d-flex flex-column gap-4">
       
-      <div style="background: var(--ink); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-        <div style="font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
-          <i class="bi bi-download" style="margin-right: 4px; color: var(--gold);"></i> Data Template
+      <div class="grove-panel-dark">
+        <div class="panel-header dark-header">
+          <div class="panel-icon" style="background: rgba(201, 168, 76, 0.15); color: var(--gold);"><i class="bi bi-download"></i></div>
+          <h3 class="panel-title dark-text">Data Template</h3>
         </div>
-        <p style="font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 20px; line-height: 1.6;">
+        <p style="font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 24px; line-height: 1.6;">
           Ensure your data matches the system architecture perfectly. Download the pre-formatted CSV template below to prevent import failures.
         </p>
-        <a href="{% url 'download_lead_template' %}" class="btn w-100" style="background: var(--gold); color: var(--ink); font-weight: 600; font-size: 14px; padding: 12px; border-radius: 8px; border: none; text-decoration: none;">
-          Download CSV Template
+        <a href="{% url 'download_lead_template' %}" class="btn w-100 d-flex align-items-center justify-content-center gap-2" style="background: var(--gold); color: var(--ink); font-weight: 700; font-size: 14px; padding: 12px; border-radius: 10px; border: none; transition: transform 0.2s;">
+          <i class="bi bi-file-earmark-spreadsheet"></i> Download CSV Template
         </a>
       </div>
 
-      <div style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px;">
-        <div style="font-size: 10px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;">
-          <i class="bi bi-book" style="margin-right: 4px; color: var(--sage);"></i> Column Reference
+      <div class="grove-panel">
+        <div class="panel-header">
+          <div class="panel-icon" style="background: var(--cloud); color: var(--stone);"><i class="bi bi-book"></i></div>
+          <h3 class="panel-title">Column Reference</h3>
         </div>
         
-        <div style="display: flex; flex-direction: column;">
+        <div class="d-flex flex-column">
           
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row pt-0">
             <div class="d-flex justify-content-between align-items-center mb-1">
-              <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">name, phone</span>
-              <span class="status-pill s-lost" style="font-size: 10px; padding: 2px 6px;">REQUIRED</span>
+              <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 700; color: var(--ink);">name, phone</span>
+              <span class="status-pill s-lost">REQUIRED</span>
             </div>
-            <div style="font-size: 12px; color: var(--stone); line-height: 1.5;">Rows missing these are skipped automatically.</div>
+            <div style="font-size: 12px; color: var(--stone); line-height: 1.5;">Rows missing these fields will be skipped automatically.</div>
           </div>
           
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">source</span>
-              <span class="status-pill s-new" style="font-size: 10px; padding: 2px 6px;">OPTIONAL</span>
+              <span class="status-pill s-new">OPTIONAL</span>
             </div>
             <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--stone); line-height: 1.5; padding-top: 4px;">meta, google, website, social, campaign, referral, walkin, whatsapp, other</div>
           </div>
 
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">temperature</span>
-              <span class="status-pill s-new" style="font-size: 10px; padding: 2px 6px;">OPTIONAL</span>
+              <span class="status-pill s-new">OPTIONAL</span>
             </div>
             <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--stone); line-height: 1.5; padding-top: 4px;">hot, warm, cold</div>
           </div>
 
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">stage</span>
-              <span class="status-pill s-new" style="font-size: 10px; padding: 2px 6px;">OPTIONAL</span>
+              <span class="status-pill s-new">OPTIONAL</span>
             </div>
             <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--stone); line-height: 1.5; padding-top: 4px;">new, contacted, interested, site_visit, negotiation, closed, lost</div>
           </div>
 
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">property_type</span>
-              <span class="status-pill s-new" style="font-size: 10px; padding: 2px 6px;">OPTIONAL</span>
+              <span class="status-pill s-new">OPTIONAL</span>
             </div>
             <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--stone); line-height: 1.5; padding-top: 4px;">apartment, villa, plot, commercial, studio</div>
           </div>
 
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">bhk_preference</span>
-              <span class="status-pill s-new" style="font-size: 10px; padding: 2px 6px;">OPTIONAL</span>
+              <span class="status-pill s-new">OPTIONAL</span>
             </div>
             <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--stone); line-height: 1.5; padding-top: 4px;">1bhk, 2bhk, 3bhk, 4bhk+</div>
           </div>
 
-          <div style="padding: 12px 0; border-bottom: 1px solid var(--cloud);">
+          <div class="ref-row">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink);">purpose</span>
-              <span class="status-pill s-new" style="font-size: 10px; padding: 2px 6px;">OPTIONAL</span>
+              <span class="status-pill s-new">OPTIONAL</span>
             </div>
             <div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--stone); line-height: 1.5; padding-top: 4px;">investment, selfuse, rental</div>
           </div>
 
-          <div style="padding-top: 16px; margin-top: 8px;">
-            <div class="d-flex gap-2" style="font-size: 12px; color: var(--stone); line-height: 1.5; background: #FFF7ED; padding: 12px; border-radius: 8px; border: 1px solid #FFEDD5;">
-              <i class="bi bi-exclamation-circle" style="color: #EA580C; font-size: 14px;"></i>
-              <span style="color: #9A3412;">Invalid values (e.g., spelling errors) will automatically fall back to system defaults during import.</span>
+          <div class="pt-4 mt-2">
+            <div class="grove-alert grove-alert-warning" style="margin: 0; padding: 12px; font-size: 12px; border-radius: 10px;">
+              <i class="bi bi-exclamation-triangle-fill" style="margin-right: 8px;"></i>
+              Invalid mapping values or spelling errors will automatically fall back to system defaults during the import process.
             </div>
           </div>
 
