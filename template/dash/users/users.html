@@ -3,31 +3,131 @@
 
 {% block title %}User Management — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS (Roles & Status) ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-hot  { background: var(--gold-lt); color: #8B6914; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+  .s-cold { background: var(--cloud); color: var(--stone); }
+  
+  .s-blue { background: #EFF6FF; color: #2563EB; }
+</style>
+{% endblock %}
+
 {% block page_header %}
-  User Management
+  System Management
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
 
-  <div class="leads-card fade-up">
+  {# ── PAGE HEADER & ACTIONS ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">User Management</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Configure corporate roles, permissions, and cross-branch hierarchy</div>
+    </div>
+    <a href="{% url 'add_user' %}" class="btn-primary-sage text-decoration-none d-inline-flex align-items-center gap-2" style="padding: 10px 24px; font-weight: 600;">
+      <i class="bi bi-person-plus"></i> Add User
+    </a>
+  </div>
+
+  {# ── KPI STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
     
-    {# ── HEADER & FILTERS ── #}
-    <div class="leads-header flex-column gap-3 align-items-stretch">
-      <div class="d-flex justify-content-between align-items-center">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-people"></i></div>
+        <div class="stat-value">{{ total_users_count|default:users.count }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-buildings"></i></div>
+        <div class="stat-value">{{ branches.count|default:"0" }}</div>
+        <div class="stat-label">Active Branches</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-person-check"></i></div>
+        <div class="stat-value">{{ active_users_count|default:"0" }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.2s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-person-x"></i></div>
+        <div class="stat-value">{{ inactive_users_count|default:"0" }}</div>
+        <div class="stat-label">Inactive Users</div>
+      </div>
+    </div>
+    
+  </div>
+
+  {# ── MAIN DATA PANEL & FILTERS ── #}
+  <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.25s;">
+    
+    {# ── HEADER & SEARCH FILTERS ── #}
+    <div class="leads-header flex-column gap-3 align-items-stretch" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+      <div class="d-flex justify-content-between align-items-center w-100">
         <div>
-          <div class="section-title">User Management</div>
-          <div style="font-size:12px;color:var(--stone);">All roles across all branches</div>
+          <div class="section-title"><i class="bi bi-shield-lock" style="color: var(--sage); margin-right: 8px;"></i>System Accounts</div>
         </div>
-        <a href="{% url 'add_user' %}" class="btn-primary-sage">
-          <i class="bi bi-person-plus" style="margin-right: 4px;"></i> Add User
-        </a>
       </div>
 
-      <form method="GET" class="d-flex align-items-center gap-2 flex-wrap" style="border-top: 1px solid var(--border); padding-top: 16px;">
-        <input type="text" name="q" class="grove-input" style="max-width: 220px; padding: 6px 12px; min-height: 36px;" placeholder="Search name..." value="{{ request.GET.q }}">
+      <form method="GET" class="d-flex align-items-center gap-3 flex-wrap pt-3" style="border-top: 1px dashed var(--cloud);">
         
-        <select name="role" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+        <div style="position: relative; flex: 1; min-width: 200px; max-width: 280px;">
+          <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
+          <input type="text" name="q" class="grove-input m-0" style="padding-left: 40px; min-height: 38px;" placeholder="Search name or username..." value="{{ request.GET.q|default:'' }}">
+        </div>
+        
+        <select name="role" class="grove-input m-0" style="width: auto; min-width: 180px; min-height: 38px;">
           <option value="">All Roles</option>
           <option value="manager" {% if role_filter == 'manager' %}selected{% endif %}>Branch Manager</option>
           <option value="tl" {% if role_filter == 'tl' %}selected{% endif %}>Team Leader</option>
@@ -36,124 +136,129 @@
           <option value="marketing" {% if role_filter == 'marketing' %}selected{% endif %}>Marketing</option>
         </select>
         
-        <select name="branch" class="grove-input" style="max-width: 180px; padding: 6px 12px; min-height: 36px;">
+        <select name="branch" class="grove-input m-0" style="width: auto; min-width: 180px; min-height: 38px;">
           <option value="">All Branches</option>
           {% for b in branches %}
             <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
           {% endfor %}
         </select>
         
-        <button type="submit" class="btn-primary-sage" style="padding: 6px 16px; min-height: 36px; border-radius: 8px;">Filter</button>
-        <a href="{% url 'users' %}" class="btn grove-btn-outline" style="padding: 6px 16px; min-height: 36px;">Clear</a>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn-primary-sage m-0" style="padding: 6px 20px; min-height: 38px; border-radius: 8px;">Filter</button>
+          <a href="{% url 'users' %}" class="btn grove-btn-outline m-0" style="padding: 6px 16px; min-height: 38px;">Clear</a>
+        </div>
       </form>
     </div>
 
     {# ── DATA TABLE ── #}
-    <table class="leads-table">
-      <thead>
-        <tr>
-          <th style="width: 40px;">#</th>
-          <th>Name</th>
-          <th>Username</th>
-          <th>Role</th>
-          <th>Branch</th>
-          <th>Phone</th>
-          <th>Reports To</th>
-          <th>Status</th>
-          <th style="text-align: right;">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in users %}
-        <tr>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:12px; color:var(--stone);">
+    <div class="table-responsive">
+      <table class="leads-table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: var(--cloud);">
+          <tr>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Name</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Username</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Role</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Branch</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Phone</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Reports To</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Status</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr style="border-bottom: 1px solid var(--cloud);">
+            <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
               {{ forloop.counter|stringformat:"02d" }}
-            </span>
-          </td>
-          <td>
-            <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ u.user.get_full_name|default:u.user.username }}</span>
-          </td>
-          <td>
-            <span style="font-size:12px; color:var(--stone);">{{ u.user.username }}</span>
-          </td>
-          <td>
-            {% if u.role == 'manager' %}
-              <span class="status-pill s-new">{{ u.get_role_display }}</span>
-            {% elif u.role == 'tl' %}
-              <span class="status-pill s-prog">{{ u.get_role_display }}</span>
-            {% elif u.role == 'member' %}
-              <span style="background:#eff6ff; color:#2563eb; font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; letter-spacing:0.5px;">{{ u.get_role_display }}</span>
-            {% elif u.role == 'hr' %}
-              <span class="status-pill s-qual">{{ u.get_role_display }}</span>
-            {% elif u.role == 'marketing' %}
-              <span class="status-pill s-lost">{{ u.get_role_display }}</span>
-            {% else %}
-              <span style="background:var(--cloud); color:var(--stone); font-size:11px; font-weight:600; padding:4px 8px; border-radius:20px; letter-spacing:0.5px;">{{ u.get_role_display }}</span>
-            {% endif %}
-          </td>
-          <td>
-            <span style="font-size:13px; color:var(--stone);">{{ u.branch.name|default:"—" }}</span>
-          </td>
-          <td>
-            <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--ink);">{{ u.phone|default:"—" }}</span>
-          </td>
-          <td>
-            <div class="d-inline-flex align-items-center gap-2">
-              {% if u.reports_to %}
-                <div style="width:20px; height:20px; border-radius:50%; background:var(--cloud); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--stone);">
-                  <i class="bi bi-person-fill"></i>
-                </div>
-                <span style="font-size:13px; color:var(--ink);">{{ u.reports_to.user.get_full_name }}</span>
+            </td>
+            <td style="padding: 16px 12px; font-weight: 600; color: var(--ink); font-size: 14px;">
+              {{ u.user.get_full_name|default:u.user.username }}
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone); font-family: 'Geist Mono', monospace;">
+              {{ u.user.username }}
+            </td>
+            <td style="padding: 16px 12px;">
+              {% if u.role == 'manager' %}
+                <span class="status-pill s-new"><i class="bi bi-building-gear"></i> {{ u.get_role_display }}</span>
+              {% elif u.role == 'tl' %}
+                <span class="status-pill s-prog"><i class="bi bi-people-fill"></i> {{ u.get_role_display }}</span>
+              {% elif u.role == 'member' %}
+                <span class="status-pill s-blue"><i class="bi bi-telephone-inbound"></i> {{ u.get_role_display }}</span>
+              {% elif u.role == 'hr' %}
+                <span class="status-pill s-qual"><i class="bi bi-person-badge"></i> {{ u.get_role_display }}</span>
+              {% elif u.role == 'marketing' %}
+                <span class="status-pill s-lost"><i class="bi bi-megaphone"></i> {{ u.get_role_display }}</span>
               {% else %}
-                <span style="font-size:13px; color:var(--stone);">—</span>
+                <span class="status-pill s-cold">{{ u.get_role_display }}</span>
               {% endif %}
-            </div>
-          </td>
-          <td>
-            {% if u.status == 'Enabled' %}
-              <span class="status-pill s-qual">Active</span>
-            {% else %}
-              <span class="status-pill s-lost">Inactive</span>
-            {% endif %}
-          </td>
-          <td>
-            <div class="d-flex gap-1 justify-content-end">
-              <a href="{% url 'edit_user' u.id %}" class="btn btn-sm grove-btn-ghost" title="Edit">
-                <i class="bi bi-pencil" style="color:var(--stone);"></i>
-              </a>
-              
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);">
+              {{ u.branch.name|default:"—" }}
+            </td>
+            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--ink);">
+              {{ u.phone|default:"—" }}
+            </td>
+            <td style="padding: 16px 12px;">
+              <div class="d-inline-flex align-items-center gap-2">
+                {% if u.reports_to %}
+                  <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                    {{ u.reports_to.user.get_full_name|default:"U"|make_list|first|upper }}
+                  </div>
+                  <span style="font-size: 13px; color: var(--ink); font-weight: 500;">{{ u.reports_to.user.get_full_name }}</span>
+                {% else %}
+                  <span style="font-size: 13px; color: var(--stone);">—</span>
+                {% endif %}
+              </div>
+            </td>
+            <td style="padding: 16px 12px;">
               {% if u.status == 'Enabled' %}
-                <a href="{% url 'disable_user' u.id %}" class="btn btn-sm grove-btn-ghost" title="Disable">
-                  <i class="bi bi-pause-circle" style="color:var(--stone);"></i>
-                </a>
+                <span class="status-pill s-qual">✓ Active</span>
               {% else %}
-                <a href="{% url 'enable_user' u.id %}" class="btn btn-sm grove-btn-ghost" title="Enable">
-                  <i class="bi bi-play-circle" style="color:var(--sage);"></i>
-                </a>
+                <span class="status-pill s-lost">✕ Inactive</span>
               {% endif %}
-              
-              <a href="{% url 'delete_user' u.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this user permanently?')" title="Delete">
-                <i class="bi bi-trash" style="color:#E53E3E;"></i>
-              </a>
-            </div>
-          </td>
-        </tr>
-        
-        {% empty %}
-        {# ── EMPTY STATE ── #}
-        <tr>
-          <td colspan="9">
-            <div class="grove-empty-state">
-              <i class="bi bi-people" style="font-size:32px; color:var(--sage-lt)"></i>
-              <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No users found</div>
-              <div style="font-size:12px; color:var(--stone); margin-top:4px;">Adjust filters or <a href="{% url 'add_user' %}" style="color: var(--sage); text-decoration: none;">add your first user</a>.</div>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+            <td style="padding: 16px 24px; text-align: right;">
+              <div class="d-flex gap-1 justify-content-end">
+                <a href="{% url 'edit_user' u.id %}" class="btn btn-sm grove-btn-ghost" title="Edit Properties" style="padding: 6px 10px;">
+                  <i class="bi bi-pencil" style="color: var(--stone);"></i>
+                </a>
+                
+                {% if u.status == 'Enabled' %}
+                  <a href="{% url 'disable_user' u.id %}" class="btn btn-sm grove-btn-ghost" title="Suspend User Account" style="padding: 6px 10px;">
+                    <i class="bi bi-pause-circle" style="color: var(--stone);"></i>
+                  </a>
+                {% else %}
+                  <a href="{% url 'enable_user' u.id %}" class="btn btn-sm grove-btn-ghost" title="Reactivate User Account" style="padding: 6px 10px;">
+                    <i class="bi bi-play-circle" style="color: var(--sage);"></i>
+                  </a>
+                {% endif %}
+                
+                <a href="{% url 'delete_user' u.id %}" class="btn btn-sm grove-btn-ghost" onclick="return confirm('Delete this operational user account configuration permanently?')" title="Delete" style="padding: 6px 10px;">
+                  <i class="bi bi-trash" style="color: #E53E3E;"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          
+          {% empty %}
+          {# ── EMPTY STATE ── #}
+          <tr>
+            <td colspan="9" style="padding: 64px 24px;">
+              <div class="grove-empty-state text-center">
+                <i class="bi bi-people" style="font-size: 32px; color: var(--sage-lt);"></i>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No active system accounts found</div>
+                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Adjust user table sorting filters or create your first system account infrastructure.</div>
+                <a href="{% url 'add_user' %}" class="btn-primary-sage mt-4 d-inline-flex align-items-center gap-2" style="padding: 10px 20px; font-weight: 600; text-decoration: none;">
+                  <i class="bi bi-person-plus"></i> Add User
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
 </div>
