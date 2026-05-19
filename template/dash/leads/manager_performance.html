@@ -143,7 +143,7 @@
             <td style="padding: 16px 12px;">
               <span style="font-size: 13px; color: var(--ink); font-weight: 500;">
                 {% if lead.assigned_to.role == 'manager' %}
-                  {{ lead.assigned_to.user.username }}
+                  {{ lead.assigned_to.user.first_name }} {{ lead.assigned_to.user.last_name }}
                 {% elif lead.assigned_to.reports_to and lead.assigned_to.reports_to.reports_to %}
                   {{ lead.assigned_to.reports_to.reports_to.user.first_name }}  {{ lead.assigned_to.reports_to.reports_to.user.last_name }}
                 {% else %}
