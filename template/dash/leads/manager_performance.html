@@ -63,7 +63,7 @@
   <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
       <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">
-        <span style="color: var(--stone); font-weight: 500;">Manager /</span> {{ manager.user.username }}
+        <span style="color: var(--stone); font-weight: 500;">Manager /</span> {{ manager.user.first_name }} {{ manager.user.last_name }}
       </h2>
       <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Performance overview and lead tracking</div>
     </div>
@@ -145,7 +145,7 @@
                 {% if lead.assigned_to.role == 'manager' %}
                   {{ lead.assigned_to.user.username }}
                 {% elif lead.assigned_to.reports_to and lead.assigned_to.reports_to.reports_to %}
-                  {{ lead.assigned_to.reports_to.reports_to.user.username }}
+                  {{ lead.assigned_to.reports_to.reports_to.user.first_name }}  {{ lead.assigned_to.reports_to.reports_to.user.last_name }}
                 {% else %}
                   <span style="color: var(--stone);">—</span>
                 {% endif %}
@@ -157,7 +157,7 @@
                 {% if lead.assigned_to.role == 'tl' %}
                   {{ lead.assigned_to.user.username }}
                 {% elif lead.assigned_to.role == 'employee' and lead.assigned_to.reports_to %}
-                  {{ lead.assigned_to.reports_to.user.username }}
+                  {{ lead.assigned_to.reports_to.user.first_name }} {{ lead.assigned_to.reports_to.user.last_name }}
                 {% else %}
                   <span style="color: var(--stone);">—</span>
                 {% endif %}
@@ -167,7 +167,7 @@
             <td style="padding: 16px 12px;">
               <span style="font-size: 13px; color: var(--ink); font-weight: 500;">
                 {% if lead.assigned_to.role == 'employee' %}
-                  {{ lead.assigned_to.user.username }}
+                  {{ lead.assigned_to.user.first_name }} {{ lead.assigned_to.user.last_name }}
                 {% else %}
                   <span style="color: var(--stone);">—</span>
                 {% endif %}
