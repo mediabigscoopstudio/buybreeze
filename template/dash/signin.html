@@ -11,7 +11,7 @@
   }
   
   .auth-wrapper {
-    min-height: 80vh;
+    min-height: 85vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,38 +21,96 @@
   .auth-card {
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 48px 32px;
+    border-radius: 20px;
+    padding: 40px 36px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04);
+    max-width: 420px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.03), 0 4px 16px rgba(0, 0, 0, 0.01);
   }
   
   .brand-title {
     font-family: 'DM Serif Display', serif;
-    font-size: 36px;
+    font-size: 32px;
     color: var(--ink);
     text-align: center;
-    margin-bottom: 4px;
+    font-weight: 400;
   }
   
   .brand-subtitle {
     font-family: 'Geist', sans-serif;
-    font-size: 10px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--stone);
-    letter-spacing: 2px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 36px;
+    margin-top: 4px;
+  }
+  
+  /* ── GROVE FORM UI FIXES ── */
+  .grove-field {
+    margin-bottom: 0;
+  }
+  
+  .grove-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--stone);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  
+  .grove-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .grove-input:focus {
+    outline: none;
+    border: 1.8px solid var(--sage);
+    padding: 10.2px 13.2px; /* Offsets border layout scaling */
+    box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+
+  .grove-input::placeholder {
+    color: #A1A1AA;
+  }
+
+  .input-icon-wrapper {
+    position: relative;
+  }
+
+  .input-icon-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 15px;
+    pointer-events: none;
+  }
+
+  .input-icon-wrapper .grove-input {
+    padding-left: 44px;
   }
   
   .auth-divider {
     font-size: 11px;
     color: var(--stone);
     text-align: center;
-    margin-top: 32px;
-    font-weight: 500;
+    margin-top: 36px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border-top: 1px dashed var(--cloud);
+    padding-top: 24px;
   }
 </style>
 {% endblock %}
@@ -61,45 +119,48 @@
 <div class="auth-wrapper">
   <div class="auth-card fade-up">
     
+    {# ── IDENTITY HEADLINE ── #}
     <div class="brand-title">BuyBuzz Infra</div>
     <div class="brand-subtitle">System Access</div>
 
+    {# ── ERROR MESSAGES FEED ── #}
     {% if messages %}
       <div class="mb-4">
         {% for message in messages %}
-          <div class="grove-alert grove-alert-error" style="margin-bottom: 8px;">
-            <i class="bi bi-x-circle-fill"></i>
+          <div class="grove-alert grove-alert-error" style="margin-bottom: 8px; border-radius: 10px; padding: 12px; font-size: 13px;">
+            <i class="bi bi-x-circle-fill" style="margin-right: 6px;"></i>
             {{ message }}
           </div>
         {% endfor %}
       </div>
     {% endif %}
 
-    <form method="POST" action="">
+    {# ── AUTHENTICATION GATEWAY ── #}
+    <form method="POST" action="" class="d-flex flex-column gap-4">
       {% csrf_token %}
       
-      <div class="grove-field mb-4">
-        <label class="grove-label">Phone Number</label>
-        <div style="position: relative;">
-          <i class="bi bi-telephone" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
-          
+      <div class="grove-field">
+        <label class="grove-label">Phone Number Credentials</label>
+        <div class="input-icon-wrapper">
+          <i class="bi bi-telephone"></i>
           <input 
             type="text" 
             name="phone" 
             class="grove-input" 
-            style="padding-left: 44px; font-family: 'Geist Mono', monospace;" 
-            placeholder="Enter your phone number" 
+            style="font-family: 'Geist Mono', monospace;" 
+            placeholder="Enter registered mobile number" 
             required 
             autofocus
           >
         </div>
       </div>
 
-      <button type="submit" class="btn-primary-sage w-100" style="padding: 12px; font-size: 14px;">
-        Sign In
+      <button type="submit" class="btn-primary-sage w-100 d-inline-flex align-items-center justify-content-center gap-2" style="padding: 12px; font-size: 14px; font-weight: 600; border-radius: 10px;">
+        <i class="bi bi-shield-check"></i> Sign In to CRM
       </button>
     </form>
 
+    {# ── ATTRIBUTION BAR ── #}
     <div class="auth-divider">BuyBuzz Infra · Enterprise CRM Hub</div>
     
   </div>

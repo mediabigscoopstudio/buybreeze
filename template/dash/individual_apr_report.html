@@ -3,6 +3,53 @@
 
 {% block title %}{{ target_employee.username }} - APR Report — Buy Buzz CRM{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* ── GROVE STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-prog { background: #FFF3CD; color: #856404; }
+  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
+  .s-lost { background: #F8D7DA; color: #721C24; }
+</style>
+{% endblock %}
+
 {% block page_header %}
   Performance
 {% endblock %}
@@ -11,87 +58,123 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">
         Performance Profile: <span style="color: var(--sage);">{{ target_employee.username }}</span>
-      </div>
-      <div style="font-size: 14px; color: var(--stone);">Individual Agent Performance Report and daily metrics</div>
+      </h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Individual Agent Performance Report and granular cross-reference milestones</div>
     </div>
-    <button onclick="history.back()" class="btn btn-sm grove-btn-outline">
+    <button onclick="history.back()" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2" style="font-weight: 600; padding: 10px 16px;">
       <i class="bi bi-arrow-left"></i> Back to Directory
     </button>
   </div>
 
+  {# ── KPI STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-clipboard-data"></i></div>
+        <div class="stat-value">{{ report_data|length|default:"0" }}</div>
+        <div class="stat-label">Logs Tracked</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.05s;">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-telephone-inbound"></i></div>
+        <div class="stat-value">CRM</div>
+        <div class="stat-label">Pipeline Streams Mapped</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-map"></i></div>
+        <div class="stat-value">Vector</div>
+        <div class="stat-label">Geofence Nodes Tracking</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-pie-chart"></i></div>
+        <div class="stat-value">Audited</div>
+        <div class="stat-label">Analytics Matrix Compiled</div>
+      </div>
+    </div>
+  </div>
+
   {# ── REPORT TABLE CARD ── #}
-  <div class="leads-card fade-up" style="animation-delay: 0.05s;">
-    <div class="leads-header">
-      <div class="section-title"><i class="bi bi-person-badge" style="margin-right: 8px; color: var(--stone);"></i>Attendance & CRM Metrics</div>
+  <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.2s;">
+    <div class="leads-header" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+      <div class="section-title"><i class="bi bi-person-vcard" style="color: var(--sage); margin-right: 8px;"></i>Attendance & CRM Metrics</div>
     </div>
 
-    <div style="max-height: 650px; overflow-y: auto;">
-      <table class="leads-table">
+    <div class="table-responsive" style="max-height: 650px; overflow-y: auto;">
+      <table class="leads-table" style="width: 100%; border-collapse: collapse;">
         <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
           <tr>
-            <th style="padding-left: 24px;">Date</th>
-            <th>Employee</th>
-            <th>Punch In</th>
-            <th>Punch Out</th>
-            <th style="text-align: center;">New Leads</th>
-            <th style="text-align: center;">Closed</th>
-            <th style="text-align: center;">Avg Call Time</th>
-            <th style="text-align: right; padding-right: 24px;">Action</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Date</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Employee</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Punch In</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Punch Out</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: center;">New Leads</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: center;">Closed</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: center;">Avg Call Time</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Action Matrix</th>
           </tr>
         </thead>
         <tbody>
           {% for row in report_data %}
-          <tr>
-            <td style="padding-left: 24px;">
+          <tr style="border-bottom: 1px solid var(--cloud);">
+            <td style="padding: 16px 24px;">
               <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ row.date|date:"d M Y" }}</span>
             </td>
-            <td>
-              <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ row.employee_name }}</span>
+            <td style="padding: 16px 12px; font-weight: 600; color: var(--ink); font-size: 14px;">
+              <div class="d-flex align-items-center gap-2">
+                <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                  {{ row.employee_name|make_list|first|upper }}
+                </div>
+                <span style="font-size: 13px; color: var(--ink); font-weight: 500;">{{ row.employee_name }}</span>
+              </div>
             </td>
-            <td>
+            <td style="padding: 16px 12px;">
               {% if row.punch_in %}
-                <span class="status-pill s-qual" style="font-family:'Geist Mono', monospace;">{{ row.punch_in|time:"h:i A" }}</span>
+                <span class="status-pill s-new" style="font-family:'Geist Mono', monospace; font-size: 12px;"><i class="bi bi-box-arrow-in-right"></i> {{ row.punch_in|time:"h:i A" }}</span>
               {% else %}
-                <span style="font-size: 12px; color: var(--stone);">Missing</span>
+                <span style="font-size: 12px; color: var(--stone); font-weight: 500;">—</span>
               {% endif %}
             </td>
-            <td>
+            <td style="padding: 16px 12px;">
               {% if row.punch_out %}
-                <span class="status-pill s-lost" style="font-family:'Geist Mono', monospace;">{{ row.punch_out|time:"h:i A" }}</span>
+                <span class="status-pill s-lost" style="font-family:'Geist Mono', monospace; font-size: 12px;"><i class="bi bi-box-arrow-left"></i> {{ row.punch_out|time:"h:i A" }}</span>
               {% else %}
-                <span class="status-pill s-prog">Active</span>
+                <span class="status-pill s-prog"><i class="bi bi-circle-fill" style="font-size: 6px; margin-right: 2px;"></i> Active Shift</span>
               {% endif %}
             </td>
-            <td style="text-align: center;">
+            <td style="padding: 16px 12px; text-align: center;">
               <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--sage);">{{ row.new_leads }}</span>
             </td>
-            <td style="text-align: center;">
+            <td style="padding: 16px 12px; text-align: center;">
               <span style="font-family:'Geist Mono', monospace; font-size:14px; font-weight:700; color:var(--ink);">{{ row.closed_contacts }}</span>
             </td>
-            <td style="text-align: center;">
-              <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--stone);">{{ row.avg_call_time }}</span>
+            <td style="padding: 16px 12px; text-align: center;">
+              <span style="font-family:'Geist Mono', monospace; font-size:13px; color:var(--stone); font-weight: 600;">{{ row.avg_call_time }}</span>
             </td>
-            <td style="text-align: right; padding-right: 24px;">
-              {# FIXED: Using double quotes for Django filter to prevent JS string breakage #}
+            <td style="padding: 16px 24px; text-align: right;">
               <button onclick="viewRoute('{{ row.employee_name }}', '{{ row.date.isoformat }}')"
-                      class="btn btn-sm grove-btn-outline"
-                      style="font-size: 12px; padding: 6px 12px;"
+                      class="btn btn-sm grove-btn-outline d-inline-flex align-items-center gap-2"
+                      style="font-size: 12px; padding: 6px 14px; font-weight: 600;"
                       data-bs-toggle="modal" data-bs-target="#mapModal">
-                <i class="bi bi-geo-alt-fill" style="margin-right: 4px;"></i> Track Route
+                <i class="bi bi-geo-alt-fill"></i> Track Route
               </button>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="8">
-              <div class="grove-empty-state" style="padding: 50px 0;">
-                <i class="bi bi-clipboard-x" style="font-size:32px; color:var(--sage-lt)"></i>
-                <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No attendance data found</div>
-                <div style="font-size:12px; color:var(--stone); margin-top:4px;">Records for this specific employee will appear here.</div>
+            <td colspan="8" style="padding: 64px 24px;">
+              <div class="grove-empty-state text-center">
+                <i class="bi bi-clipboard-x" style="font-size: 32px; color: var(--sage-lt);"></i>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No attendance data found</div>
+                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">Performance metric matrices will render uniquely for this supervisor timeline track once parameters load.</div>
               </div>
             </td>
           </tr>
@@ -108,7 +191,7 @@
     <div class="modal-content" style="border-radius: 16px; border: none; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
       <div class="modal-header" style="background: var(--white); border-bottom: 1px solid var(--border); padding: 20px 24px;">
         <h5 class="modal-title" style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">
-          Field Route: <span id="mapEmpName" style="color: var(--sage);"></span>
+          Field Coordinate Vector Route: <span id="mapEmpName" style="color: var(--sage);"></span>
         </h5>
         <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -138,11 +221,11 @@
                 if (data.status === 'success') {
                     drawMap(data.route);
                 } else {
-                    alert('Could not load route data.');
+                    alert('Could not safely extract route parameters.');
                 }
             })
             .catch(err => {
-                console.error("Map fetch error:", err);
+                console.error("Map core vector loading error:", err);
             });
     }
 
@@ -159,21 +242,21 @@
         markers = [];
         
         if (!routePoints || routePoints.length === 0) {
-            alert("No location data found for this employee today.");
+            alert("No vector coordinate entries mapped for this supervisor profile day record.");
             return;
         }
 
         const latlngs = routePoints.map(point => [point.lat, point.lng]);
-        polyline = L.polyline(latlngs, {color: '#4F7942', weight: 5, opacity: 0.8}).addTo(map);
+        polyline = L.polyline(latlngs, {color: '#6F8F9F', weight: 5, opacity: 0.85}).addTo(map);
 
         map.fitBounds(polyline.getBounds(), {padding: [50, 50]});
 
-        const startMarker = L.marker(latlngs[0]).addTo(map).bindPopup("<b>Start:</b> " + routePoints[0].time);
+        const startMarker = L.marker(latlngs[0]).addTo(map).bindPopup("<b>Vector Shift Origin:</b> " + routePoints[0].time);
         markers.push(startMarker);
 
         if (latlngs.length > 1) {
             const lastIdx = latlngs.length - 1;
-            const endMarker = L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest:</b> " + routePoints[lastIdx].time);
+            const endMarker = L.marker(latlngs[lastIdx]).addTo(map).bindPopup("<b>Latest Captured Threshold:</b> " + routePoints[lastIdx].time);
             markers.push(endMarker);
         }
 
@@ -182,7 +265,9 @@
 </script>
 
 <style>
+  /* Leaflet Internal Container System Normalizations */
   .leaflet-container { font-family: 'Geist', sans-serif !important; }
-  .leaflet-popup-content-wrapper { border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .leaflet-popup-content-wrapper { border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.06); background: var(--white); color: var(--ink); }
+  .leaflet-popup-tip { background: var(--white); }
 </style>
 {% endblock %}

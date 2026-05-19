@@ -1,7 +1,52 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Employee Directory — Buy Buzz CRM{% endblock %}
+{% block title %}Employee Directory — Buy Buzz CRM{% block title %}
+
+{% block extra_css %}
+<style>
+  /* ── GROVE STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    height: 100%;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
+  
+  .stat-icon-box {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+  }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
+  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
+  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
+
+  /* ── STATUS PILLS ── */
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px; 
+    padding: 4px 10px; border-radius: 20px; 
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .s-new  { background: var(--sage-lt); color: var(--sage); }
+  .s-cold { background: var(--cloud); color: var(--stone); }
+</style>
+{% endblock %}
 
 {% block page_header %}
   Directory
@@ -11,68 +56,109 @@
 <div class="main-content">
 
   {# ── PAGE HEADER ── #}
-  <div class="d-flex align-items-start justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
-      <div style="font-family: 'Geist', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink);">Employee Directory</div>
-      <div style="font-size: 14px; color: var(--stone);">Search by Branch or Team Leader to view individual APR reports</div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Employee Directory</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Search by Branch or Team Leader to view individual APR analytical reports</div>
     </div>
-    <button onclick="history.back()" class="btn btn-sm grove-btn-outline">
+    <button onclick="history.back()" class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2">
       <i class="bi bi-arrow-left"></i> Back to Dashboard
     </button>
   </div>
 
+  {# ── KPI STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-journal-richtext"></i></div>
+        <div class="stat-value">{{ directory_data|length|default:"0" }}</div>
+        <div class="stat-label">Total APR Ledgers</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.05s;">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-patch-check"></i></div>
+        <div class="stat-value">Active</div>
+        <div class="stat-label">Performance Parameters</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-shield-check"></i></div>
+        <div class="stat-value">Audited</div>
+        <div class="stat-label">Cross-Branch Valuations</div>
+      </div>
+    </div>
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box stone"><i class="bi bi-diagram-3"></i></div>
+        <div class="stat-value">Linked</div>
+        <div class="stat-label">Hierarchy Chains Mapped</div>
+      </div>
+    </div>
+  </div>
+
   {# ── DIRECTORY DATA CARD ── #}
-  <div class="leads-card fade-up" style="animation-delay: 0.05s;">
+  <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.2s;">
     
-    <div class="leads-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-      <div class="section-title"><i class="bi bi-journal-richtext" style="margin-right: 8px; color: var(--stone);"></i>APR Records</div>
-      
-      <div style="position: relative; width: 100%; max-width: 320px;">
-        <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
-        <input type="text" id="liveSearch" class="grove-input m-0" style="padding-left: 36px; min-height: 36px; font-size: 13px;" placeholder="Search employee, branch, or team leader..." onkeyup="filterTable()">
+    <div class="leads-header flex-column gap-3 align-items-stretch" style="padding: 20px 24px; border-bottom: 1px solid var(--border); background: var(--white);">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 w-100">
+        <div>
+          <div class="section-title"><i class="bi bi-person-lines-fill" style="color: var(--sage); margin-right: 8px;"></i>APR Performance Directory</div>
+        </div>
+        
+        <div style="position: relative; width: 100%; max-width: 320px;">
+          <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--stone); font-size: 14px;"></i>
+          <input type="text" id="liveSearch" class="grove-input m-0" style="padding-left: 40px; min-height: 38px; font-size: 13px;" placeholder="Search employee, branch, or team leader..." onkeyup="filterTable()">
+        </div>
       </div>
     </div>
 
-    <div style="max-height: 600px; overflow-y: auto;">
-      <table class="leads-table" id="directoryTable">
+    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+      <table class="leads-table" id="directoryTable" style="width: 100%; border-collapse: collapse;">
         <thead style="position: sticky; top: 0; z-index: 5; background: var(--cloud);">
           <tr>
-            <th style="padding-left: 24px;">Employee Name</th>
-            <th>Branch</th>
-            <th>Team Leader</th>
-            <th style="text-align: right; padding-right: 24px;">Action</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Employee Name</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Branch</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Team Leader</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Action Matrix</th>
           </tr>
         </thead>
         <tbody>
           {% for emp in directory_data %}
-          <tr class="searchable-row">
-            <td style="padding-left: 24px;">
-              <span style="font-size:14px; font-weight:600; color:var(--ink);">{{ emp.username }}</span>
-            </td>
-            <td>
-              <span class="status-pill s-new">{{ emp.branch }}</span>
-            </td>
-            <td>
-              <div class="d-inline-flex align-items-center gap-2">
-                <div style="width:20px; height:20px; border-radius:50%; background:var(--cloud); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--stone);">
-                  <i class="bi bi-person-fill"></i>
+          <tr class="searchable-row" style="border-bottom: 1px solid var(--cloud);">
+            <td style="padding: 16px 24px; font-weight: 600; color: var(--ink); font-size: 14px;">
+              <div class="d-flex align-items-center gap-3">
+                <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+                  {{ emp.username|make_list|first|upper }}
                 </div>
-                <span style="font-size:13px; color:var(--ink);">{{ emp.team_leader }}</span>
+                <span>{{ emp.username }}</span>
               </div>
             </td>
-            <td style="text-align: right; padding-right: 24px;">
-              <a href="/apr-report/{{ emp.username }}/" class="btn btn-sm grove-btn-outline" style="font-size: 12px; padding: 6px 16px;">
-                View APR Report <i class="bi bi-arrow-right" style="margin-left: 4px;"></i>
+            <td style="padding: 16px 12px;">
+              <span class="status-pill s-new">{{ emp.branch }}</span>
+            </td>
+            <td style="padding: 16px 12px;">
+              <div class="d-inline-flex align-items-center gap-2">
+                <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                  {{ emp.team_leader|default:"—"|make_list|first|upper }}
+                </div>
+                <span style="font-size: 13px; color: var(--ink); font-weight: 500;">{{ emp.team_leader|default:"—" }}</span>
+              </div>
+            </td>
+            <td style="padding: 16px 24px; text-align: right;">
+              <a href="/apr-report/{{ emp.username }}/" class="btn btn-sm grove-btn-outline d-inline-flex align-items-center gap-2" style="font-size: 12px; padding: 6px 16px; font-weight: 600;">
+                View APR Report <i class="bi bi-arrow-right"></i>
               </a>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="4">
-              <div class="grove-empty-state" style="padding: 40px 0;">
-                <i class="bi bi-folder2-open" style="font-size:32px; color:var(--sage-lt)"></i>
-                <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:12px;">No employees found</div>
-                <div style="font-size:12px; color:var(--stone); margin-top:4px;">No matching records in the directory.</div>
+            <td colspan="4" style="padding: 64px 24px;">
+              <div class="grove-empty-state text-center">
+                <i class="bi bi-folder2-open" style="font-size: 32px; color: var(--sage-lt);"></i>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No employees found</div>
+                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">No matching performance logs mapped in the organizational matrix.</div>
               </div>
             </td>
           </tr>
