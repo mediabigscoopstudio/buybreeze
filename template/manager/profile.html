@@ -1,495 +1,305 @@
 {% extends "manager/base.html" %}
 
-{% block title %}Welcome back to Manager Dashboard!{% endblock title %}
+{% block title %}Profile Settings — Buy Buzz CRM{% endblock %}
 
 {% block css %}
 <style>
-  /* ── GROVE UI COMPONENT SYSTEM ── */
-  
-  /* Panels & Structural */
-  .grove-panel {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-  }
+    /* ── GROVE UI COMPONENT SYSTEM: PROFILE ── */
+    
+    .grove-panel {
+        background: var(--white, #ffffff);
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.015);
+        margin-bottom: 24px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .grove-panel:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.03);
+    }
 
-  /* Stat Cards */
-  .grove-stat-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      height: 100%;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .grove-stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
-  }
-  .grove-stat-card.top-charcoal { border-top: 4px solid #333333; }
-  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
-  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
-  .grove-stat-card.top-gold { border-top: 4px solid #b8860b; }
+    .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--brand-ink, #2E2E2E);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-  /* Stat Icons & Typography */
-  .stat-icon-box {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      margin-bottom: 16px;
-  }
-  .stat-icon-box.charcoal { background: #f5f5f5; color: #333333; }
-  .stat-icon-box.stone { background: #eff6ff; color: var(--stone); }
-  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
-  .stat-icon-box.gold { background: #fdf5e6; color: #b8860b; }
+    .grove-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--brand-accent, #6F8F9F);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-  .stat-value {
-      font-family: 'Geist Mono', monospace, sans-serif;
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1;
-      margin-bottom: 6px;
-  }
-  .stat-label {
-      font-size: 13px;
-      color: var(--stone);
-      font-weight: 600;
-  }
+    .grove-input {
+        width: 100%;
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+        color: var(--brand-ink, #2E2E2E);
+        background: var(--white, #ffffff);
+        transition: all 0.2s ease;
+    }
+    
+    .grove-input:focus {
+        outline: none;
+        border-color: var(--sage, #4f7942);
+        box-shadow: 0 0 0 4px var(--sage-lt, #dce7d9);
+    }
+    
+    .grove-input.readonly-field {
+        background-color: var(--cloud, #f7f3f0);
+        color: var(--brand-accent, #6F8F9F);
+        cursor: not-allowed;
+        border-color: transparent;
+        font-weight: 500;
+    }
 
-  /* Form Elements */
-  .grove-input {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      color: var(--ink);
-      background: var(--white);
-      transition: all 0.2s ease;
-  }
-  .grove-input:focus {
-      outline: none;
-      border: 1.8px solid var(--sage);
-      box-shadow: 0 0 0 4px var(--sage-lt);
-  }
-  
-  select.grove-input {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 36px;
-  }
+    /* ── PROFILE PICTURE COMPONENT ── */
+    .profile-img-container {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        overflow: hidden;
+        position: relative;
+        margin: 0 auto;
+        border: 4px solid var(--white, #ffffff);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        background-color: var(--cloud, #f7f3f0);
+        cursor: pointer;
+    }
 
-  /* Buttons */
-  .btn-primary-sage {
-      background: var(--sage);
-      color: var(--white);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 14px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: opacity 0.2s ease;
-  }
-  .btn-primary-sage:hover:not([disabled]) {
-      opacity: 0.9;
-      color: var(--white);
-  }
-  .btn-primary-sage[disabled] {
-      background: var(--border);
-      color: var(--stone);
-      cursor: not-allowed;
-  }
+    .profile-img-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s ease;
+    }
 
-  .grove-btn-outline {
-      border: 1px solid var(--border);
-      background: var(--white);
-      color: var(--ink);
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 10px 16px;
-      transition: all 0.2s;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-  }
-  .grove-btn-outline:hover {
-      background: var(--cloud);
-      border-color: var(--stone);
-      color: var(--ink);
-  }
+    .profile-overlay {
+        position: absolute;
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%;
+        background: rgba(46, 46, 46, 0.6); /* --brand-ink with opacity */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: var(--white, #ffffff);
+        font-size: 28px;
+        backdrop-filter: blur(2px);
+    }
 
-  /* Tables & Pills */
-  .table-custom th {
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--stone);
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      border-bottom: 1px solid var(--border);
-      padding: 16px 12px;
-      background: var(--cloud);
-  }
-  .table-custom td {
-      padding: 16px 12px;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-      font-size: 14px;
-  }
+    .profile-img-container:hover .profile-overlay {
+        opacity: 1;
+    }
 
-  .status-pill {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      white-space: nowrap;
-  }
-  .s-hot { background: #f8d7da; color: #721c24; }
-  .s-warm { background: #fff3cd; color: #856404; }
-  .s-cold { background: var(--cloud); color: var(--stone); }
+    /* ── BUTTONS & ALERTS ── */
+    .btn-primary-sage {
+        background: var(--sage, #4f7942);
+        color: var(--white, #ffffff);
+        border: none;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(79, 121, 66, 0.2);
+    }
+    
+    .btn-primary-sage:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(79, 121, 66, 0.3);
+    }
 
-  .form-check-input {
-      width: 1.2em;
-      height: 1.2em;
-      accent-color: var(--sage);
-      cursor: pointer;
-      border-color: var(--border);
-  }
+    .grove-btn-outline {
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        background: var(--white, #ffffff);
+        color: var(--brand-ink, #2E2E2E);
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 8px 16px;
+        transition: all 0.2s;
+        font-size: 12px;
+    }
+    
+    .grove-btn-outline:hover {
+        background: var(--cloud, #f7f3f0);
+        border-color: var(--brand-accent, #6F8F9F);
+    }
 
-  /* Mobile Responsiveness */
-  .table-responsive { scrollbar-width: thin; }
-  
-  @media (max-width: 768px) {
-      .grove-panel, .grove-stat-card {
-          padding: 16px;
-      }
-      .stat-value {
-          font-size: 24px;
-      }
-      .assign-controls {
-          flex-direction: column;
-          align-items: stretch !important;
-          width: 100%;
-          max-width: 100% !important;
-      }
-      .assign-controls select, .assign-controls button {
-          width: 100% !important;
-      }
-      .header-actions {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 12px;
-      }
-  }
+    .alert-custom {
+        border-radius: 12px;
+        border: none;
+        padding: 16px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .alert-success-custom {
+        background: var(--sage-lt, #dce7d9);
+        color: var(--sage, #4f7942);
+    }
 </style>
 {% endblock css %}
 
 {% block body %}
-<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+<div class="container-fluid py-4 px-3 px-md-4 mx-auto" style="max-width: 900px;">
 
     {# ── PAGE HEADER ── #}
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 header-actions">
-        <div>
-            <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Manager Portal</h2>
-            <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Strategic oversight of cross-branch performance</div>
-        </div>
+    <div class="mb-4 fade-up">
+        <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink, #2E2E2E); margin: 0;">Profile Settings</h2>
+        <div style="font-size: 13px; color: var(--brand-accent, #6F8F9F); margin-top: 4px;">Update your personal information and system preferences</div>
     </div>
 
-    {# ── KPI STAT CARDS ── #}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
-        <div class="col">
-            <div class="grove-stat-card top-charcoal">
-                <div class="stat-icon-box charcoal"><i class="bi bi-briefcase-fill"></i></div>
-                <div class="stat-value">{{ total_leads|default:"0" }}</div>
-                <div class="stat-label">Total Assigned Leads</div>
-            </div>
+    {# ── SUCCESS ALERTS ── #}
+    {% if messages %}
+        <div class="mb-4 fade-up" style="animation-delay: 0.05s;">
+            {% for message in messages %}
+                <div class="alert-custom {% if message.tags == 'success' %}alert-success-custom{% else %}bg-white border{% endif %}">
+                    <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-info-circle-fill{% endif %} fs-5"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
-        <div class="col">
-            <div class="grove-stat-card top-stone">
-                <div class="stat-icon-box stone" style="background: #F8D7DA; color: #721C24;"><i class="bi bi-fire"></i></div>
-                <div class="stat-value" style="color: #721C24;">{{ hot_leads|default:"0" }}</div>
-                <div class="stat-label">Hot Opportunities</div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="grove-stat-card top-sage">
-                <div class="stat-icon-box sage"><i class="bi bi-plus-circle-fill"></i></div>
-                <div class="stat-value" style="color: var(--sage);">{{ new_leads|default:"0" }}</div>
-                <div class="stat-label">New Pipeline Entries</div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="grove-stat-card top-gold">
-                <div class="stat-icon-box gold"><i class="bi bi-check-circle-fill"></i></div>
-                <div class="stat-value" style="color: #b8860b;">{{ closed_leads|default:"0" }}</div>
-                <div class="stat-label">Closed Transactions</div>
-            </div>
-        </div>
-    </div>
+    {% endif %}
 
-    {# ── LEAD DISTRIBUTION MATRIX ── #}
-    <div class="grove-panel mb-5 p-0" style="overflow: hidden;">
-        
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
-            <h5 class="mb-0 fw-bold" style="font-size: 16px; color: var(--ink);">
-                <i class="bi bi-list-task" style="color: var(--sage); margin-right: 8px;"></i> Lead Distribution Matrix
-            </h5>
+    <form method="POST" enctype="multipart/form-data" class="fade-up" style="animation-delay: 0.1s;">
+        {% csrf_token %}
+
+        {# ── MAIN PROFILE CARD ── #}
+        <div class="grove-panel">
+            <div class="section-title">
+                <i class="bi bi-person-badge" style="color: var(--brand-accent);"></i> Personal Information
+            </div>
             
-            <div class="d-flex align-items-center gap-2 flex-wrap assign-controls" style="max-width: 500px;">
-                <select id="tlSelect" class="grove-input m-0" style="width: auto; min-width: 220px; min-height: 42px;">
-                    <option value="">Select Team Leader...</option>
-                    {% for tl in team_leaders %}
-                        <option value="{{ tl.id }}">{{ tl.user.username }}</option>
-                    {% endfor %}
-                </select>
-                <button id="btnAssign" class="btn-primary-sage m-0" style="min-height: 42px;" disabled>
-                    <i class="bi bi-person-plus-fill"></i> Assign to TL
-                </button>
-            </div>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-custom align-middle mb-0 text-nowrap text-start" style="width: 100%;">
-                <thead>
-                    <tr>
-                        <th scope="col" class="ps-4" style="width: 60px;">
-                            <input class="form-check-input" type="checkbox" id="selectAll">
-                        </th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Phone</th>
-                        <th scope="col">Source</th>
-                        <th scope="col">Campaign</th>
-                        <th scope="col">Temp</th>
-                        <th scope="col">Stage</th>
-                        <th scope="col" class="pe-4 text-end">Assigned TL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lead in leads %}
-                    <tr>
-                        <td class="ps-4">
-                            <input class="form-check-input lead-checkbox" type="checkbox" value="{{ lead.id }}">
-                        </td>
-                        <td class="fw-bold" style="color: var(--ink);">{{ lead.name }}</td>
-                        <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--ink);">{{ lead.phone }}</td>
-                        <td style="font-size: 13px; color: var(--stone);">{{ lead.source }}</td>
-                        <td style="font-size: 13px; color: var(--stone);">{{ lead.campaign_name|default:"—" }}</td>
-                        <td>
-                            {% if lead.temperature|lower == 'hot' %}
-                                <span class="status-pill s-hot">Hot</span>
-                            {% elif lead.temperature|lower == 'warm' %}
-                                <span class="status-pill s-warm">Warm</span>
-                            {% else %}
-                                <span class="status-pill s-cold">Cold</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="status-pill s-cold" style="background: transparent; border: 1px solid var(--border);">{{ lead.stage }}</span>
-                        </td>
-                        <td class="pe-4 text-end">
-                            {% if lead.assigned_tl %}
-                                <div class="d-inline-flex align-items-center gap-2 justify-content-end">
-                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
-                                        {{ lead.assigned_tl.user.username|make_list|first|upper }}
-                                    </div>
-                                    <span style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ lead.assigned_tl.user.username }}</span>
-                                </div>
-                            {% else %}
-                                <span style="font-size: 12px; color: var(--stone); font-style: italic;">Unassigned</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center py-5">
-                            <div style="width: 48px; height: 48px; background: var(--cloud); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
-                                <i class="bi bi-inbox fs-4" style="color: var(--stone);"></i>
+            <div class="row g-4 align-items-center">
+                <div class="col-12 col-md-4 text-center">
+                    <div class="profile-img-container mb-3" onclick="document.getElementById('profile_pic_input').click()">
+                        {% if profile.profile_pic %}
+                            <img src="{{ profile.profile_pic.url }}" id="profile_pic_preview" alt="Profile Picture">
+                        {% else %}
+                            <div id="initials_fallback" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--cloud); color:var(--brand-accent); font-size:48px; font-weight:700;">
+                                {{ profile.user.first_name|make_list|first|default:"U"|upper }}
                             </div>
-                            <div style="font-size: 14px; font-weight: 600; color: var(--ink);">No operational leads available</div>
-                            <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">You currently have no leads mapped to your queue.</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+                            <img src="" id="profile_pic_preview" style="display:none;" alt="Profile Picture">
+                        {% endif %}
+                        <div class="profile-overlay">
+                            <i class="bi bi-camera-fill"></i>
+                        </div>
+                    </div>
+                    <input type="file" name="profile_pic" id="profile_pic_input" style="display: none;" accept="image/jpeg, image/png, image/webp">
+                    <button type="button" class="grove-btn-outline mb-2" onclick="document.getElementById('profile_pic_input').click()">
+                        <i class="bi bi-upload me-1"></i> Upload Image
+                    </button>
+                    <div style="font-size: 11px; color: var(--brand-accent); font-weight: 500;">JPG, PNG supported. Max 2MB.</div>
+                </div>
 
-    {# ── HIERARCHICAL CHAIN NODES (TEAM LEADERS) ── #}
-    <div class="mb-4 d-flex align-items-center gap-2">
-        <h5 class="fw-bold m-0" style="font-size: 16px; color: var(--ink);">
-            <i class="bi bi-diagram-3-fill" style="color: var(--sage); margin-right: 6px;"></i> Hierarchical Chain Nodes
-        </h5>
-    </div>
-    
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-5">
-        {% for tl in team_leaders %}
-        <div class="col">
-            <div class="grove-panel h-100 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3" style="border-color: var(--cloud) !important;">
-                        <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; border: 1px solid var(--border);">
-                            {{ tl.user.username|make_list|first|upper }}
+                <div class="col-12 col-md-8">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="grove-label">First Name</label>
+                            <input type="text" name="first_name" class="grove-input" value="{{ profile.user.first_name }}" placeholder="Enter first name">
                         </div>
-                        <div>
-                            <h6 class="fw-bold mb-0" style="font-size: 14px; color: var(--ink);">{{ tl.user.username }}</h6>
-                            <span class="status-pill s-cold mt-1" style="font-size: 9px; padding: 2px 8px;">Supervisor Node</span>
+                        <div class="col-sm-6">
+                            <label class="grove-label">Last Name</label>
+                            <input type="text" name="last_name" class="grove-input" value="{{ profile.user.last_name }}" placeholder="Enter last name">
                         </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Total Pool</span>
-                        <span style="font-size: 13px; font-weight: 700; color: var(--ink);">{{ tl.total_leads|default:"0" }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Hot Leads</span>
-                        <span style="font-size: 13px; font-weight: 700; color: #721C24;">{{ tl.hot_leads|default:"0" }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span style="font-size: 12px; color: var(--stone); font-weight: 500;">New Assigned</span>
-                        <span style="font-size: 13px; font-weight: 700; color: var(--sage);">{{ tl.new_leads|default:"0" }}</span>
+                        <div class="col-12">
+                            <label class="grove-label">Email Address</label>
+                            <div class="position-relative">
+                                <i class="bi bi-envelope position-absolute" style="left: 16px; top: 50%; transform: translateY(-50%); color: var(--brand-accent);"></i>
+                                <input type="email" name="email" class="grove-input" style="padding-left: 44px;" value="{{ profile.user.email }}" placeholder="name@company.com">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="grove-label">Phone Number</label>
+                            <div class="position-relative">
+                                <i class="bi bi-telephone position-absolute" style="left: 16px; top: 50%; transform: translateY(-50%); color: var(--brand-accent);"></i>
+                                <input type="text" name="phone" class="grove-input" style="padding-left: 44px; font-family: 'Geist Mono', monospace;" value="{{ profile.phone }}" placeholder="+1 234 567 8900">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <a href="/tl_performance/{{ tl.id }}" class="grove-btn-outline w-100 text-center">
-                    View Performance <i class="bi bi-arrow-right"></i>
-                </a>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="text-center py-5 grove-panel">
-                <i class="bi bi-people fs-3 mb-2" style="color: var(--stone);"></i>
-                <p class="mb-0" style="color: var(--ink); font-weight: 600; font-size: 14px;">No Team Leaders Found</p>
-                <p class="mb-0" style="color: var(--stone); font-size: 12px; margin-top: 4px;">No corporate team leaders compiled inside your branch routing tree.</p>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
 
+        {# ── READ-ONLY INFO CARD ── #}
+        <div class="grove-panel">
+            <div class="section-title">
+                <i class="bi bi-shield-lock" style="color: var(--brand-accent);"></i> System Authorization
+            </div>
+            <div class="row g-3">
+                <div class="col-sm-6 col-lg-3">
+                    <label class="grove-label">Role</label>
+                    <input type="text" class="grove-input readonly-field" value="{{ profile.role|title }}" readonly disabled>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="grove-label">Branch</label>
+                    <input type="text" class="grove-input readonly-field" value="{{ profile.branch|default:'Global' }}" readonly disabled>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="grove-label">Reports To</label>
+                    <input type="text" class="grove-input readonly-field" value="{{ profile.reports_to|default:'Super Admin' }}" readonly disabled>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label class="grove-label">Account Status</label>
+                    <input type="text" class="grove-input readonly-field" value="{{ profile.status|default:'Active' }}" readonly disabled>
+                </div>
+            </div>
+        </div>
+
+        {# ── FOOTER ACTIONS ── #}
+        <div class="d-flex justify-content-end mb-5">
+            <button type="submit" class="btn-primary-sage">
+                <i class="bi bi-floppy-fill"></i> Update Profile
+            </button>
+        </div>
+
+    </form>
 </div>
 {% endblock body %}
 
 {% block script %}
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('btnAssign');
-        const tlSelect = document.getElementById('tlSelect');
-        const checkboxes = document.querySelectorAll('.lead-checkbox');
-        const selectAll = document.getElementById('selectAll');
-
-        // Helper: Get CSRF Token
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Helper: Get Selected Lead IDs
-        function getSelected() {
-            return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
-        }
-
-        // Update button state based on selection & dropdown
-        function update() {
-            const selectedCount = getSelected().length;
-            btn.disabled = !(selectedCount > 0 && tlSelect.value !== "");
-        }
-
-        // "Select All" Logic
-        if (selectAll) {
-            selectAll.addEventListener('change', e => {
-                checkboxes.forEach(cb => cb.checked = e.target.checked);
-                update();
-            });
-        }
-
-        // Individual Checkbox Logic
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', () => {
-                const allChecked = Array.from(checkboxes).every(c => c.checked);
-                const someChecked = Array.from(checkboxes).some(c => c.checked);
+    // Image Preview Logic
+    document.getElementById('profile_pic_input').addEventListener('change', function(event) {
+        if(event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const preview = document.getElementById('profile_pic_preview');
+                const fallback = document.getElementById('initials_fallback');
                 
-                if(selectAll) {
-                    selectAll.checked = allChecked;
-                    selectAll.indeterminate = someChecked && !allChecked;
-                }
-                update();
-            });
-        });
-
-        // Dropdown Logic
-        tlSelect.addEventListener('change', update);
-
-        // API Submission Logic
-        btn.addEventListener('click', async () => {
-            const selected = getSelected();
-            const tlName = tlSelect.options[tlSelect.selectedIndex].text;
-
-            if (!confirm(`Assign ${selected.length} lead(s) to ${tlName}?`)) return;
-
-            // Loading state
-            btn.disabled = true;
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Assigning...`;
-
-            try {
-                const res = await fetch('/assign-to-tl/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({
-                        lead_ids: selected,
-                        tl_id: tlSelect.value
-                    })
-                });
-
-                const data = await res.json();
-
-                if (data.status === 'success') {
-                    location.reload();
-                } else {
-                    alert(data.message || 'Failed to assign leads.');
-                    btn.disabled = false;
-                    btn.innerHTML = originalContent;
-                }
-            } catch (err) {
-                console.error("Assignment error:", err);
-                alert("System exception mapping distribution pipelines.");
-                btn.disabled = false;
-                btn.innerHTML = originalContent;
+                // Hide fallback initials if present, show image tag
+                if (fallback) fallback.style.display = 'none';
+                
+                preview.src = e.target.result;
+                preview.style.display = 'block';
             }
-        });
+            
+            reader.readAsDataURL(event.target.files[0]);
+        }
     });
 </script>
 {% endblock script %}
