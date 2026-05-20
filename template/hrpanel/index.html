@@ -1,134 +1,137 @@
-{% extends 'hrpanel/base.html' %}
+{% extends "hrpanel/base.html" %}
 {% load static %}
 
-{% block title %}HR Panel Dashboard — Buy Buzz CRM{% endblock %}
-
-{% block extra_css %}
-<style>
-  /* ── HR DASHBOARD SPECIFIC LAYOUT ── */
-  .hr-stat-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-  }
-  .hr-stat-value { font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--ink); }
-  .hr-stat-label { font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.5px; }
-  
-  .grove-panel {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  .table-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .table-actions {
-    display: flex;
-    gap: 8px;
-  }
-  .btn-icon {
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--white);
-    color: var(--stone);
-    transition: all 0.2s;
-  }
-  .btn-icon:hover { background: var(--cloud); border-color: var(--sage); color: var(--sage); }
-</style>
-{% endblock %}
+{% block title %}HR Panel — Buy Buzz CRM{% endblock %}
 
 {% block content %}
 <div class="main-content">
 
-  {# ── TOP STATS (From Reference) ── #}
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="hr-stat-card">
-        <div class="hr-stat-label">Present Today</div>
-        <div class="hr-stat-value">{{ present_today }}</div>
+  {# ── HEADER ── #}
+  <div class="mb-4 fade-up">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Operational Workspace</h2>
+    <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Employee lifecycle management and branch synchronization logs</div>
+  </div>
+
+  {# ── STAT CARDS (Now with classes connected to CSS) ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col fade-up">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-value">{{ total_employees }}</div>
+        <div class="stat-label">Total Employees</div>
       </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="hr-stat-card">
-        <div class="hr-stat-label">On Leave Today</div>
-        <div class="hr-stat-value">{{ on_leave_today }}</div>
+    
+    <div class="col fade-up" style="animation-delay: 0.1s;">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-value">{{ present_today }}</div>
+        <div class="stat-label">Present Today</div>
       </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="hr-stat-card">
-        <div class="hr-stat-label">Pending Leaves</div>
-        <div class="hr-stat-value" style="color: #dc2626;">{{ pending_leaves }}</div>
+    
+    <div class="col fade-up" style="animation-delay: 0.15s;">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-calendar-x-fill"></i></div>
+        <div class="stat-value">{{ on_leave_today }}</div>
+        <div class="stat-label">On Leave Today</div>
+      </div>
+    </div>
+    
+    <div class="col fade-up" style="animation-delay: 0.2s;">
+      <div class="grove-stat-card top-stone">
+        <div class="stat-icon-box" style="background: #F8D7DA; color: #721C24;"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-value" style="color: #721C24;">{{ pending_leaves }}</div>
+        <div class="stat-label">Pending Leaves</div>
       </div>
     </div>
   </div>
 
-  {# ── QUICK NAVIGATION CARDS ── #}
-  <div class="row g-3 mb-4">
+  {# ── NAVIGATION SECTIONS (The 3 big feature blocks) ── #}
+  <div class="row g-4 mb-4 fade-up" style="animation-delay: 0.25s;">
+    <div class="col-md-4">
+      <a href="{% url 'attendance' %}" class="grove-nav-card">
+        <div class="d-flex align-items-center gap-3">
+          <div class="stat-icon-box sage"><i class="bi bi-clock-history"></i></div>
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--ink);">Attendance Dashboard</div>
+            <div style="font-size: 12px; color: var(--stone);">View & audit localized punch timelines</div>
+          </div>
+        </div>
+      </a>
+    </div>
+    
     <div class="col-md-4">
       <a href="{% url 'leaves' %}" class="grove-nav-card">
         <div class="d-flex align-items-center gap-3">
-          <div style="background: var(--gold-lt); color: var(--gold); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-calendar-check"></i></div>
+          <div class="stat-icon-box gold"><i class="bi bi-calendar-check"></i></div>
           <div>
-            <div style="font-weight: 700; color: var(--ink);">Leave Management</div>
-            <div style="font-size: 12px; color: var(--stone);">Approve or reject leave requests</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--ink);">Leave Management</div>
+            <div style="font-size: 12px; color: var(--stone);">Approve or adjust leave requests</div>
           </div>
         </div>
       </a>
     </div>
+    
     <div class="col-md-4">
       <a href="{% url 'payroll' %}" class="grove-nav-card">
         <div class="d-flex align-items-center gap-3">
-          <div style="background: var(--cloud); color: var(--charcoal); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-wallet2"></i></div>
+          <div class="stat-icon-box charcoal"><i class="bi bi-wallet2"></i></div>
           <div>
-            <div style="font-weight: 700; color: var(--ink);">Payroll</div>
-            <div style="font-size: 12px; color: var(--stone);">Salary records & payslips</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--ink);">Payroll Accounting</div>
+            <div style="font-size: 12px; color: var(--stone);">Salary frameworks & disbursements</div>
           </div>
         </div>
       </a>
     </div>
   </div>
 
-  {# ── EMPLOYEE TABLE ── #}
-  <div class="grove-panel">
-    <div class="table-header">
-      <h6 style="font-weight: 700; margin: 0;">Employee Directory</h6>
+  {# ── EMPLOYEE DIRECTORY ── #}
+  <div class="brand-panel fade-up" style="animation-delay: 0.3s; padding: 0;">
+    <div class="panel-header">
+      <h6 class="panel-title"><i class="bi bi-people" style="color: var(--sage);"></i> Employee Directory</h6>
     </div>
+    
+    {# Filter Form #}
+    <div class="p-4" style="border-bottom: 1px solid var(--border);">
+      <form method="GET" class="d-flex align-items-center gap-3 flex-wrap">
+        <input type="text" name="q" class="grove-input" placeholder="Search employee..." value="{{ search|default:'' }}">
+        <select name="role" class="grove-input">
+          <option value="">All Account Roles</option>
+          <option value="manager">Branch Manager</option>
+          <option value="tl">Team Leader</option>
+        </select>
+        <button type="submit" class="btn-primary-sage px-4">Filter</button>
+      </form>
+    </div>
+
     <div class="table-responsive">
-      <table class="table align-middle mb-0" style="font-size: 0.85rem;">
-        <thead style="background: var(--cloud);">
+      <table class="table table-custom align-middle mb-0 text-nowrap">
+        <thead>
           <tr>
-            <th style="padding: 12px 20px;">Name</th>
-            <th style="padding: 12px 20px;">Branch</th>
-            <th style="padding: 12px 20px;">Phone</th>
-            <th style="padding: 12px 20px; text-align: right;">Actions</th>
+            <th class="ps-4">#</th>
+            <th>Employee</th>
+            <th>Role</th>
+            <th>Branch</th>
+            <th>Phone</th>
+            <th class="text-end pe-4">Actions</th>
           </tr>
         </thead>
         <tbody>
           {% for e in employees %}
           <tr>
-            <td style="padding: 12px 20px; font-weight: 600;">{{ e.user.get_full_name }}</td>
-            <td style="padding: 12px 20px; color: var(--stone);">{{ e.branch.name }}</td>
-            <td style="padding: 12px 20px; font-family: 'Geist Mono', monospace;">{{ e.phone }}</td>
-            <td style="padding: 12px 20px; text-align: right;">
-              <div class="table-actions justify-content-end">
-                <a href="{% url 'employee_detail' e.id %}" class="btn-icon"><i class="bi bi-person"></i></a>
-                <a href="{% url 'leaves' %}?q={{ e.user.get_full_name }}" class="btn-icon"><i class="bi bi-pencil"></i></a>
-                <a href="{% url 'payroll' %}?q={{ e.user.get_full_name }}" class="btn-icon"><i class="bi bi-play-btn"></i></a>
-              </div>
+            <td class="ps-4" style="font-family: 'Geist Mono', monospace;">{{ forloop.counter }}</td>
+            <td class="fw-bold">
+               <div class="d-flex align-items-center gap-2">
+                 <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-weight:700;">{{ e.user.get_full_name|make_list|first|upper }}</div>
+                 {{ e.user.get_full_name }}
+               </div>
+            </td>
+            <td><span class="status-pill s-new">{{ e.get_role_display }}</span></td>
+            <td>{{ e.branch.name }}</td>
+            <td class="mono-font">{{ e.phone }}</td>
+            <td class="text-end pe-4">
+              <a href="{% url 'employee_detail' e.id %}" class="grove-btn-ghost"><i class="bi bi-person-vcard"></i></a>
             </td>
           </tr>
           {% endfor %}
@@ -136,6 +139,5 @@
       </table>
     </div>
   </div>
-
 </div>
 {% endblock %}
