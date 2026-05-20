@@ -59,6 +59,15 @@
     /* ── ANIMATIONS ── */
     .fade-up { animation: fadeUp .5s ease both; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    /* Mobile Responsive */
+    .mobile-toggle { display: none; background: none; border: none; font-size: 24px; margin-right: 15px; }
+    @media (max-width: 991px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.active { transform: translateX(0); }
+      .topbar { left: 0; }
+      .main-content { margin-left: 0; }
+      .mobile-toggle { display: block; }
+    }
   </style>
 
   {% block extra_css %}{% endblock %}
@@ -95,6 +104,7 @@
 
   <header class="topbar">
     <h1 class="page-header-title">{% block page_header %}HR Panel{% endblock %}</h1>
+    <button class="mobile-toggle" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
     <div class="d-flex align-items-center gap-4">
       <button class="notification-btn"><i class="bi bi-bell-fill"></i></button>
       <div class="admin-profile">
@@ -106,7 +116,11 @@
 
   
     {% block content %}{% endblock %}
-
+<script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+  </script>
 
 </body>
 </html>
