@@ -385,23 +385,72 @@ def profile_settings(request):
         'profile': profile
     })
 
+from dash.models import (
+    Lead,
+    LeadAssignmentHistory,
+    CallLog,
+    CallWrapUp,
+    FollowUp
+)
+
+@user_passes_test(manager_required, login_url='/login/')
 def view_lead(request, id):
     profile = request.user.profile
 
-    # Only manager can view their own assigned leads
+    # Only allow manager to see leads assigned to him
     lead = get_object_or_404(
         Lead.objects.select_related(
-            'assigned_to_manager',
-            'assigned_to_tl',
             'assigned_to',
             'branch'
         ),
         id=id,
-        assigned_to_manager=profile
+        assigned_to=profile
     )
 
+    # Assignment history
+    assignment_history = LeadAssignmentHistory.objects.filter(
+        lead=lead
+    ).select_related(
+        'assigned_from',
+        'assigned_to'
+    ).order_by('-created_at')
+
+    # Call logs
+    call_logs = CallLog.objects.filter(
+        lead=lead
+    ).select_related(
+        'called_by',
+        'branch'
+    ).order_by('-created_at')
+
+    # Call wrapups
+    wrapups = CallWrapUp.objects.filter(
+        lead=lead
+    ).select_related(
+        'call',
+        'submitted_by'
+    ).order_by('-created_at')
+
+    # Followups
+    followups = FollowUp.objects.filter(
+        lead=lead
+    ).select_related(
+        'assigned_to',
+        'branch'
+    ).order_by('-followup_at')
+
     context = {
-        'lead': lead
+        'lead': lead,
+        'assigned_user': lead.assigned_to,
+        'branch': lead.branch,
+        'assignment_history': assignment_history,
+        'call_logs': call_logs,
+        'wrapups': wrapups,
+        'followups': followups,
     }
 
-    return render(request, 'manager/lead.html', context)
+    return render(
+        request,
+        'manager/view_lead.html',
+        context
+    )
