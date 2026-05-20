@@ -4,6 +4,10 @@
 {% block title %}HR Panel — Buy Buzz CRM{% endblock %}
 
 {% block extra_css %}
+
+{% endblock %}
+
+{% block content %}
 <style>
   /* ── HR DASHBOARD LOCAL STYLES ── */
   .grove-stat-card {
@@ -20,7 +24,7 @@
   .top-charcoal { border-top: 4px solid var(--charcoal); }
   .top-sage     { border-top: 4px solid var(--sage); }
   .top-gold     { border-top: 4px solid var(--gold); }
-  .top-lost     { border-top: 4px solid #FCA5A5; } /* Softer red for pending */
+  .top-lost     { border-top: 4px solid #FCA5A5; } 
   
   /* Icon Boxes */
   .stat-icon-box {
@@ -36,7 +40,7 @@
 
   /* Typography for Stats */
   .stat-value { font-family: 'Geist', sans-serif; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 6px; letter-spacing: -1px; }
-  .stat-label { font-size: 12px; color: var(--stone); font-weight: 500; }
+  .stat-label { font-size: 12px; color: var(--stone); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;}
 
   /* ── NAVIGATION CARDS ── */
   .grove-nav-card {
@@ -89,7 +93,9 @@
     font-weight: 600;
     padding: 8px 24px;
     font-size: 13px;
+    transition: background 0.2s;
   }
+  .filter-btn:hover { background: var(--border); }
 
   .leads-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
   .leads-table th { 
@@ -108,10 +114,6 @@
   .action-icon { color: var(--stone); font-size: 14px; text-decoration: none; margin-left: 8px; }
   .action-icon:hover { color: var(--ink); }
 </style>
-{% endblock %}
-
-{% block content %}
-
 {# ── PAGE HEADER ── #}
 <div class="mb-4 fade-up" style="animation-delay: 0s;">
   <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Operational Workspace</h2>
@@ -213,7 +215,7 @@
     </select>
     
     <button type="submit" class="filter-btn">Filter</button>
-    <a href="{% url 'hr_panel' %}" style="font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; margin-left: 8px;">Clear</a>
+    <a href="{% url '/' %}" style="font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; margin-left: 8px;">Clear</a>
   </form>
 
   <div class="table-responsive">
@@ -250,7 +252,7 @@
             {% endif %}
           </td>
           <td style="color: var(--stone); font-size: 13px;">{{ e.branch.name|default:"Delhi Central" }}</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">{{ e.phone|default:"9396157298" }}</td>
+          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">{{ e.phone|default:"-" }}</td>
           <td class="text-end">
             <a href="{% url 'employee_detail' e.id %}" class="action-icon"><i class="bi bi-person-vcard"></i></a>
             <a href="{% url 'leaves' %}?q={{ e.user.get_full_name }}" class="action-icon"><i class="bi bi-calendar-check"></i></a>
@@ -297,5 +299,4 @@
     </table>
   </div>
 </div>
-
 {% endblock %}
