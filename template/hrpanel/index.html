@@ -1,302 +1,215 @@
-{% extends "hrpanel/base.html" %}
+{% extends 'hrpanel/base.html' %}
 {% load static %}
 
 {% block title %}HR Panel — Buy Buzz CRM{% endblock %}
+{% block page_header %}HR Dashboard{% endblock %}
 
-{% block extra_css %}
+{% block content %}
 <style>
-  /* ── HR DASHBOARD LOCAL STYLES ── */
   .grove-stat-card {
-    background: var(--white);
-    border: 1px solid var(--border);
+    background: #FFFFFF;
+    border: 1px solid #E4E4E0;
     border-radius: 16px;
     padding: 24px;
     height: 100%;
     transition: transform .2s, box-shadow .2s;
   }
-  .grove-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
-  
-  /* Top Accent Borders */
-  .top-charcoal { border-top: 4px solid var(--charcoal); }
-  .top-sage     { border-top: 4px solid var(--sage); }
-  .top-gold     { border-top: 4px solid var(--gold); }
-  .top-lost     { border-top: 4px solid #FCA5A5; } 
-  
-  /* Icon Boxes */
-  .stat-icon-box {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; margin-bottom: 20px;
+  .grove-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
   }
-  .stat-icon-box.charcoal { background: #F5F5F3; color: var(--charcoal); }
-  .stat-icon-box.sage     { background: var(--sage-lt); color: var(--sage); }
-  .stat-icon-box.gold     { background: var(--gold-lt); color: #B48E32; }
-  .stat-icon-box.lost     { background: #FCE8E8; color: #DC2626; }
+  
+  .top-charcoal { border-top: 4px solid #2C2C2A !important; }
+  .top-sage     { border-top: 4px solid #1A6B55 !important; }
+  .top-gold     { border-top: 4px solid #C9A84C !important; }
+  .top-lost     { border-top: 4px solid #DC2626 !important; }
+  
+  .stat-icon-box {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 16px;
+  }
+  .stat-icon-box.charcoal { background: #F5F5F3; color: #2C2C2A; }
+  .stat-icon-box.sage     { background: #E6F2EE; color: #1A6B55; }
+  .stat-icon-box.gold     { background: #FBF4E0; color: #C9A84C; }
+  .stat-icon-box.lost     { background: #F8D7DA; color: #DC2626; }
 
-  /* Typography for Stats */
-  .stat-value { font-family: 'Geist', sans-serif; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 6px; letter-spacing: -1px; }
-  .stat-label { font-size: 12px; color: var(--stone); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;}
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: #0D0D0D; line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: #7A7A72; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  /* ── NAVIGATION CARDS ── */
   .grove-nav-card {
     display: flex; align-items: center; gap: 16px;
     text-decoration: none;
-    background: var(--white);
-    border: 1px solid var(--border);
+    background: #FFFFFF;
+    border: 1px solid #E4E4E0;
     border-radius: 16px;
     padding: 20px;
-    transition: all 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
-  .grove-nav-card:hover { border-color: var(--sage); transform: translateY(-2px); }
-  
-  .nav-icon {
-    width: 40px; height: 40px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  .grove-nav-card:hover {
+    transform: translateY(-2px);
+    border-color: #1A6B55;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
   }
-  .nav-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
-  .nav-sub   { font-size: 11px; color: var(--stone); font-weight: 500; }
 
-  /* ── TABLE & DIRECTORY ── */
-  .leads-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    padding: 24px;
-  }
+  .leads-card { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; overflow: hidden; }
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th { padding: 16px 24px; font-size: 10px; font-weight: 700; color: #7A7A72; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E4E4E0; }
+  .leads-table td { padding: 16px 24px; border-bottom: 1px solid #F5F5F3; vertical-align: middle; }
   
-  .table-header-title {
-    font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 24px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  
-  .grove-input {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: var(--ink);
-    outline: none;
-    background: var(--white);
-  }
-  
-  .filter-btn {
-    background: var(--cloud);
-    border: 1px solid var(--ink);
-    color: var(--ink);
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 8px 24px;
-    font-size: 13px;
-    transition: background 0.2s;
-  }
-  .filter-btn:hover { background: var(--border); }
+  .grove-input { border: 1px solid #E4E4E0; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #0D0D0D; outline: none; }
+  .grove-input:focus { border-color: #1A6B55; box-shadow: 0 0 0 3px #E6F2EE; }
 
-  .leads-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-  .leads-table th { 
-    padding: 12px 16px; font-size: 10px; font-weight: 700; 
-    color: var(--stone); letter-spacing: 1px; text-transform: uppercase; 
-    border-bottom: 1px solid var(--border); border-top: 1px solid var(--border);
-  }
-  .leads-table td { padding: 16px; border-bottom: 1px solid var(--cloud); vertical-align: middle; }
-  
-  /* Status Pills */
-  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-  .s-tl { background: var(--gold-lt); color: #8B6914; }
-  .s-emp { background: var(--cloud); color: var(--stone); }
+  .btn-primary-sage { background: #1A6B55; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; padding: 8px 20px; transition: opacity 0.2s; }
+  .btn-primary-sage:hover { opacity: 0.9; color: #FFFFFF; }
 
-  /* Action Icons */
-  .action-icon { color: var(--stone); font-size: 14px; text-decoration: none; margin-left: 8px; }
-  .action-icon:hover { color: var(--ink); }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .s-new { background: #FBF4E0; color: #C9A84C; }
+  .s-blue { background: #EFF6FF; color: #2563EB; }
 </style>
-{% endblock %}
 
-{% block content %}
+<div class="main-content">
 
-{# ── PAGE HEADER ── #}
-<div class="mb-4 fade-up" style="animation-delay: 0s;">
-  <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Operational Workspace</h2>
-  <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Employee lifecycle management and branch synchronization logs</div>
-</div>
+  {# ── PAGE HEADER (If you don't see "Operational Workspace", you are editing the wrong file!) ── #}
+  <div class="mb-4">
+    <h2 style="font-size: 24px; font-weight: 700; color: #0D0D0D; margin: 0;">Operational Workspace</h2>
+    <div style="font-size: 13px; color: #7A7A72; margin-top: 4px;">Employee lifecycle management and branch synchronization logs</div>
+  </div>
 
-{# ── STAT CARDS ── #}
-<div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
-  <div class="col fade-up" style="animation-delay: 0.05s;">
-    <div class="grove-stat-card top-charcoal">
-      <div class="stat-icon-box charcoal"><i class="bi bi-people-fill"></i></div>
-      <div class="stat-value">{{ total_employees|default:"196" }}</div>
-      <div class="stat-label">Total Employees</div>
-    </div>
-  </div>
-  
-  <div class="col fade-up" style="animation-delay: 0.1s;">
-    <div class="grove-stat-card top-sage">
-      <div class="stat-icon-box sage"><i class="bi bi-check-circle-fill"></i></div>
-      <div class="stat-value">{{ present_today|default:"0" }}</div>
-      <div class="stat-label">Present Today</div>
-    </div>
-  </div>
-  
-  <div class="col fade-up" style="animation-delay: 0.15s;">
-    <div class="grove-stat-card top-gold">
-      <div class="stat-icon-box gold"><i class="bi bi-calendar-x-fill"></i></div>
-      <div class="stat-value">{{ on_leave_today|default:"0" }}</div>
-      <div class="stat-label">On Leave Today</div>
-    </div>
-  </div>
-  
-  <div class="col fade-up" style="animation-delay: 0.2s;">
-    <div class="grove-stat-card top-lost">
-      <div class="stat-icon-box lost"><i class="bi bi-hourglass-split"></i></div>
-      <div class="stat-value" style="color: #DC2626;">{{ pending_leaves|default:"0" }}</div>
-      <div class="stat-label">Pending Leaves</div>
-    </div>
-  </div>
-</div>
-
-{# ── NAVIGATION SECTIONS ── #}
-<div class="row g-4 mb-4 fade-up" style="animation-delay: 0.25s;">
-  <div class="col-md-4">
-    <a href="{% url 'attendance' %}" class="grove-nav-card">
-      <div class="nav-icon" style="background: var(--sage-lt); color: var(--sage);"><i class="bi bi-clock"></i></div>
-      <div>
-        <div class="nav-title">Attendance Dashboard</div>
-        <div class="nav-sub">View & audit localized punch timelines</div>
+  {# ── STAT CARDS ── #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col">
+      <div class="grove-stat-card top-charcoal">
+        <div class="stat-icon-box charcoal"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-value">{{ total_employees|default:"196" }}</div>
+        <div class="stat-label">Total Employees</div>
       </div>
-    </a>
-  </div>
-  
-  <div class="col-md-4">
-    <a href="{% url 'leaves' %}" class="grove-nav-card">
-      <div class="nav-icon" style="background: var(--gold-lt); color: #B48E32;"><i class="bi bi-calendar-check"></i></div>
-      <div>
-        <div class="nav-title">Leave Management</div>
-        <div class="nav-sub">Authorize or adjust leave rows requests</div>
-      </div>
-    </a>
-  </div>
-  
-  <div class="col-md-4">
-    <a href="{% url 'payroll' %}" class="grove-nav-card">
-      <div class="nav-icon" style="background: var(--cloud); color: var(--charcoal);"><i class="bi bi-wallet2"></i></div>
-      <div>
-        <div class="nav-title">Payroll Accounting</div>
-        <div class="nav-sub">Salary frameworks & ledger disbursements</div>
-      </div>
-    </a>
-  </div>
-</div>
-
-{# ── EMPLOYEE DIRECTORY ── #}
-<div class="leads-card fade-up" style="animation-delay: 0.3s;">
-  
-  <div class="table-header-title">
-    <i class="bi bi-people" style="color: var(--sage);"></i> Employee Directory
-  </div>
-
-  <form method="GET" class="d-flex align-items-center gap-3 flex-wrap mb-2">
-    <div style="position: relative; flex: 1; min-width: 200px; max-width: 280px;">
-      <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--stone);"></i>
-      <input type="text" name="q" class="grove-input w-100" style="padding-left: 36px;" placeholder="Search employee..." value="{{ search|default:'' }}">
     </div>
-    
-    <select name="role" class="grove-input" style="min-width: 180px;">
-      <option value="">All Account Roles</option>
-      <option value="tl">Team Leader</option>
-      <option value="member">Employee</option>
-    </select>
-    
-    <select name="branch" class="grove-input" style="min-width: 180px;">
-      <option value="">All Active Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}">{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    
-    <button type="submit" class="filter-btn">Filter</button>
-    <a href="{% url '/' %}" style="font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; margin-left: 8px;">Clear</a>
-  </form>
+    <div class="col">
+      <div class="grove-stat-card top-sage">
+        <div class="stat-icon-box sage"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-value">{{ present_today|default:"0" }}</div>
+        <div class="stat-label">Present Today</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="grove-stat-card top-gold">
+        <div class="stat-icon-box gold"><i class="bi bi-calendar-x-fill"></i></div>
+        <div class="stat-value">{{ on_leave_today|default:"0" }}</div>
+        <div class="stat-label">On Leave Today</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="grove-stat-card top-lost">
+        <div class="stat-icon-box lost"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-value" style="color: #DC2626;">{{ pending_leaves|default:"0" }}</div>
+        <div class="stat-label">Pending Leaves</div>
+      </div>
+    </div>
+  </div>
 
-  <div class="table-responsive">
-    <table class="leads-table">
-      <thead>
-        <tr>
-          <th style="width: 50px;">#</th>
-          <th>Employee</th>
-          <th class="text-center">Role</th>
-          <th>Branch</th>
-          <th>Phone</th>
-          <th class="text-end">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in employees %}
-        <tr>
-          <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: var(--stone);">
-            {{ forloop.counter|stringformat:"02d" }}
-          </td>
-          <td style="font-weight: 700; color: var(--ink);">
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
-                {{ e.user.get_full_name|default:e.user.username|make_list|first|upper }}
+  {# ── NAVIGATION SECTIONS ── #}
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <a href="{% url 'attendance' %}" class="grove-nav-card">
+        <div class="stat-icon-box sage m-0"><i class="bi bi-clock-history"></i></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: #0D0D0D;">Attendance Dashboard</div>
+          <div style="font-size: 12px; color: #7A7A72;">View & audit localized punch timelines</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="{% url 'leaves' %}" class="grove-nav-card">
+        <div class="stat-icon-box gold m-0"><i class="bi bi-calendar-check"></i></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: #0D0D0D;">Leave Management</div>
+          <div style="font-size: 12px; color: #7A7A72;">Authorize or adjust leave requests</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="{% url 'payroll' %}" class="grove-nav-card">
+        <div class="stat-icon-box charcoal m-0"><i class="bi bi-wallet2"></i></div>
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: #0D0D0D;">Payroll Accounting</div>
+          <div style="font-size: 12px; color: #7A7A72;">Salary frameworks & ledger disbursements</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  {# ── EMPLOYEE DIRECTORY ── #}
+  <div class="leads-card">
+    <div class="p-4 border-bottom">
+      <div style="font-size: 16px; font-weight: 700; color: #0D0D0D; margin-bottom: 16px;">
+        <i class="bi bi-people" style="color: #1A6B55; margin-right: 8px;"></i>Employee Directory
+      </div>
+
+      <form method="GET" class="d-flex align-items-center gap-3 flex-wrap">
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #7A7A72;"></i>
+          <input type="text" name="q" class="grove-input w-100" style="padding-left: 40px;" placeholder="Search employee..." value="{{ search|default:'' }}">
+        </div>
+        
+        <select name="role" class="grove-input">
+          <option value="">All Account Roles</option>
+          <option value="manager">Branch Manager</option>
+          <option value="tl">Team Leader</option>
+          <option value="member">Employee</option>
+        </select>
+        
+        <select name="branch" class="grove-input">
+          <option value="">All Active Branches</option>
+          {% for b in branches %}
+            <option value="{{ b.id }}">{{ b.name }}</option>
+          {% endfor %}
+        </select>
+        
+        <button type="submit" class="btn-primary-sage">Filter</button>
+        <a href="{% url 'index' %}" class="btn text-dark border bg-light">Clear</a>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table class="leads-table">
+        <thead style="background: #F5F5F3;">
+          <tr>
+            <th>#</th>
+            <th>Employee</th>
+            <th>Role</th>
+            <th>Branch</th>
+            <th>Phone</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in employees %}
+          <tr>
+            <td style="font-family: 'Geist Mono', monospace;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td style="font-weight: 600;">
+              <div class="d-flex align-items-center gap-3">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: #E6F2EE; color: #1A6B55; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+                  {{ e.user.get_full_name|default:e.user.username|make_list|first|upper }}
+                </div>
+                {{ e.user.get_full_name }}
               </div>
-              {{ e.user.get_full_name }}
-            </div>
-          </td>
-          <td class="text-center">
-            {% if e.role == 'tl' %}
-              <span class="status-pill s-tl"><i class="bi bi-people-fill"></i> Team Leader</span>
-            {% else %}
-              <span class="status-pill s-emp">Employee</span>
-            {% endif %}
-          </td>
-          <td style="color: var(--stone); font-size: 13px;">{{ e.branch.name|default:"Delhi Central" }}</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">{{ e.phone|default:"-" }}</td>
-          <td class="text-end">
-            <a href="{% url 'employee_detail' e.id %}" class="action-icon"><i class="bi bi-person-vcard"></i></a>
-            <a href="{% url 'leaves' %}?q={{ e.user.get_full_name }}" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-            <a href="{% url 'payroll' %}?q={{ e.user.get_full_name }}" class="action-icon"><i class="bi bi-cash"></i></a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: var(--stone);">01</td>
-          <td style="font-weight: 700; color: var(--ink);">
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">A</div>
-              Amit Verma
-            </div>
-          </td>
-          <td class="text-center"><span class="status-pill s-tl"><i class="bi bi-people-fill"></i> Team Leader</span></td>
-          <td style="color: var(--stone); font-size: 13px;">Delhi Central</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">9396157298</td>
-          <td class="text-end">
-            <a href="#" class="action-icon"><i class="bi bi-person-vcard"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-cash"></i></a>
-          </td>
-        </tr>
-        <tr>
-          <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: var(--stone);">02</td>
-          <td style="font-weight: 700; color: var(--ink);">
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">S</div>
-              Sandeep Singh
-            </div>
-          </td>
-          <td class="text-center"><span class="status-pill s-emp">Employee</span></td>
-          <td style="color: var(--stone); font-size: 13px;">Delhi Central</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">9700364323</td>
-          <td class="text-end">
-            <a href="#" class="action-icon"><i class="bi bi-person-vcard"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-cash"></i></a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+            </td>
+            <td><span class="status-pill s-new"><i class="bi bi-person-fill"></i> {{ e.get_role_display }}</span></td>
+            <td>{{ e.branch.name|default:"Delhi Central" }}</td>
+            <td style="font-family: 'Geist Mono', monospace; font-weight: 600;">{{ e.phone|default:"-" }}</td>
+            <td class="text-end">
+              <div class="d-flex gap-2 justify-content-end">
+                <a href="{% url 'employee_detail' e.id %}" class="btn btn-sm btn-light border"><i class="bi bi-person-vcard text-muted"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
+
 </div>
 {% endblock %}
