@@ -10,6 +10,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout_view'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
 
+    path('profile', views.profile, name='profile'),
+
     # Branch
     path('branches', views.branch, name='branch'),
     path('add_branch', views.add_branch, name='add_branch'),

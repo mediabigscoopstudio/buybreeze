@@ -712,3 +712,36 @@ def employee_detail(request, id):
         'payroll_records': payroll_records,
         'branches': branches,
     })
+
+@user_passes_test(hr_required, login_url='/login/')
+def profile(request):
+    profile = request.user.profile
+
+    if request.method == "POST":
+        # User model fields
+        request.user.first_name = request.POST.get('first_name')
+        request.user.last_name = request.POST.get('last_name')
+        request.user.email = request.POST.get('email')
+        request.user.save()
+
+        # UserProfile fields
+        profile.phone = request.POST.get('phone')
+        profile.address = request.POST.get('address')
+        profile.bio = request.POST.get('bio')
+
+        # if image field exists
+        if request.FILES.get('profile_image'):
+            profile.profile_image = request.FILES['profile_image']
+
+        profile.save()
+
+        messages.success(request, "Profile updated successfully.")
+        return redirect('hr_profile')
+
+    return render(
+        request,
+        'hrpanel/profile.html',
+        {
+            'profile': profile
+        }
+    )
