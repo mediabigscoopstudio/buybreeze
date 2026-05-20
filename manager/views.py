@@ -397,7 +397,6 @@ from dash.models import (
 def view_lead(request, id):
     manager = request.user.profile
 
-    # all team members under this manager (TL + employees if they report directly)
     team_ids = UserProfile.objects.filter(
         reports_to=manager
     ).values_list('id', flat=True)
@@ -408,12 +407,26 @@ def view_lead(request, id):
         Lead.objects.select_related(
             'assigned_to',
             'assigned_to__user',
-            'assigned_to__branch',
+            'assigned_to__reports_to',
+            'assigned_to__reports_to__user',
+            'assigned_to__reports_to__reports_to',
+            'assigned_to__reports_to__reports_to__user',
             'branch'
         ),
         id=id,
         assigned_to_id__in=allowed_user_ids
     )
+
+    # Assignment hierarchy
+    employee = item.assigned_to
+    tl = None
+    assigned_manager = None
+
+    if employee:
+        tl = employee.reports_to
+
+    if tl:
+        assigned_manager = tl.reports_to
 
     calls = item.calls.order_by('-created_at')
     followups = item.followups.order_by('followup_at')
@@ -424,6 +437,9 @@ def view_lead(request, id):
         'manager/lead.html',
         {
             'lead': item,
+            'employee': employee,
+            'tl': tl,
+            'assigned_manager': assigned_manager,
             'calls': calls,
             'followups': followups,
             'wrapups': wrapups,

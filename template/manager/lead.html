@@ -358,9 +358,9 @@
                                 <div class="data-grid" style="grid-template-columns: 1fr;">
                                     <div class="data-item"><span class="data-label">Assigned To</span>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="data-value">{{ lead.assigned_to.reports_to.reports_to.user.get_full_name|default:"Not Assigned" }} | MANAGER</span>
-                                            <span class="data-value">{{ lead.assigned_to.reports_to.user.get_full_name|default:"Not Assigned" }} | TEAM LEADER</span>
-                                            <span class="data-value">{{ lead.assigned_to.user.get_full_name|default:lead.assigned_to.user.username|default:"Unassigned" }} | EMPLOYEE</span>
+                                            <span class="data-value">Manager : {{ assigned_manager.user.get_full_name|default:"Not Assigned" }}</span>
+                                            <span class="data-value">Team Leader : {{ tl.user.get_full_name|default:"Not Assigned" }}</span>
+                                            <span class="data-value">Employee: {{ employee.user.get_full_name|default:"Unassigned" }}</span>
                                         </div>
                                     </div>
                                     <div class="data-item"><span class="data-label">Role & Phone</span><span class="data-value">{{ lead.assigned_to.role|default:"-" }} · {{ lead.assigned_to.phone|default:"-" }}</span></div>
