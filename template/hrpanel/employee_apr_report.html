@@ -1,0 +1,99 @@
+{% extends 'hrpanel/base.html' %}
+{% load static %}
+
+{% block title %}APR Report — {{ employee.user.get_full_name }} — Buy Buzz CRM{% endblock %}
+{% block page_header %}Performance Report{% endblock %}
+
+{% block content %}
+<style>
+    /* ── GROVE UI: INDIVIDUAL REPORT ── */
+    .profile-banner { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; padding: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 24px; }
+    .avatar-circle { width: 80px; height: 80px; border-radius: 50%; background: #E6F2EE; color: #1A6B55; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; border: 4px solid #F5F5F3; }
+    
+    .stat-card { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; padding: 20px; display: flex; align-items: center; gap: 16px; }
+    .stat-val { font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: #0D0D0D; line-height: 1; }
+    .stat-label { font-size: 11px; color: #7A7A72; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .grove-table { width: 100%; border-collapse: collapse; }
+    .grove-table th { padding: 16px 24px; font-size: 10px; font-weight: 700; color: #7A7A72; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E4E4E0; }
+    .grove-table td { padding: 16px 24px; border-bottom: 1px solid #F5F5F3; vertical-align: middle; }
+    
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .s-sage { background: #E6F2EE; color: #1A6B55; }
+    .s-lost { background: #FCE8E8; color: #DC2626; }
+</style>
+
+<div class="main-content">
+
+    {# ── PROFILE HEADER ── #}
+    <div class="profile-banner fade-up">
+        <div class="avatar-circle">{{ employee.user.get_full_name|make_list|first|upper }}</div>
+        <div>
+            <h2 style="font-size: 20px; font-weight: 700; color: #0D0D0D; margin: 0;">{{ employee.user.get_full_name }}</h2>
+            <div style="font-size: 13px; color: #1A6B55; font-weight: 600;">{{ employee.get_role_display }}</div>
+            <div style="font-size: 13px; color: #7A7A72; margin-top: 4px;">
+                <i class="bi bi-envelope"></i> {{ employee.user.email|default:"No email" }} &nbsp;•&nbsp; 
+                <i class="bi bi-building"></i> {{ employee.branch.name|default:"No Branch" }}
+            </div>
+        </div>
+    </div>
+
+    {# ── SUMMARY CARDS ── #}
+    <div class="row g-4 mb-4">
+        <div class="col-4 fade-up" style="animation-delay: 0.05s;">
+            <div class="stat-card"><div class="stat-val">{{ total_days }}</div><div class="stat-label">Total Days</div></div>
+        </div>
+        <div class="col-4 fade-up" style="animation-delay: 0.1s;">
+            <div class="stat-card"><div class="stat-val" style="color: #1A6B55;">{{ present_days }}</div><div class="stat-label">Present</div></div>
+        </div>
+        <div class="col-4 fade-up" style="animation-delay: 0.15s;">
+            <div class="stat-card"><div class="stat-val" style="color: #DC2626;">{{ absent_days }}</div><div class="stat-label">Absent</div></div>
+        </div>
+    </div>
+
+    {# ── ATTENDANCE TABLE ── #}
+    <div class="grove-panel fade-up" style="animation-delay: 0.2s; background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; overflow: hidden;">
+        <div style="padding: 24px; font-size: 16px; font-weight: 700; color: #0D0D0D; border-bottom: 1px solid #F5F5F3;">Attendance Timeline</div>
+        <div class="table-responsive">
+            <table class="grove-table">
+                <thead style="background: #F5F5F3;">
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Punch In</th>
+                        <th>Punch Out</th>
+                        <th>Hours Worked</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #7A7A72;">{{ forloop.counter|stringformat:"02d" }}</td>
+                        <td style="font-weight: 600; color: #0D0D0D;">{{ r.date|date:"d M Y" }}</td>
+                        <td style="font-family: 'Geist Mono', monospace;">{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
+                        <td style="font-family: 'Geist Mono', monospace;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
+                        <td style="font-family: 'Geist Mono', monospace;">{{ r.total_hours|default:"0" }}h</td>
+                        <td>
+                            {% if r.punch_in %}
+                                <span class="status-pill s-sage"><i class="bi bi-check-circle-fill"></i> Present</span>
+                            {% else %}
+                                <span class="status-pill s-lost"><i class="bi bi-x-circle-fill"></i> Absent</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 64px 24px; text-align: center;">
+                            <i class="bi bi-calendar-x" style="font-size: 32px; color: #E4E4E0; margin-bottom: 12px; display: block;"></i>
+                            <div style="font-size: 14px; font-weight: 600; color: #0D0D0D;">No attendance data found</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

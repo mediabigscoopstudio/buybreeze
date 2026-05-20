@@ -256,7 +256,6 @@
           <td class="text-end">
             <a href="{% url 'employee_detail' e.id %}" class="action-icon"><i class="bi bi-person-vcard"></i></a>
             <a href="{% url 'leaves' %}?q={{ e.user.get_full_name }}" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-            <a href="{% url 'payroll' %}?q={{ e.user.get_full_name }}" class="action-icon"><i class="bi bi-cash"></i></a>
           </td>
         </tr>
         {% empty %}
