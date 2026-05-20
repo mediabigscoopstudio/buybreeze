@@ -403,26 +403,23 @@ def profile(request):
 
 @user_passes_test(tl_required, login_url='/login/')
 def view_lead(request, id):
-    tl = request.user.profile   # logged-in team leader
+    tl = request.user.profile   # logged-in TL
 
     item = get_object_or_404(
         Lead.objects.select_related(
             'assigned_to',
             'assigned_to__user',
-            'assigned_to__reports_to',               # manager
+            'assigned_to__reports_to',
             'assigned_to__reports_to__user',
             'branch'
         ),
         id=id,
-        assigned_to=tl   # ONLY leads assigned to this TL
+        assigned_to_id=tl.id   # filter by logged-in TL id
     )
 
     # hierarchy
     assigned_tl = item.assigned_to
-    assigned_manager = None
-
-    if assigned_tl:
-        assigned_manager = assigned_tl.reports_to
+    assigned_manager = assigned_tl.reports_to if assigned_tl else None
 
     calls = item.calls.order_by('-created_at')
     followups = item.followups.order_by('followup_at')
