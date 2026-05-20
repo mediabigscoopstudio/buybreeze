@@ -1,27 +1,56 @@
 {% extends 'hrpanel/base.html' %}
-{% block page_title %}Add Leave{% endblock %}
+{% load static %}
+
+{% block title %}Add Leave — Buy Buzz CRM{% endblock %}
+{% block page_header %}Add Leave Request{% endblock %}
+
 {% block content %}
+<style>
+  /* ── GROVE FORM STYLES ── */
+  .form-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 600px; }
+  .form-label { font-size: 12px; font-weight: 700; color: var(--stone); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .grove-input, .grove-select, .grove-textarea { 
+      width: 100%; border: 1px solid var(--border); border-radius: 8px; 
+      padding: 10px 14px; font-size: 14px; color: var(--ink); outline: none; background: var(--white);
+  }
+  .grove-input:focus, .grove-select:focus, .grove-textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-lt); }
+  
+  .btn-primary-sage { background: var(--sage); color: var(--white); border: none; border-radius: 8px; font-weight: 600; padding: 10px 24px; transition: opacity 0.2s; }
+  .btn-primary-sage:hover { opacity: 0.9; color: var(--white); }
+  .btn-outline-stone { border: 1px solid var(--border); background: var(--white); color: var(--stone); font-weight: 600; padding: 10px 24px; border-radius: 8px; text-decoration: none; }
+  .btn-outline-stone:hover { background: var(--cloud); }
+</style>
 
-<div class="page-header">
-  <div><h4>Add Leave Request</h4></div>
-  <a href="{% url 'leaves' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
+<div class="main-content">
 
-<div class="card" style="max-width:580px;">
-  <div class="card-body">
+  {# ── HEADER ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Add Leave Request</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Log a new leave entry for an employee</div>
+    </div>
+    <a href="{% url 'leaves' %}" class="btn-outline-stone">
+      <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+  </div>
+
+  {# ── FORM ── #}
+  <div class="form-card fade-up" style="animation-delay: 0.1s;">
     <form method="POST">
       {% csrf_token %}
-      <div class="row g-3 mb-3">
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
           <label class="form-label">Employee *</label>
-          <select name="employee" class="form-select" required>
+          <select name="employee" class="grove-select" required>
             <option value="">Select employee</option>
-            {% for e in employees %}<option value="{{ e.id }}">{{ e.user.get_full_name }}</option>{% endfor %}
+            {% for e in employees %}
+              <option value="{{ e.id }}">{{ e.user.get_full_name }}</option>
+            {% endfor %}
           </select>
         </div>
         <div class="col-md-6">
           <label class="form-label">Leave Type *</label>
-          <select name="leave_type" class="form-select" required>
+          <select name="leave_type" class="grove-select" required>
             <option value="casual">Casual Leave</option>
             <option value="sick">Sick Leave</option>
             <option value="annual">Annual Leave</option>
@@ -30,33 +59,37 @@
             <option value="compoff">Comp Off</option>
           </select>
         </div>
+        
         <div class="col-md-6">
           <label class="form-label">From Date *</label>
-          <input type="date" name="from_date" class="form-control" required>
+          <input type="date" name="from_date" class="grove-input" required>
         </div>
         <div class="col-md-6">
           <label class="form-label">To Date *</label>
-          <input type="date" name="to_date" class="form-control" required>
+          <input type="date" name="to_date" class="grove-input" required>
         </div>
-        <div class="col-md-6">
-          <label class="form-label">Status</label>
-          <select name="leave_status" class="form-select">
+        
+        <div class="col-md-12">
+          <label class="form-label">Initial Status</label>
+          <select name="leave_status" class="grove-select">
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
           </select>
         </div>
+        
         <div class="col-12">
           <label class="form-label">Reason *</label>
-          <textarea name="reason" class="form-control" rows="3" required placeholder="Reason for leave..."></textarea>
+          <textarea name="reason" class="grove-textarea" rows="4" placeholder="Detail the reason for the leave request..." required></textarea>
         </div>
       </div>
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Save</button>
-        <a href="{% url 'leaves' %}" class="btn btn-sm btn-action">Cancel</a>
+
+      <div class="d-flex gap-3 pt-3 border-top">
+        <button type="submit" class="btn-primary-sage">Save Request</button>
+        <a href="{% url 'leaves' %}" class="btn-outline-stone">Cancel</a>
       </div>
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

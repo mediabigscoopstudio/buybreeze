@@ -1,72 +1,107 @@
 {% extends 'hrpanel/base.html' %}
-{% block page_title %}Add Attendance{% endblock %}
+{% load static %}
+
+{% block title %}Add Attendance — Buy Buzz CRM{% endblock %}
+{% block page_header %}Add Punch Record{% endblock %}
+
 {% block content %}
+<style>
+    /* ── GROVE FORM STYLES ── */
+    .form-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 700px; }
+    .form-label { font-size: 12px; font-weight: 700; color: var(--stone); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .grove-input, .grove-select, .grove-textarea { 
+        width: 100%; border: 1px solid var(--border); border-radius: 8px; 
+        padding: 10px 14px; font-size: 14px; color: var(--ink); outline: none; background: var(--white);
+    }
+    .grove-input:focus, .grove-select:focus, .grove-textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-lt); }
+    
+    .btn-primary-sage { background: var(--sage); color: var(--white); border: none; border-radius: 8px; font-weight: 600; padding: 10px 24px; transition: opacity 0.2s; }
+    .btn-primary-sage:hover { opacity: 0.9; color: var(--white); }
+    .btn-outline-stone { border: 1px solid var(--border); background: var(--white); color: var(--stone); font-weight: 600; padding: 10px 24px; border-radius: 8px; }
+    .btn-outline-stone:hover { background: var(--cloud); }
+</style>
 
-<div class="page-header">
-  <div><h4>Add Attendance</h4><div class="sub">Log a punch record</div></div>
-  <a href="{% url 'attendance' %}" class="btn btn-sm btn-action"><i class="bi bi-arrow-left me-1"></i> Back</a>
-</div>
+<div class="main-content">
 
-<div class="card" style="max-width:620px;">
-  <div class="card-body">
+  {# ── HEADER ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Add Attendance</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Manually log a new employee punch record</div>
+    </div>
+    <a href="{% url 'attendance' %}" class="btn-outline-stone">
+      <i class="bi bi-arrow-left"></i> Back to Logs
+    </a>
+  </div>
+
+  {# ── FORM ── #}
+  <div class="form-card fade-up" style="animation-delay: 0.1s;">
     <form method="POST">
       {% csrf_token %}
-      <div class="row g-3 mb-3">
+      <div class="row g-4 mb-4">
         <div class="col-md-6">
           <label class="form-label">Employee *</label>
-          <select name="employee" class="form-select" required>
+          <select name="employee" class="grove-select" required>
             <option value="">Select employee</option>
-            {% for e in employees %}<option value="{{ e.id }}">{{ e.user.get_full_name }} ({{ e.get_role_display }})</option>{% endfor %}
+            {% for e in employees %}
+                <option value="{{ e.id }}">{{ e.user.get_full_name }} ({{ e.get_role_display }})</option>
+            {% endfor %}
           </select>
         </div>
         <div class="col-md-6">
           <label class="form-label">Branch</label>
-          <select name="branch" class="form-select">
+          <select name="branch" class="grove-select">
             <option value="">Select branch</option>
-            {% for b in branches %}<option value="{{ b.id }}">{{ b.name }}</option>{% endfor %}
+            {% for b in branches %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+            {% endfor %}
           </select>
         </div>
+        
         <div class="col-md-4">
           <label class="form-label">Date *</label>
-          <input type="date" name="date" class="form-control" required>
+          <input type="date" name="date" class="grove-input" required>
         </div>
         <div class="col-md-4">
           <label class="form-label">Punch In</label>
-          <input type="datetime-local" name="punch_in" class="form-control">
+          <input type="datetime-local" name="punch_in" class="grove-input">
         </div>
         <div class="col-md-4">
           <label class="form-label">Punch Out</label>
-          <input type="datetime-local" name="punch_out" class="form-control">
+          <input type="datetime-local" name="punch_out" class="grove-input">
         </div>
+
         <div class="col-md-6">
-          <label class="form-label">Status *</label>
-          <select name="status" class="form-select" required>
+          <label class="form-label">Attendance Status *</label>
+          <select name="status" class="grove-select" required>
             <option value="present">Present</option>
             <option value="absent">Absent</option>
             <option value="late">Late</option>
             <option value="half_day">Half Day</option>
             <option value="wfh">Work From Home</option>
             <option value="on_leave">On Leave</option>
-            <option value="holiday">Holiday</option>
           </select>
         </div>
-        <div class="col-md-6 d-flex align-items-end">
-          <div class="form-check">
-            <input type="checkbox" name="is_out_of_zone" class="form-check-input" id="outofzone">
-            <label class="form-check-label" for="outofzone" style="font-size:0.84rem;">Out of Zone</label>
-          </div>
+        
+        <div class="col-md-6 d-flex align-items-end pb-2">
+            <div class="form-check">
+                <input type="checkbox" name="is_out_of_zone" class="form-check-input" id="outofzone" style="border-color: var(--border);">
+                <label class="form-check-label" for="outofzone" style="font-size: 13px; font-weight: 600; color: var(--ink);">Flag as "Out of Zone"</label>
+            </div>
         </div>
+
         <div class="col-12">
-          <label class="form-label">Notes</label>
-          <textarea name="notes" class="form-control" rows="2" placeholder="Any notes..."></textarea>
+          <label class="form-label">Administrative Notes</label>
+          <textarea name="notes" class="grove-textarea" rows="3" placeholder="Add specific details for this entry..."></textarea>
         </div>
       </div>
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Save Record</button>
-        <a href="{% url 'attendance' %}" class="btn btn-sm btn-action">Cancel</a>
+
+      <div class="d-flex gap-3 pt-3 border-top">
+        <button type="submit" class="btn-primary-sage">Save Record</button>
+        <a href="{% url 'attendance' %}" class="btn-outline-stone">Cancel</a>
       </div>
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}

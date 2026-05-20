@@ -1,75 +1,155 @@
 {% extends 'hrpanel/base.html' %}
-{% block page_title %}Attendance{% endblock %}
+{% load static %}
+
+{% block title %}Attendance — Buy Buzz CRM{% endblock %}
+{% block page_header %}Attendance Records{% endblock %}
+
 {% block content %}
+<style>
+  .leads-card { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; overflow: hidden; padding: 24px; }
+  .leads-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .leads-table th { padding: 12px 16px; font-size: 10px; font-weight: 700; color: #7A7A72; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E4E4E0; border-top: 1px solid #E4E4E0; }
+  .leads-table td { padding: 16px; border-bottom: 1px solid #F5F5F3; vertical-align: middle; }
+  
+  .grove-input { border: 1px solid #E4E4E0; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #0D0D0D; outline: none; background: #FFFFFF; }
+  .grove-input:focus { border-color: #1A6B55; box-shadow: 0 0 0 3px #E6F2EE; }
 
-<div class="page-header">
-  <div><h4>Attendance Records</h4><div class="sub">All punch-in / punch-out records</div></div>
-  <a href="{% url 'add_attendance' %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Add Record</a>
+  .btn-primary-sage { background: #1A6B55; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; padding: 8px 20px; font-size: 13px; transition: opacity 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary-sage:hover { opacity: 0.9; color: #FFFFFF; }
+
+  /* Grove Status Pills */
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .s-sage { background: #E6F2EE; color: #1A6B55; }
+  .s-lost { background: #FCE8E8; color: #DC2626; }
+  .s-gold { background: #FBF4E0; color: #B48E32; }
+  .s-blue { background: #EFF6FF; color: #2563EB; }
+  .s-charcoal { background: #F5F5F3; color: #2C2C2A; }
+
+  .action-icon { color: #7A7A72; font-size: 14px; text-decoration: none; margin-left: 8px; transition: color 0.2s; }
+  .action-icon:hover { color: #0D0D0D; }
+  .action-icon.text-danger:hover { color: #DC2626; }
+  
+  .table-header-title { font-size: 16px; font-weight: 700; color: #0D0D0D; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+</style>
+
+<div class="main-content">
+
+  {# ── PAGE HEADER ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: #0D0D0D; margin: 0;">Attendance Log</h2>
+      <div style="font-size: 13px; color: #7A7A72; margin-top: 4px;">Monitor and audit punch-in/punch-out timelines across all branches</div>
+    </div>
+    <a href="{% url 'add_attendance' %}" class="btn-primary-sage">
+      <i class="bi bi-plus-lg"></i> Add Record
+    </a>
+  </div>
+
+  {# ── ATTENDANCE DIRECTORY & FILTERS ── #}
+  <div class="leads-card fade-up" style="animation-delay: 0.1s;">
+    
+    <form method="GET" class="d-flex align-items-center gap-3 flex-wrap mb-2">
+      <div style="position: relative; flex: 1; min-width: 200px; max-width: 280px;">
+        <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #7A7A72;"></i>
+        <input type="text" name="q" class="grove-input w-100" style="padding-left: 36px;" placeholder="Search employee..." value="{{ search }}">
+      </div>
+      
+      <input type="date" name="date" class="grove-input" style="max-width:160px;" value="{{ date_filter }}">
+      
+      <select name="status" class="grove-input" style="min-width: 140px;">
+        <option value="">All Status</option>
+        <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
+        <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
+        <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Late</option>
+        <option value="half_day" {% if status_filter == 'half_day' %}selected{% endif %}>Half Day</option>
+        <option value="wfh" {% if status_filter == 'wfh' %}selected{% endif %}>WFH</option>
+        <option value="on_leave" {% if status_filter == 'on_leave' %}selected{% endif %}>On Leave</option>
+      </select>
+      
+      <select name="branch" class="grove-input" style="min-width: 160px;">
+        <option value="">All Branches</option>
+        {% for b in branches %}
+          <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="submit" class="btn-primary-sage" style="padding: 8px 24px;">Filter</button>
+      <a href="{% url 'attendance' %}" style="font-size: 13px; font-weight: 600; color: #0D0D0D; text-decoration: none; margin-left: 8px;">Clear</a>
+    </form>
+
+    <div class="table-responsive">
+      <table class="leads-table">
+        <thead style="background: #F5F5F3;">
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Employee</th>
+            <th>Date</th>
+            <th>Punch In</th>
+            <th>Punch Out</th>
+            <th>Hours</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Zone</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #7A7A72;">
+              {{ forloop.counter|stringformat:"02d" }}
+            </td>
+            <td style="font-weight: 700; color: #0D0D0D;">
+              <div class="d-flex align-items-center gap-3">
+                <div style="width: 28px; height: 28px; border-radius: 50%; background: #E6F2EE; color: #1A6B55; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+                  {{ r.employee.user.get_full_name|make_list|first|upper }}
+                </div>
+                {{ r.employee.user.get_full_name }}
+              </div>
+            </td>
+            <td style="font-size: 13px; color: #7A7A72; font-weight: 500;">{{ r.date|date:"d M Y" }}</td>
+            <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #0D0D0D;">{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
+            <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #0D0D0D;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
+            <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #7A7A72;">{{ r.total_hours|default:"—" }}h</td>
+            <td class="text-center">
+              {% if r.status == 'present' %}
+                <span class="status-pill s-sage"><i class="bi bi-check-circle-fill"></i> Present</span>
+              {% elif r.status == 'absent' %}
+                <span class="status-pill s-lost"><i class="bi bi-x-circle-fill"></i> Absent</span>
+              {% elif r.status == 'late' %}
+                <span class="status-pill s-gold"><i class="bi bi-clock-history"></i> Late</span>
+              {% elif r.status == 'on_leave' %}
+                <span class="status-pill s-blue"><i class="bi bi-calendar-check"></i> On Leave</span>
+              {% elif r.status == 'half_day' %}
+                <span class="status-pill s-charcoal"><i class="bi bi-brightness-alt-high"></i> Half Day</span>
+              {% else %}
+                <span class="status-pill s-charcoal">{{ r.get_status_display }}</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if r.is_out_of_zone %}
+                <span class="status-pill s-lost">Out of Zone</span>
+              {% else %}
+                <span class="status-pill s-sage">In Zone</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'edit_attendance' r.id %}" class="action-icon"><i class="bi bi-pencil-square"></i></a>
+              <a href="{% url 'delete_attendance' r.id %}" class="action-icon text-danger" onclick="return confirm('Delete this record?')"><i class="bi bi-trash3"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" style="padding: 64px 24px; text-align: center;">
+              <i class="bi bi-clock-history" style="font-size: 32px; color: #E4E4E0; margin-bottom: 12px; display: block;"></i>
+              <div style="font-size: 14px; font-weight: 600; color: #0D0D0D;">No attendance records found</div>
+              <div style="font-size: 12px; color: #7A7A72; margin-top: 4px;">Adjust your filters or add a new punch record to get started.</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
-
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <input type="text" name="q" class="form-control" placeholder="Search employee..." value="{{ search }}">
-    <input type="date" name="date" class="form-control" style="max-width:160px;" value="{{ date_filter }}">
-    <select name="status" class="form-select">
-      <option value="">All Status</option>
-      <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
-      <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
-      <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Late</option>
-      <option value="half_day" {% if status_filter == 'half_day' %}selected{% endif %}>Half Day</option>
-      <option value="wfh" {% if status_filter == 'wfh' %}selected{% endif %}>WFH</option>
-      <option value="on_leave" {% if status_filter == 'on_leave' %}selected{% endif %}>On Leave</option>
-    </select>
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}<option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'attendance' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
-
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr><th>#</th><th>Employee</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Hours</th><th>Status</th><th>Zone</th><th>Actions</th></tr>
-    </thead>
-    <tbody>
-      {% for r in records %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td style="font-weight:600;">{{ r.employee.user.get_full_name }}</td>
-        <td style="font-size:0.82rem;">{{ r.date|date:"d M Y" }}</td>
-        <td style="font-size:0.82rem;">{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
-        <td style="font-size:0.82rem;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
-        <td style="font-size:0.82rem;">{{ r.total_hours|default:"—" }}h</td>
-        <td>
-          <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; font-weight:600;
-            {% if r.status == 'present' %}background:#ecfdf5;color:#059669;
-            {% elif r.status == 'absent' %}background:#fef2f2;color:#dc2626;
-            {% elif r.status == 'late' %}background:#fff7ed;color:#ea580c;
-            {% elif r.status == 'on_leave' %}background:#faf5ff;color:#7c3aed;
-            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
-            {{ r.get_status_display }}
-          </span>
-        </td>
-        <td>
-          {% if r.is_out_of_zone %}
-            <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; background:#fef2f2; color:#dc2626; font-weight:600;">Out of Zone</span>
-          {% else %}
-            <span style="font-size:0.7rem; padding:3px 8px; border-radius:20px; background:#ecfdf5; color:#059669; font-weight:600;">In Zone</span>
-          {% endif %}
-        </td>
-        <td style="white-space:nowrap;">
-          <a href="{% url 'edit_attendance' r.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
-          <a href="{% url 'delete_attendance' r.id %}" class="btn btn-sm btn-action" onclick="return confirm('Delete this record?')"><i class="bi bi-trash" style="color:#dc2626"></i></a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="9"><div class="empty-state"><i class="bi bi-clock"></i><p>No attendance records found</p></div></td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
-
 {% endblock %}
