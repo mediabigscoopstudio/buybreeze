@@ -549,10 +549,21 @@
                     <span class="summary-stat-value">{{ lead.status|default:"Active" }}</span>
                 </div>
                 <div class="summary-stat-row">
-                    <span class="summary-stat-label">Assigned Rep</span>
+                    <span class="summary-stat-label">Assigned Manager</span>
                     <span class="summary-stat-value text-end">
-                        {{ lead.assigned_to.name|default:"Unassigned" }}<br>
-                        <span style="font-size: 10px; color: var(--brand-accent); font-weight: 500;">{{ lead.assigned_to.role|default:"" }}</span>
+                        {{ lead.assigned_to.reports_to.reports_to.user.get_full_name|default:"Not Assigned" }}
+                    </span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Assigned Team Leader</span>
+                    <span class="summary-stat-value text-end">
+                        {{ lead.assigned_to.reports_to.user.get_full_name|default:"Not Assigned" }}
+                    </span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Assigned Employee</span>
+                    <span class="summary-stat-value text-end">
+                        {{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}
                     </span>
                 </div>
                 <div class="summary-stat-row">
