@@ -1,159 +1,338 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Leader Performance | CRM</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { 
-            background-color: #f8f9fa; 
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-        }
-        .table-responsive { 
-            scrollbar-width: thin; 
-        }
-    </style>
-</head>
-<body>
+{% extends "manager/base.html" %}
 
-    <!-- Team Leader Performance Container -->
-    <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+{% block title %}Team Leader Performance — Buy Buzz CRM{% endblock %}
 
-        <!-- BACK BUTTON -->
-        <div class="mb-4">
-            <button onclick="window.history.back()" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-medium d-inline-flex align-items-center gap-2 transition-all">
-                <span>&larr;</span> Back
-            </button>
-        </div>
+{% block css %}
+<style>
+  /* ── GROVE SYSTEM: TL PERFORMANCE PORTAL ── */
+  
+  /* Back Button */
+  .grove-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--brand-accent, #6F8F9F);
+      font-weight: 600;
+      font-size: 13px;
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--white, #ffffff);
+      border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+      transition: all 0.2s ease;
+  }
+  .grove-back-btn:hover {
+      background: var(--cloud, #f7f3f0);
+      color: var(--brand-ink, #2E2E2E);
+      border-color: var(--brand-accent, #6F8F9F);
+  }
 
-        <!-- SECTION 1: HEADER -->
-        <div class="mb-4 d-flex align-items-center gap-3">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fs-3 fw-bold shadow-sm" style="width: 56px; height: 56px;">
-                {{ tl.user.username|make_list|first|upper|default:"T" }}
-            </div>
-            <div>
-                <h3 class="fw-bold text-dark mb-0">{{ tl.user.username }}</h3>
-                <span class="badge bg-light text-secondary border fw-normal mt-1 px-2 py-1">Team Leader Performance</span>
-            </div>
-        </div>
+  /* Identity Header */
+  .tl-identity-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: var(--brand-ink, #2E2E2E);
+      color: var(--white, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .tl-identity-role {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand-accent, #6F8F9F);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: var(--accent-light, rgba(111, 143, 159, 0.1));
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-top: 4px;
+  }
 
-        <!-- SECTION 2: KPI CARDS -->
-        <div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
-            <!-- Total Leads -->
-            <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center bg-white">
-                    <div class="text-muted small fw-semibold text-uppercase mb-2 tracking-wide">Total Leads</div>
-                    <h2 class="display-6 fw-bold text-dark mb-0">{{ total_leads|default:"0" }}</h2>
-                </div>
-            </div>
-            <!-- Hot Leads -->
-            <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center bg-white">
-                    <div class="text-muted small fw-semibold text-uppercase mb-2 tracking-wide">Hot Leads</div>
-                    <h2 class="display-6 fw-bold text-danger mb-0">{{ hot_leads|default:"0" }}</h2>
-                </div>
-            </div>
-            <!-- New Leads -->
-            <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center bg-white">
-                    <div class="text-muted small fw-semibold text-uppercase mb-2 tracking-wide">New Leads</div>
-                    <h2 class="display-6 fw-bold text-primary mb-0">{{ new_leads|default:"0" }}</h2>
-                </div>
-            </div>
-            <!-- Closed Leads -->
-            <div class="col">
-                <div class="card border-0 shadow-sm rounded-4 h-100 p-4 text-center bg-white">
-                    <div class="text-muted small fw-semibold text-uppercase mb-2 tracking-wide">Closed Leads</div>
-                    <h2 class="display-6 fw-bold text-success mb-0">{{ closed_leads|default:"0" }}</h2>
-                </div>
-            </div>
-        </div>
+  /* Stat Cards */
+  .grove-stat-card {
+      background: var(--white, #ffffff);
+      border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+      border-radius: 16px;
+      padding: 24px;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .grove-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+  }
+  .stat-label-center {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brand-accent, #6F8F9F);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+  }
+  .stat-value-center {
+      font-family: 'Geist Mono', monospace, sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--brand-ink, #2E2E2E);
+      line-height: 1;
+  }
 
-        <!-- SECTION 3: LEADS TABLE -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
-            
-            <!-- Table Header -->
-            <div class="card-header bg-white border-bottom p-4">
-                <h5 class="mb-0 fw-bold text-dark">Leads Under TL</h5>
-            </div>
+  /* Table Container */
+  .grove-panel {
+      background: var(--white, #ffffff);
+      border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+  .panel-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+      background: var(--white, #ffffff);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
 
-            <!-- Scrollable Table Body -->
-            <div class="card-body p-0">
-                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
-                    <table class="table table-hover align-middle mb-0 text-nowrap">
-                        <thead class="table-light sticky-top z-1" style="top: 0;">
-                            <tr>
-                                <th scope="col" class="py-3 ps-4 text-secondary fw-semibold">Lead Name</th>
-                                <th scope="col" class="py-3 text-secondary fw-semibold">Phone</th>
-                                <th scope="col" class="py-3 text-secondary fw-semibold">Source</th>
-                                <th scope="col" class="py-3 text-secondary fw-semibold">Campaign</th>
-                                <th scope="col" class="py-3 text-secondary fw-semibold">Temperature</th>
-                                <th scope="col" class="py-3 text-secondary fw-semibold">Stage</th>
-                                <th scope="col" class="py-3 pe-4 text-secondary fw-semibold">Created At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for lead in leads %}
-                            <tr>
-                                <!-- Lead Name -->
-                                <td class="ps-4 fw-bold text-dark">{{ lead.name }}</td>
-                                
-                                <!-- Phone -->
-                                <td class="text-secondary">{{ lead.phone|default:"-" }}</td>
-                                
-                                <!-- Source -->
-                                <td class="text-secondary small">{{ lead.source|default:"-" }}</td>
-                                
-                                <!-- Campaign -->
-                                <td class="text-secondary small">{{ lead.campaign_name|default:"-" }}</td>
-                                
-                                <!-- Temperature -->
-                                <td>
-                                    {% if lead.temperature|lower == 'hot' %}
-                                        <span class="badge bg-danger rounded-pill px-3 py-2 fw-medium">Hot</span>
-                                    {% elif lead.temperature|lower == 'warm' %}
-                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-medium">Warm</span>
-                                    {% elif lead.temperature|lower == 'cold' %}
-                                        <span class="badge bg-info text-dark rounded-pill px-3 py-2 fw-medium">Cold</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary rounded-pill px-3 py-2 fw-medium">{{ lead.temperature|default:"None" }}</span>
-                                    {% endif %}
-                                </td>
-                                
-                                <!-- Stage -->
-                                <td>
-                                    <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">
-                                        {{ lead.stage|default:"New" }}
-                                    </span>
-                                </td>
-                                
-                                <!-- Created At -->
-                                <td class="pe-4 text-secondary small">
-                                    {{ lead.created_at|date:"M d, Y" }}
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-5">
-                                    <div class="d-flex flex-column align-items-center justify-content-center">
-                                        <span class="fs-1 mb-2">📋</span>
-                                        <p class="mb-0 fs-5 fw-medium">No leads assigned yet.</p>
-                                        <p class="small">This Team Leader currently has no active leads.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+  /* Interactive Table Rows */
+  .table-custom th {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--brand-accent, #6F8F9F);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+      padding: 16px 12px;
+      background: var(--cloud, #f7f3f0);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+  }
+  .table-custom td {
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+      vertical-align: middle;
+      font-size: 14px;
+  }
+  
+  /* Lead Link Styling (Mobile Friendly Target) */
+  .lead-link {
+      color: var(--brand-ink, #2E2E2E);
+      text-decoration: none;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s ease;
+  }
+  .lead-link:hover {
+      color: var(--sage, #4f7942);
+  }
+  .lead-link i {
+      font-size: 12px;
+      color: var(--brand-accent, #6F8F9F);
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translateX(-4px);
+  }
+  .lead-link:hover i {
+      opacity: 1;
+      transform: translateX(0);
+  }
 
+  /* Pills */
+  .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+  }
+  .s-hot { background: #f8d7da; color: #721c24; }
+  .s-warm { background: #fff3cd; color: #856404; }
+  .s-cold { background: var(--accent-light, rgba(111, 143, 159, 0.1)); color: var(--brand-accent, #6F8F9F); }
+  .s-stage { border: 1px solid var(--border, rgba(111, 143, 159, 0.2)); color: var(--brand-ink, #2E2E2E); }
+
+  /* Mobile Adjustments */
+  @media (max-width: 768px) {
+      .tl-identity-avatar {
+          width: 48px;
+          height: 48px;
+          font-size: 20px;
+      }
+      .stat-value-center {
+          font-size: 28px;
+      }
+      .table-custom td, .table-custom th {
+          padding: 16px 8px;
+      }
+      .lead-link {
+          padding: 8px 0; /* Larger touch target on mobile */
+      }
+      .lead-link i {
+          opacity: 1; /* Always visible on touch devices */
+          transform: none;
+      }
+  }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4 mx-auto" style="max-width: 1400px;">
+
+    {# ── ACTION BAR ── #}
+    <div class="mb-4 fade-up">
+        <a href="javascript:history.back()" class="grove-back-btn">
+            <i class="bi bi-arrow-left"></i> Back to Directory
+        </a>
     </div>
 
-    <!-- Bootstrap JS (Optional, for any dynamic components) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    {# ── IDENTITY HEADER ── #}
+    <div class="d-flex align-items-center gap-3 mb-4 fade-up" style="animation-delay: 0.05s;">
+        <div class="tl-identity-avatar">
+            {{ tl.user.username|make_list|first|upper|default:"T" }}
+        </div>
+        <div>
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0; line-height: 1.2;">{{ tl.user.username }}</h2>
+            <div class="tl-identity-role">Team Leader Performance</div>
+        </div>
+    </div>
+
+    {# ── KPI STAT CARDS ── #}
+    <div class="row row-cols-2 row-cols-lg-4 g-3 mb-5 fade-up" style="animation-delay: 0.1s;">
+        <div class="col">
+            <div class="grove-stat-card" style="border-top: 3px solid var(--brand-ink);">
+                <div class="stat-label-center">Total Pool</div>
+                <div class="stat-value-center">{{ total_leads|default:"0" }}</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="grove-stat-card" style="border-top: 3px solid #721c24; background: #fffcfc;">
+                <div class="stat-label-center" style="color: #721c24;">Hot Opportunities</div>
+                <div class="stat-value-center" style="color: #721c24;">{{ hot_leads|default:"0" }}</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="grove-stat-card" style="border-top: 3px solid var(--sage);">
+                <div class="stat-label-center">New Leads</div>
+                <div class="stat-value-center" style="color: var(--sage);">{{ new_leads|default:"0" }}</div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="grove-stat-card" style="border-top: 3px solid #b8860b;">
+                <div class="stat-label-center">Closed Deals</div>
+                <div class="stat-value-center" style="color: #b8860b;">{{ closed_leads|default:"0" }}</div>
+            </div>
+        </div>
+    </div>
+
+    {# ── ROUTED LEADS DATA TABLE ── #}
+    <div class="grove-panel mb-4 fade-up" style="animation-delay: 0.15s;">
+        
+        <div class="panel-header">
+            <i class="bi bi-diagram-3-fill" style="color: var(--brand-accent); font-size: 18px;"></i>
+            <h5 class="mb-0 fw-bold" style="font-size: 16px; color: var(--brand-ink);">Assigned Pipeline Operations</h5>
+        </div>
+
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-custom align-middle mb-0 text-nowrap text-start" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4">Lead Entity</th>
+                        <th scope="col">Phone Contact</th>
+                        <th scope="col">Origin Source</th>
+                        <th scope="col">Campaign Tag</th>
+                        <th scope="col">Temperature</th>
+                        <th scope="col">Workflow Stage</th>
+                        <th scope="col" class="pe-4 text-end">Entry Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td class="ps-4">
+                            <a href="{% url 'view_lead' lead.id %}" class="lead-link" title="Open Lead Profile">
+                                {{ lead.name }} <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                        </td>
+                        
+                        <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--brand-accent);">
+                            {{ lead.phone|default:"—" }}
+                        </td>
+                        
+                        <td style="font-size: 13px; color: var(--brand-accent);">
+                            {{ lead.source|default:"—" }}
+                        </td>
+                        
+                        <td style="font-size: 13px; color: var(--brand-accent);">
+                            {{ lead.campaign_name|default:"—" }}
+                        </td>
+                        
+                        <td>
+                            {% if lead.temperature|lower == 'hot' %}
+                                <span class="status-pill s-hot">Hot</span>
+                            {% elif lead.temperature|lower == 'warm' %}
+                                <span class="status-pill s-warm">Warm</span>
+                            {% elif lead.temperature|lower == 'cold' %}
+                                <span class="status-pill s-cold">Cold</span>
+                            {% else %}
+                                <span class="status-pill s-cold" style="background: transparent; border: 1px dashed var(--border);">{{ lead.temperature|default:"None" }}</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                            <span class="status-pill s-stage">{{ lead.stage|default:"New" }}</span>
+                        </td>
+                        
+                        <td class="pe-4 text-end" style="font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--brand-accent);">
+                            {{ lead.created_at|date:"M d, Y" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div style="width: 56px; height: 56px; background: var(--cloud); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                                <i class="bi bi-inbox fs-3" style="color: var(--brand-accent);"></i>
+                            </div>
+                            <div style="font-size: 15px; font-weight: 700; color: var(--brand-ink);">No routing operations active</div>
+                            <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">This supervisor currently has zero pipeline entries assigned to their node.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock body %}
+
+{% block script %}
+<script>
+    // Optional: Add simple fade-up animation initialization if not handled in base.html
+    document.addEventListener("DOMContentLoaded", function() {
+        const fadeElements = document.querySelectorAll('.fade-up');
+        fadeElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 100 * index);
+        });
+    });
+</script>
+{% endblock script %}

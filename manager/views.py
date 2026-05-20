@@ -358,6 +358,7 @@ def tl_performance(request, id):
 
 
 from dash.models import UserProfile 
+from dash.models import Lead
 @user_passes_test(manager_required, login_url='/login/')
 def profile_settings(request):
     user = request.user
@@ -383,3 +384,24 @@ def profile_settings(request):
     return render(request, 'manager/profile.html', {
         'profile': profile
     })
+
+def view_lead(request, id):
+    profile = request.user.profile
+
+    # Only manager can view their own assigned leads
+    lead = get_object_or_404(
+        Lead.objects.select_related(
+            'assigned_to_manager',
+            'assigned_to_tl',
+            'assigned_to',
+            'branch'
+        ),
+        id=id,
+        assigned_to_manager=profile
+    )
+
+    context = {
+        'lead': lead
+    }
+
+    return render(request, 'manager/lead.html', context)

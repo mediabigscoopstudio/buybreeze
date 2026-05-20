@@ -1,0 +1,339 @@
+{% extends "manager/base.html" %}
+
+{% block title %}{{ lead.name|default:"Lead Profile" }} — Manager Portal{% endblock %}
+
+{% block css %}
+<style>
+    /* ── GROVE UI COMPONENT SYSTEM: VIEW LEAD ── */
+    
+    .grove-panel {
+        background: var(--white, #ffffff);
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.015);
+        margin-bottom: 24px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--brand-ink, #2E2E2E);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 16px;
+        border-bottom: 1px dashed var(--border, rgba(111, 143, 159, 0.2));
+    }
+
+    /* Info Groups */
+    .info-group {
+        margin-bottom: 16px;
+    }
+    .info-group:last-child {
+        margin-bottom: 0;
+    }
+    .info-label {
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--brand-accent, #6F8F9F);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--brand-ink, #2E2E2E);
+    }
+    .info-value.mono {
+        font-family: 'Geist Mono', monospace;
+        letter-spacing: -0.3px;
+    }
+
+    /* Pills & Badges */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .s-hot { background: rgba(229, 62, 62, 0.1); color: #E53E3E; }
+    .s-warm { background: rgba(217, 119, 6, 0.1); color: #D97706; }
+    .s-cold { background: var(--accent-light, rgba(111, 143, 159, 0.1)); color: var(--brand-accent, #6F8F9F); }
+    .s-stage { border: 1px solid var(--border, rgba(111, 143, 159, 0.2)); color: var(--brand-ink, #2E2E2E); background: var(--white); }
+
+    /* Timeline Styling */
+    .timeline {
+        position: relative;
+        padding-left: 24px;
+        margin-top: 16px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 6px;
+        bottom: 0;
+        width: 2px;
+        background: var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 2px;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 24px;
+    }
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    .timeline-marker {
+        position: absolute;
+        left: -24px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--white);
+        border: 3px solid var(--brand-accent, #6F8F9F);
+        z-index: 2;
+    }
+    .timeline-content {
+        background: var(--brand-bg, #f7f3f0);
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+    }
+    .timeline-date {
+        font-family: 'Geist Mono', monospace;
+        font-size: 11px;
+        color: var(--brand-accent, #6F8F9F);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    /* Avatar */
+    .lead-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: var(--brand-ink, #2E2E2E);
+        color: var(--white, #ffffff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 700;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    }
+
+    /* Forms */
+    .grove-input {
+        width: 100%;
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: var(--brand-ink, #2E2E2E);
+        background: var(--white, #ffffff);
+        transition: all 0.2s ease;
+    }
+    .grove-input:focus {
+        outline: none;
+        border-color: var(--brand-accent, #6F8F9F);
+        box-shadow: 0 0 0 3px var(--accent-light, rgba(111, 143, 159, 0.1));
+    }
+
+    @media (max-width: 768px) {
+        .header-actions {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 16px;
+        }
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4 mx-auto" style="max-width: 1200px;">
+
+    {# ── BREADCRUMB / BACK ── #}
+    <div class="mb-4 fade-up">
+        <a href="javascript:history.back()" class="btn-outline-brand d-inline-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    {# ── IDENTITY HEADER ── #}
+    <div class="grove-panel fade-up d-flex flex-column flex-md-row justify-content-between align-items-md-center header-actions" style="animation-delay: 0.05s;">
+        <div class="d-flex align-items-center gap-4">
+            <div class="lead-avatar">
+                {{ lead.name|make_list|first|upper|default:"L" }}
+            </div>
+            <div>
+                <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0; line-height: 1.2;">{{ lead.name }}</h2>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="status-pill s-stage"><i class="bi bi-bezier2 me-1"></i> {{ lead.stage|default:"New Lead" }}</span>
+                    {% if lead.temperature|lower == 'hot' %}
+                        <span class="status-pill s-hot"><i class="bi bi-fire me-1"></i> Hot</span>
+                    {% elif lead.temperature|lower == 'warm' %}
+                        <span class="status-pill s-warm"><i class="bi bi-thermometer-half me-1"></i> Warm</span>
+                    {% else %}
+                        <span class="status-pill s-cold"><i class="bi bi-snow me-1"></i> Cold</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn-outline-brand text-danger border-danger" style="background: transparent;" onclick="if(confirm('Delete this lead?')) { document.getElementById('deleteForm').submit(); }">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+            <form id="deleteForm" method="POST" action="{% url 'delete_lead' lead.id %}" style="display:none;">{% csrf_token %}</form>
+        </div>
+    </div>
+
+    {# ── MAIN GRID ── #}
+    <div class="row g-4 fade-up" style="animation-delay: 0.1s;">
+        
+        <div class="col-12 col-lg-4">
+            
+            <div class="grove-panel">
+                <div class="section-title">
+                    <i class="bi bi-person-lines-fill" style="color: var(--brand-accent);"></i> Contact Information
+                </div>
+                
+                <div class="info-group">
+                    <span class="info-label">Phone Number</span>
+                    <span class="info-value mono d-flex align-items-center gap-2">
+                        <i class="bi bi-telephone text-muted fs-6"></i> {{ lead.phone|default:"Not Provided" }}
+                    </span>
+                </div>
+                <div class="info-group mt-3">
+                    <span class="info-label">Email Address</span>
+                    <span class="info-value mono d-flex align-items-center gap-2">
+                        <i class="bi bi-envelope text-muted fs-6"></i> {{ lead.email|default:"Not Provided" }}
+                    </span>
+                </div>
+                <div class="info-group mt-3">
+                    <span class="info-label">Location / City</span>
+                    <span class="info-value d-flex align-items-center gap-2">
+                        <i class="bi bi-geo-alt text-muted fs-6"></i> {{ lead.city|default:"Not Provided" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="grove-panel">
+                <div class="section-title">
+                    <i class="bi bi-radar" style="color: var(--brand-accent);"></i> Lead Origin
+                </div>
+                
+                <div class="info-group">
+                    <span class="info-label">Source</span>
+                    <span class="info-value">{{ lead.source|default:"Organic" }}</span>
+                </div>
+                <div class="info-group mt-3">
+                    <span class="info-label">Campaign</span>
+                    <span class="info-value">{{ lead.campaign_name|default:"—" }}</span>
+                </div>
+                <div class="info-group mt-3">
+                    <span class="info-label">Date Acquired</span>
+                    <span class="info-value mono">{{ lead.created_at|date:"M d, Y · h:i A" }}</span>
+                </div>
+            </div>
+
+            <div class="grove-panel" style="background: var(--brand-bg); border-color: var(--brand-accent);">
+                <div class="section-title border-bottom-0 pb-0">
+                    <i class="bi bi-shield-lock" style="color: var(--brand-accent);"></i> Manager Oversight
+                </div>
+                
+                <form method="POST" action="{% url 'reassign_lead' lead.id %}" class="mt-3">
+                    {% csrf_token %}
+                    <label class="info-label mb-2">Assigned Team Leader</label>
+                    <select name="tl_id" class="grove-input mb-3" style="font-weight: 500;">
+                        <option value="">-- Unassigned --</option>
+                        {% for tl in team_leaders %}
+                            <option value="{{ tl.id }}" {% if lead.assigned_tl.id == tl.id %}selected{% endif %}>
+                                {{ tl.user.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-primary-brand w-100" style="padding: 10px;">
+                        <i class="bi bi-arrow-repeat"></i> Update Assignment
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="grove-panel h-100">
+                <div class="section-title d-flex justify-content-between">
+                    <span><i class="bi bi-journal-text" style="color: var(--brand-accent);"></i> Activity & Notes</span>
+                </div>
+
+                <form method="POST" action="{% url 'add_lead_note' lead.id %}" class="mb-4">
+                    {% csrf_token %}
+                    <div class="position-relative">
+                        <textarea name="note_content" class="grove-input" rows="3" placeholder="Add a managerial note or log an activity..." required style="resize: none; padding-right: 50px;"></textarea>
+                        <button type="submit" class="btn-primary-brand position-absolute" style="bottom: 10px; right: 10px; padding: 6px 12px; border-radius: 6px;">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="timeline">
+                    {% for note in notes %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <span class="timeline-date">{{ note.created_at|date:"M d, Y · h:i A" }}</span>
+                            <p class="mb-0" style="font-size: 13px; color: var(--brand-ink); line-height: 1.5;">{{ note.content }}</p>
+                            
+                            <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top" style="border-color: var(--border) !important;">
+                                <div style="width: 16px; height: 16px; border-radius: 50%; background: var(--brand-accent); color: white; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold;">
+                                    {{ note.author.username|make_list|first|upper }}
+                                </div>
+                                <span style="font-size: 10px; font-weight: 700; color: var(--brand-accent); text-transform: uppercase;">{{ note.author.username }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4" style="color: var(--brand-accent);">
+                        <i class="bi bi-chat-square-dots fs-3 mb-2 d-block"></i>
+                        <span style="font-size: 13px; font-weight: 500;">No activity notes recorded yet.</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock body %}
+
+{% block script %}
+<script>
+    // Fade up animation initialization
+    document.addEventListener("DOMContentLoaded", function() {
+        const fadeElements = document.querySelectorAll('.fade-up');
+        fadeElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(15px)';
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 50 * index);
+        });
+    });
+</script>
+{% endblock script %}
