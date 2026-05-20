@@ -397,14 +397,15 @@ from dash.models import (
 def view_lead(request, id):
     profile = request.user.profile
 
-    # Only allow manager to see leads assigned to him
     lead = get_object_or_404(
         Lead.objects.select_related(
+            'assigned_to_manager',
+            'assigned_to_tl',
             'assigned_to',
             'branch'
         ),
         id=id,
-        assigned_to=profile
+        assigned_to_manager=profile
     )
 
     # Assignment history
