@@ -405,7 +405,7 @@ def view_lead(request, id):
             'branch'
         ),
         id=id,
-        assigned_to_manager=profile   # only this manager's leads
+        assigned_to_manager=profile.id   # only this manager's leads
     )
 
     calls = item.calls.order_by('-created_at')
