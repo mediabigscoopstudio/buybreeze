@@ -1,105 +1,139 @@
 {% extends 'hrpanel/base.html' %}
-{% block page_title %}Users{% endblock %}
+{% load static %}
+
+{% block title %}User Management — Buy Buzz CRM{% endblock %}
+{% block page_header %}User Management{% endblock %}
+
 {% block content %}
+<style>
+  .leads-card { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; overflow: hidden; padding: 24px; }
+  .leads-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  .leads-table th { padding: 12px 16px; font-size: 10px; font-weight: 700; color: #7A7A72; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E4E4E0; border-top: 1px solid #E4E4E0; }
+  .leads-table td { padding: 16px; border-bottom: 1px solid #F5F5F3; vertical-align: middle; }
+  
+  .grove-input { border: 1px solid #E4E4E0; border-radius: 8px; padding: 8px 12px; font-size: 13px; color: #0D0D0D; outline: none; background: #FFFFFF; }
+  .grove-input:focus { border-color: #1A6B55; box-shadow: 0 0 0 3px #E6F2EE; }
 
-<div class="page-header">
-  <div>
-    <h4>User Management</h4>
-    <div class="sub">All roles across all branches</div>
+  .btn-primary-sage { background: #1A6B55; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; padding: 8px 20px; font-size: 13px; transition: opacity 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-primary-sage:hover { opacity: 0.9; color: #FFFFFF; }
+
+  /* Grove Status Pills */
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .s-mgr { background: #FAF5FF; color: #7C3AED; }
+  .s-tl  { background: #FFF7ED; color: #EA580C; }
+  .s-mem { background: #EFF6FF; color: #2563EB; }
+  .s-hr  { background: #E6F2EE; color: #1A6B55; }
+  .s-mkt { background: #FCE8E8; color: #DC2626; }
+  .s-act { background: #E6F2EE; color: #1A6B55; }
+  .s-inact { background: #F5F5F3; color: #7A7A72; }
+
+  .action-icon { color: #7A7A72; font-size: 14px; text-decoration: none; margin-left: 8px; transition: color 0.2s; }
+  .action-icon:hover { color: #0D0D0D; }
+  .action-icon.text-danger:hover { color: #DC2626; }
+</style>
+
+<div class="main-content">
+
+  {# ── HEADER ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: #0D0D0D; margin: 0;">User Management</h2>
+      <div style="font-size: 13px; color: #7A7A72; margin-top: 4px;">{{ users.count }} team members across all roles</div>
+    </div>
+    <a href="{% url 'add_user' %}" class="btn-primary-sage">
+      <i class="bi bi-plus-lg"></i> Add User
+    </a>
   </div>
-  <a href="{% url 'add_user' %}" class="btn btn-primary btn-sm">
-    <i class="bi bi-plus-lg me-1"></i> Add User
-  </a>
-</div>
 
-<!-- FILTERS -->
-<div class="filters-bar">
-  <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
-    <input type="text" name="q" class="form-control" placeholder="Search name..." value="{{ request.GET.q }}">
-    <select name="role" class="form-select">
-      <option value="">All Roles</option>
-      <option value="manager" {% if role_filter == 'manager' %}selected{% endif %}>Branch Manager</option>
-      <option value="tl" {% if role_filter == 'tl' %}selected{% endif %}>Team Leader</option>
-      <option value="member" {% if role_filter == 'member' %}selected{% endif %}>Call Member</option>
-      <option value="hr" {% if role_filter == 'hr' %}selected{% endif %}>HR Panel</option>
-      <option value="marketing" {% if role_filter == 'marketing' %}selected{% endif %}>Marketing</option>
-    </select>
-    <select name="branch" class="form-select">
-      <option value="">All Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-    <a href="{% url 'users' %}" class="btn btn-sm btn-action">Clear</a>
-  </form>
-</div>
+  {# ── DIRECTORY & FILTERS ── #}
+  <div class="leads-card fade-up" style="animation-delay: 0.1s;">
+    
+    <form method="GET" class="d-flex align-items-center gap-3 flex-wrap mb-2">
+      <div style="position: relative; flex: 1; min-width: 200px; max-width: 280px;">
+        <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #7A7A72;"></i>
+        <input type="text" name="q" class="grove-input w-100" style="padding-left: 36px;" placeholder="Search name..." value="{{ request.GET.q }}">
+      </div>
+      
+      <select name="role" class="grove-input" style="min-width: 160px;">
+        <option value="">All Roles</option>
+        <option value="manager" {% if role_filter == 'manager' %}selected{% endif %}>Branch Manager</option>
+        <option value="tl" {% if role_filter == 'tl' %}selected{% endif %}>Team Leader</option>
+        <option value="member" {% if role_filter == 'member' %}selected{% endif %}>Call Member</option>
+        <option value="hr" {% if role_filter == 'hr' %}selected{% endif %}>HR Panel</option>
+        <option value="marketing" {% if role_filter == 'marketing' %}selected{% endif %}>Marketing</option>
+      </select>
+      
+      <select name="branch" class="grove-input" style="min-width: 160px;">
+        <option value="">All Branches</option>
+        {% for b in branches %}
+          <option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="submit" class="btn-primary-sage" style="padding: 8px 24px;">Filter</button>
+      <a href="{% url 'users' %}" style="font-size: 13px; font-weight: 600; color: #0D0D0D; text-decoration: none; margin-left: 8px;">Clear</a>
+    </form>
 
-<div class="table-card">
-  <table class="crm-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Username</th>
-        <th>Role</th>
-        <th>Branch</th>
-        <th>Phone</th>
-        <th>Reports To</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in users %}
-      <tr>
-        <td style="color:#94a3b8; font-size:0.75rem;">{{ forloop.counter }}</td>
-        <td style="font-weight:600;">{{ u.user.get_full_name|default:u.user.username }}</td>
-        <td style="color:#64748b; font-size:0.8rem;">{{ u.user.username }}</td>
-        <td>
-          <span style="font-size:0.72rem; padding:3px 8px; border-radius:20px; font-weight:600;
-            {% if u.role == 'manager' %}background:#faf5ff;color:#7c3aed;
-            {% elif u.role == 'tl' %}background:#fff7ed;color:#ea580c;
-            {% elif u.role == 'member' %}background:#eff6ff;color:#2563eb;
-            {% elif u.role == 'hr' %}background:#ecfdf5;color:#059669;
-            {% elif u.role == 'marketing' %}background:#fef2f2;color:#dc2626;
-            {% else %}background:#f1f5f9;color:#475569;{% endif %}">
-            {{ u.get_role_display }}
-          </span>
-        </td>
-        <td>{{ u.branch.name|default:"—" }}</td>
-        <td>{{ u.phone|default:"—" }}</td>
-        <td>{{ u.reports_to.user.get_full_name|default:"—" }}</td>
-        <td>
-          {% if u.status == 'Enabled' %}
-            <span class="badge-enabled">Active</span>
-          {% else %}
-            <span class="badge-disabled">Inactive</span>
-          {% endif %}
-        </td>
-        <td>
-          <a href="{% url 'edit_user' u.id %}" class="btn btn-sm btn-action me-1"><i class="bi bi-pencil"></i></a>
-          {% if u.status == 'Enabled' %}
-            <a href="{% url 'disable_user' u.id %}" class="btn btn-sm btn-action me-1" title="Disable"><i class="bi bi-pause-circle"></i></a>
-          {% else %}
-            <a href="{% url 'enable_user' u.id %}" class="btn btn-sm btn-action me-1" title="Enable"><i class="bi bi-play-circle"></i></a>
-          {% endif %}
-          <a href="{% url 'delete_user' u.id %}" class="btn btn-sm btn-action"
-             onclick="return confirm('Delete this user permanently?')">
-            <i class="bi bi-trash" style="color:#dc2626"></i>
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="9">
-        <div class="empty-state">
-          <i class="bi bi-people-fill"></i>
-          <p>No users found. <a href="{% url 'add_user' %}">Add first user</a></p>
-        </div>
-      </td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+    <div class="table-responsive">
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th class="text-center">Role</th>
+            <th>Branch</th>
+            <th>Phone</th>
+            <th>Reports To</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #7A7A72;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td style="font-weight: 700; color: #0D0D0D;">{{ u.user.get_full_name|default:u.user.username }}</td>
+            <td style="color: #7A7A72; font-size: 13px;">{{ u.user.username }}</td>
+            <td class="text-center">
+              <span class="status-pill {% if u.role == 'manager' %}s-mgr{% elif u.role == 'tl' %}s-tl{% elif u.role == 'member' %}s-mem{% elif u.role == 'hr' %}s-hr{% else %}s-mkt{% endif %}">
+                {{ u.get_role_display }}
+              </span>
+            </td>
+            <td style="color: #7A7A72; font-size: 13px;">{{ u.branch.name|default:"—" }}</td>
+            <td style="font-family: 'Geist Mono', monospace; color: #0D0D0D;">{{ u.phone|default:"—" }}</td>
+            <td style="color: #7A7A72; font-size: 13px;">{{ u.reports_to.user.get_full_name|default:"—" }}</td>
+            <td>
+              {% if u.status == 'Enabled' %}
+                <span class="status-pill s-act">Active</span>
+              {% else %}
+                <span class="status-pill s-inact">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'edit_user' u.id %}" class="action-icon"><i class="bi bi-pencil-square"></i></a>
+              {% if u.status == 'Enabled' %}
+                <a href="{% url 'disable_user' u.id %}" class="action-icon" title="Disable"><i class="bi bi-pause-circle"></i></a>
+              {% else %}
+                <a href="{% url 'enable_user' u.id %}" class="action-icon" title="Enable"><i class="bi bi-play-circle"></i></a>
+              {% endif %}
+              <a href="{% url 'delete_user' u.id %}" class="action-icon text-danger" onclick="return confirm('Delete this user permanently?')">
+                <i class="bi bi-trash3"></i>
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9" style="padding: 64px 24px; text-align: center;">
+              <i class="bi bi-people" style="font-size: 32px; color: #E4E4E0; margin-bottom: 12px; display: block;"></i>
+              <div style="font-size: 14px; font-weight: 600; color: #0D0D0D;">No users found</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
+</div>
 {% endblock %}
