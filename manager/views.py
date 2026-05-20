@@ -446,83 +446,75 @@ def view_lead(request, id):
         }
     )
 
-from dash.models import UserProfile, APR   # adjust if APR model name differs
-
+from dash.models import UserProfile
+from employee.models import Attendance
 @user_passes_test(manager_required, login_url='/login/')
 def apr_reports(request):
     manager = request.user.profile
 
     # Team Leaders under this manager
-    tl_ids = UserProfile.objects.filter(
+    tls = UserProfile.objects.filter(
         reports_to=manager,
         role='tl',
-        branch=manager.branch,
-        status='Enabled'
-    ).values_list('id', flat=True)
-
-    # Employees under those TLs
-    employees = UserProfile.objects.select_related(
-        'user',
-        'reports_to',
-        'branch'
-    ).filter(
-        reports_to_id__in=tl_ids,
-        role='employee',
-        branch=manager.branch,
-        status='Enabled'
+        status='Enabled',
+        branch=manager.branch
     )
 
-    apr_reports = APR.objects.select_related(
-        'employee',
-        'employee__user',
-        'employee__reports_to',
-        'employee__branch'
-    ).filter(
-        employee__in=employees
-    ).order_by('-id')
+    # Employees under those TLs
+    employees = UserProfile.objects.filter(
+        reports_to__in=tls,
+        role='employee',
+        status='Enabled',
+        branch=manager.branch
+    ).select_related(
+        'user',
+        'reports_to',
+        'reports_to__user'
+    )
 
     return render(
         request,
         'manager/apr_reports.html',
         {
-            'apr_reports': apr_reports,
-            'employees': employees,
-            'manager': manager,
+            'employees': employees
         }
     )
 
+
 @user_passes_test(manager_required, login_url='/login/')
-def view_apr_report(request, id):
+def individual_apr_report(request, id):
     manager = request.user.profile
 
     # TLs under manager
-    tl_ids = UserProfile.objects.filter(
+    tls = UserProfile.objects.filter(
         reports_to=manager,
         role='tl',
-        branch=manager.branch,
-        status='Enabled'
-    ).values_list('id', flat=True)
+        branch=manager.branch
+    )
 
-    apr = get_object_or_404(
-        APR.objects.select_related(
-            'employee',
-            'employee__user',
-            'employee__reports_to',
-            'employee__reports_to__user',
-            'employee__branch'
+    # Employee must belong under one of these TLs
+    employee_profile = get_object_or_404(
+        UserProfile.objects.select_related(
+            'user',
+            'reports_to',
+            'reports_to__user'
         ),
         id=id,
-        employee__reports_to_id__in=tl_ids,
-        employee__branch=manager.branch
+        role='employee',
+        reports_to__in=tls,
+        branch=manager.branch
     )
+
+    # Attendance belongs to User
+    attendances = Attendance.objects.filter(
+        employee=employee_profile.user
+    ).order_by('-date')
 
     return render(
         request,
-        'manager/view_apr_report.html',
+        'manager/individual_apr_report.html',
         {
-            'apr': apr,
-            'employee': apr.employee,
-            'team_leader': apr.employee.reports_to,
-            'manager': manager,
+            'employee': employee_profile,
+            'attendances': attendances,
         }
     )

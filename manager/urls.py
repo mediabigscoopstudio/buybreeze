@@ -14,5 +14,5 @@ urlpatterns = [
     path('profile_settings', views.profile_settings, name='profile_settings'),
     path('view_lead/<int:id>/', views.view_lead, name='view_lead'),
     path('apr-reports/', views.apr_reports, name='apr_reports'),
-    path('apr-report/<int:id>/', views.view_apr_report, name='view_apr_report'),
+    path('apr-report/<int:id>/', views.individual_apr_report, name='individual_apr_report'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
