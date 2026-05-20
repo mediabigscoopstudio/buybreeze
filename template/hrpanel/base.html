@@ -128,7 +128,7 @@
   });
 
   function loadNotifications() {
-      fetch("{% url 'get_notifications' %}") // Ensure this URL name exists in your urls.py
+      fetch("/get_notifications") // Ensure this URL name exists in your urls.py
           .then(response => response.json())
           .then(data => {
               const badge = document.getElementById("notification-badge");
