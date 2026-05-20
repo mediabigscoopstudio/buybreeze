@@ -1,0 +1,161 @@
+{% extends "teamleader/base.html" %}
+
+{% block title %}Lead Profile: {{ lead.name|default:"Lead Details" }} — Team Leader Portal{% endblock %}
+
+{% block css %}
+<style>
+    /* ── GROVE UI: TL VIEW LEAD SYSTEM ── */
+    
+    .grove-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        margin-bottom: 24px;
+    }
+
+    .lead-hero {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .lead-title { font-size: 28px; font-weight: 700; color: var(--brand-ink); margin-bottom: 8px; }
+    
+    .info-label { font-size: 10px; font-weight: 700; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+    .info-value { font-size: 14px; font-weight: 600; color: var(--brand-ink); }
+    .info-value.mono { font-family: 'Geist Mono', monospace; }
+
+    .summary-sidebar {
+        background: var(--brand-ink);
+        color: var(--white);
+        border-radius: 16px;
+        padding: 24px;
+        position: sticky;
+        top: 90px;
+    }
+
+    .table-custom th {
+        font-size: 10px; font-weight: 700; color: var(--brand-accent);
+        text-transform: uppercase; border-bottom: 1px solid var(--border);
+        padding: 14px; background: var(--brand-bg);
+    }
+    .table-custom td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+    .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .bg-status-hot { background: #F8D7DA; color: #721C24; }
+    .bg-status-warm { background: #FFF3CD; color: #856404; }
+    .bg-status-cold { background: var(--brand-bg); color: var(--brand-accent); }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+
+    {# ── HERO HEADER ── #}
+    <div class="lead-hero">
+        <div>
+            <a href="javascript:history.back()" class="text-decoration-none small" style="color: var(--brand-accent);"><i class="bi bi-arrow-left"></i> Back to Leads</a>
+            <h1 class="lead-title mt-2">{{ lead.name }}</h1>
+            <div class="d-flex gap-2">
+                <span class="status-pill bg-status-hot">{{ lead.status|default:"Active" }}</span>
+                <span class="status-pill bg-status-cold" style="border: 1px solid var(--border);">{{ lead.source|default:"Direct" }}</span>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="#" class="btn btn-outline-brand"><i class="bi bi-pencil"></i> Edit</a>
+            <a href="tel:{{ lead.phone }}" class="btn btn-primary-brand"><i class="bi bi-telephone"></i> Call Lead</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {# ── LEFT COLUMN: DETAILS ── #}
+        <div class="col-12 col-lg-8">
+            
+            <div class="grove-panel">
+                <h5 class="panel-title mb-4"><i class="bi bi-person-badge"></i> Lead Information</h5>
+                <div class="row g-4">
+                    <div class="col-md-4"><span class="info-label">Full Name</span><div class="info-value">{{ lead.name }}</div></div>
+                    <div class="col-md-4"><span class="info-label">Phone</span><div class="info-value mono">{{ lead.phone|default:"-" }}</div></div>
+                    <div class="col-md-4"><span class="info-label">Email</span><div class="info-value">{{ lead.email|default:"-" }}</div></div>
+                    <div class="col-md-4"><span class="info-label">Company</span><div class="info-value">{{ lead.company_name|default:"-" }}</div></div>
+                    <div class="col-md-4"><span class="info-label">Budget</span><div class="info-value">₹ {{ lead.budget|default:"0" }}</div></div>
+                    <div class="col-md-4"><span class="info-label">Priority</span><div class="info-value">{{ lead.priority|default:"Normal" }}</div></div>
+                </div>
+            </div>
+
+            <div class="grove-panel">
+                <h5 class="panel-title"><i class="bi bi-journal-text"></i> Lead Notes</h5>
+                <div class="p-3 rounded" style="background: var(--brand-bg);">{{ lead.notes|default:"No notes added." }}</div>
+            </div>
+
+            <div class="grove-panel p-0 overflow-hidden">
+                <ul class="nav nav-tabs px-3 pt-3" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#calls">Call Logs</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#followups">Follow-ups</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#wrapups">Wrap-ups</button></li>
+                </ul>
+                <div class="tab-content p-3">
+                    <div class="tab-pane fade show active" id="calls">
+                        <table class="table table-custom mb-0">
+                            <thead><tr><th>Date</th><th>Duration</th><th>Outcome</th><th>Created By</th></tr></thead>
+                            <tbody>
+                                {% for call in lead.calls.all %}
+                                <tr><td>{{ call.date|date:"M d, H:i" }}</td><td>{{ call.duration }}</td><td>{{ call.outcome }}</td><td>{{ call.created_by }}</td></tr>
+                                {% empty %}<tr><td colspan="4" class="text-center py-3">No call history found</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="followups">
+                        <table class="table table-custom mb-0">
+                            <thead><tr><th>Date</th><th>Type</th><th>Status</th><th>Notes</th></tr></thead>
+                            <tbody>
+                                {% for fu in lead.followups.all %}
+                                <tr><td>{{ fu.date|date:"M d, Y" }}</td><td>{{ fu.type }}</td><td>{{ fu.status }}</td><td>{{ fu.notes }}</td></tr>
+                                {% empty %}<tr><td colspan="4" class="text-center py-3">No followups available</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="wrapups">
+                        <table class="table table-custom mb-0">
+                            <thead><tr><th>Date</th><th>Remark</th><th>Created By</th></tr></thead>
+                            <tbody>
+                                {% for w in lead.wrapups.all %}
+                                <tr><td>{{ w.date|date:"M d, Y" }}</td><td>{{ w.remark }}</td><td>{{ w.created_by }}</td></tr>
+                                {% empty %}<tr><td colspan="3" class="text-center py-3">No wrapups available</td></tr>{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── RIGHT SIDEBAR ── #}
+        <div class="col-12 col-lg-4">
+            <div class="summary-card">
+                <div class="summary-header d-flex align-items-center gap-3 mb-4">
+                    <div class="summary-avatar">
+                        {{ lead.name|make_list|first|upper }}
+                    </div>
+                    <div>
+                        <h6 class="m-0">Quick Summary</h6>
+                        <span class="small opacity-75">#LD-{{ lead.id }}</span>
+                    </div>
+                </div>
+                <div class="summary-row"><span class="summary-label">Status</span><span class="summary-val">{{ lead.status }}</span></div>
+                <div class="summary-row"><span class="summary-label">Assigned Rep</span><span class="summary-val">{{ lead.assigned_to.user.get_full_name }}</span></div>
+                <div class="summary-row"><span class="summary-label">Branch</span><span class="summary-val">{{ lead.branch.name }}</span></div>
+                <div class="summary-row"><span class="summary-label">Manager</span><span class="summary-val">{{ manager_name }}</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock body %}

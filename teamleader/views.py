@@ -363,3 +363,70 @@ def employee_performance(request, id):
         'new_leads': new_leads,
         'closed_leads': closed_leads,
     })
+
+@user_passes_test(tl_required, login_url='/login/')
+def profile(request):
+    user = request.user
+    profile = user.profile
+
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+
+        # Update User model
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
+        user.save()
+
+        # Update UserProfile model
+        profile.phone = phone
+
+        if request.FILES.get('profile_pic'):
+            profile.profile_pic = request.FILES.get('profile_pic')
+
+        profile.save()
+
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('profile')
+
+    return render(
+        request,
+        'tl/profile.html',
+        {
+            'profile': profile,
+            'user_obj': user,
+        }
+    )
+
+@user_passes_test(tl_required, login_url='/login/')
+def view_lead(request, id):
+    tl = request.user.profile   # logged-in Team Leader profile
+
+    item = get_object_or_404(
+        Lead.objects.select_related(
+            'assigned_to',
+            'assigned_to__user',
+            'assigned_to__branch',
+            'branch'
+        ),
+        id=id,
+        assigned_to=tl   # only leads assigned to this TL
+    )
+
+    calls = item.calls.order_by('-created_at')
+    followups = item.followups.order_by('followup_at')
+    wrapups = item.wrapups.order_by('-created_at')
+
+    return render(
+        request,
+        'tl/lead.html',
+        {
+            'lead': item,
+            'calls': calls,
+            'followups': followups,
+            'wrapups': wrapups,
+        }
+    )
