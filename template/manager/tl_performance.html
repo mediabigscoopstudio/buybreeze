@@ -204,7 +204,7 @@
             {{ tl.user.get_full_name|make_list|first|upper|default:"T" }}
         </div>
         <div>
-            <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0; line-height: 1.2;">{{ tl.user.username }}</h2>
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0; line-height: 1.2;">{{ tl.user.get_full_name }}</h2>
             <div class="tl-identity-role">Team Leader Performance</div>
         </div>
     </div>
