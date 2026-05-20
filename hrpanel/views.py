@@ -764,25 +764,39 @@ def apr_reports(request):
         records = Attendance.objects.filter(employee=emp)
 
         total_days = records.count()
+
         present_days = records.filter(
-            punch_in_time__isnull=False
+            punch_in__isnull=False
         ).count()
 
-        absent_days = total_days - present_days
+        absent_days = records.filter(
+            status='absent'
+        ).count()
+
+        late_days = records.filter(
+            status='late'
+        ).count()
+
+        half_days = records.filter(
+            status='half_day'
+        ).count()
 
         apr_data.append({
             'employee': emp,
             'total_days': total_days,
             'present_days': present_days,
             'absent_days': absent_days,
+            'late_days': late_days,
+            'half_days': half_days,
         })
 
     return render(
         request,
         'hrpanel/apr_reports.html',
-        {'employees': apr_data}
-    )
-# ==========================================
+        {
+            'employees': apr_data
+        }
+    )# ==========================================
 # INDIVIDUAL APR REPORT
 # ==========================================
 @user_passes_test(hr_required, login_url='/login/')
@@ -801,11 +815,22 @@ def employee_apr_report(request, id):
     ).order_by('-date')
 
     total_days = records.count()
+
     present_days = records.filter(
-        punch_in_time__isnull=False
+        punch_in__isnull=False
     ).count()
 
-    absent_days = total_days - present_days
+    absent_days = records.filter(
+        status='absent'
+    ).count()
+
+    late_days = records.filter(
+        status='late'
+    ).count()
+
+    half_days = records.filter(
+        status='half_day'
+    ).count()
 
     return render(
         request,
@@ -816,5 +841,7 @@ def employee_apr_report(request, id):
             'total_days': total_days,
             'present_days': present_days,
             'absent_days': absent_days,
+            'late_days': late_days,
+            'half_days': half_days,
         }
     )
