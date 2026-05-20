@@ -369,33 +369,15 @@
                                 <div class="data-grid" style="grid-template-columns: 1fr;">
                                     <div class="data-item"><span class="data-label">Assigned To</span>
                                         <div class="d-flex align-items-center gap-2">
-                                           <div class="info-grid">
-
-    <!-- Employee -->
-    <div class="info-item">
-        <span class="info-label">Assigned Employee</span>
-        <span class="info-value">
-            {{ lead.assigned_to.user.get_full_name|default:lead.assigned_to.user.username|default:"Unassigned" }}
-        </span>
-    </div>
-
-    <!-- Team Leader -->
-    <div class="info-item">
-        <span class="info-label">Team Leader</span>
-        <span class="info-value">
-            {{ lead.assigned_to.reports_to.user.get_full_name|default:"Not Assigned" }}
-        </span>
-    </div>
-
-    <!-- Manager -->
-    <div class="info-item">
-        <span class="info-label">Manager</span>
-        <span class="info-value">
-            {{ lead.assigned_to.reports_to.reports_to.user.get_full_name|default:"Not Assigned" }}
-        </span>
-    </div>
-
-</div>
+                                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--brand-ink); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">
+                                               {{ lead.assigned_to.reports_to.reports_to.user.get_full_name|default:"Not Assigned" }} | Manager
+                                            </div>
+                                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--brand-ink); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">
+                                               {{ lead.assigned_to.reports_to.user.get_full_name|default:"Not Assigned" }} | Team Leader
+                                            </div>
+                                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--brand-ink); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">
+                                                {{ lead.assigned_to.user.get_full_name|default:lead.assigned_to.user.username|default:"Unassigned" }} | Employee
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="data-item"><span class="data-label">Role & Phone</span><span class="data-value">{{ lead.assigned_to.role|default:"-" }} · {{ lead.assigned_to.phone|default:"-" }}</span></div>
@@ -574,20 +556,10 @@
                 </div>
                 <div class="summary-stat-row">
                     <span class="summary-stat-label">Assigned Rep</span>
-                     <div class="summary-card">
-    <h6>Assigned Employee</h6>
-    <p>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</p>
-</div>
-
-<div class="summary-card">
-    <h6>Team Leader</h6>
-    <p>{{ lead.assigned_to.reports_to.user.get_full_name|default:"Not Assigned" }}</p>
-</div>
-
-<div class="summary-card">
-    <h6>Manager</h6>
-    <p>{{ lead.assigned_to.reports_to.reports_to.user.get_full_name|default:"Not Assigned" }}</p>
-</div>
+                    <span class="summary-stat-value text-end">
+                        {{ lead.assigned_to.name|default:"Unassigned" }}<br>
+                        <span style="font-size: 10px; color: var(--brand-accent); font-weight: 500;">{{ lead.assigned_to.role|default:"" }}</span>
+                    </span>
                 </div>
                 <div class="summary-stat-row">
                     <span class="summary-stat-label">Total Calls</span>
