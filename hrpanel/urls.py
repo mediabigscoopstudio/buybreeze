@@ -20,7 +20,6 @@ urlpatterns = [
     
 
     # HR Panel
-    path('', views.hr_panel, name='hr_panel'),
     path('hr/employee/<int:id>', views.employee_detail, name='employee_detail'),
 
     # Attendance

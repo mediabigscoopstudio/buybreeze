@@ -140,42 +140,43 @@ def logout_view(request):
 # ============================================================
 @user_passes_test(hr_required, login_url='/login')
 def index(request):
-    total_leads    = Lead.objects.count()
-    hot_leads      = Lead.objects.filter(temperature='hot').count()
-    total_calls    = CallLog.objects.count()
-    total_branches = Branch.objects.filter(status='Enabled').count()
-    total_users    = UserProfile.objects.filter(status='Enabled').count()
-    pending_followups = FollowUp.objects.filter(followup_status='pending').count()
+    branches  = Branch.objects.filter(status='Enabled')
+    employees = UserProfile.objects.filter(status='Enabled').select_related('user', 'branch')
 
-    # Stage breakdown
-    stage_data = Lead.objects.values('stage').annotate(count=Count('id'))
+    branch_filter = request.GET.get('branch', '')
+    role_filter   = request.GET.get('role', '')
+    search        = request.GET.get('q', '')
 
-    # Branch-wise leads
-    branch_leads = Branch.objects.annotate(lead_count=Count('lead')).filter(status='Enabled')
+    if branch_filter:
+        employees = employees.filter(branch_id=branch_filter)
+    if role_filter:
+        employees = employees.filter(role=role_filter)
+    if search:
+        employees = employees.filter(
+            Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search)
+        )
 
-    # Recent leads
-    recent_leads = Lead.objects.order_by('-created_at')[:8]
+    total_employees  = employees.count()
+    present_today    = Attendance.objects.filter(
+        date=timezone.now().date(), status='present'
+    ).count()
+    on_leave_today   = Attendance.objects.filter(
+        date=timezone.now().date(), status='on_leave'
+    ).count()
+    pending_leaves   = LeaveRequest.objects.filter(leave_status='pending').count()
 
-    # Upcoming follow-ups (next 24 hrs)
-    upcoming_followups = FollowUp.objects.filter(
-        followup_status='pending',
-        followup_at__gte=timezone.now(),
-        followup_at__lte=timezone.now() + timedelta(hours=24)
-    ).order_by('followup_at')[:5]
+    return render(request, 'hrpanel/index.html', {
+        'employees': employees,
+        'branches': branches,
+        'branch_filter': branch_filter,
+        'role_filter': role_filter,
+        'search': search,
+        'total_employees': total_employees,
+        'present_today': present_today,
+        'on_leave_today': on_leave_today,
+        'pending_leaves': pending_leaves,
+    })
 
-    context = {
-        'total_leads': total_leads,
-        'hot_leads': hot_leads,
-        'total_calls': total_calls,
-        'total_branches': total_branches,
-        'total_users': total_users,
-        'pending_followups': pending_followups,
-        'stage_data': stage_data,
-        'branch_leads': branch_leads,
-        'recent_leads': recent_leads,
-        'upcoming_followups': upcoming_followups,
-    }
-    return render(request, 'hrpanel/index.html', context)
 
 
 # ============================================================
