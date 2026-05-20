@@ -137,15 +137,15 @@
             <ul class="navbar-nav ms-auto align-items-center flex-row gap-3">
                 <li class="nav-item dropdown">
                     <a class="nav-avatar-box" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="nav-avatar">{{ user.username|make_list|first|upper|default:"T" }}</div>
+                        <div class="nav-avatar">{{ user.get_full_name|make_list|first|upper|default:"T" }}</div>
                         <div class="nav-avatar-info">
-                            <span class="nav-avatar-name">{{ user.username|default:"Team Leader" }}</span>
+                            <span class="nav-avatar-name">{{ user.get_full_name|default:"Team Leader" }}</span>
                             <span class="nav-avatar-role">TL Dashboard</span>
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom mt-3">
                         <li class="px-3 py-2 border-bottom border-dashed" style="border-color: var(--border) !important;">
-                            <span class="d-block fw-bold" style="color: var(--brand-ink); font-size: 14px;">{{ user.username }}</span>
+                            <span class="d-block fw-bold" style="color: var(--brand-ink); font-size: 14px;">{{ user.get_full_name }}</span>
                             <span class="d-block" style="color: var(--brand-accent); font-size: 12px;">team.leader@buybuzz.infra</span>
                         </li>
                         <li><a class="dropdown-item-custom" href="/profile"><i class="bi bi-person dropdown-icon"></i> My Profile</a></li>

@@ -75,7 +75,7 @@
             <div class="d-flex gap-2">
                 <select id="employeeSelect" class="grove-input" style="width: auto;">
                     <option value="">Select Employee...</option>
-                    {% for emp in employees %}<option value="{{ emp.id }}">{{ emp.user.username }}</option>{% endfor %}
+                    {% for emp in employees %}<option value="{{ emp.id }}">{{ emp.user.get_full_name }}</option>{% endfor %}
                 </select>
                 <button id="btnAssign" class="btn-primary-brand" disabled>Assign</button>
             </div>
@@ -96,7 +96,7 @@
                         <td>{{ lead.phone }}</td>
                         <td>{{ lead.source }}</td>
                         <td><span class="status-pill {% if lead.temperature|lower == 'hot' %}s-hot{% else %}s-cold{% endif %}">{{ lead.temperature }}</span></td>
-                        <td>{{ lead.assigned_to.user.username|default:"Unassigned" }}</td>
+                        <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -111,9 +111,9 @@
         <div class="col"><div class="grove-panel h-100">
             <div class="d-flex align-items-center gap-3 mb-3 border-bottom pb-3">
                 <div style="width:40px; height:40px; border-radius:50%; background:var(--brand-bg); display:flex; align-items:center; justify-content:center; font-weight:700;">
-                    {{ emp.user.username|make_list|first|upper }}
+                    {{ emp.user.get_full_name|make_list|first|upper }}
                 </div>
-                <div><div class="fw-bold">{{ emp.user.username }}</div><div class="small text-muted">Staff Member</div></div>
+                <div><div class="fw-bold">{{ emp.user.get_full_name }}</div><div class="small text-muted">Staff Member</div></div>
             </div>
             <div class="d-flex justify-content-between mb-2"><span class="small">Total Leads</span><strong>{{ emp.total_leads }}</strong></div>
             <a href="/employee_performance/{{ emp.id }}" class="grove-btn-outline w-100 mt-3 text-center">View Performance</a>
