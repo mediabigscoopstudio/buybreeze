@@ -12,7 +12,6 @@
 
   <style>
     :root { --sage: #1A6B55; --charcoal: #2C2C2A; --cloud: #F5F5F3; --ink: #0D0D0D; --white: #FFFFFF; --border: #E4E4E0; --sidebar-w: 240px; }
-    * { box-sizing: border-box; }
     body { font-family: 'Geist', sans-serif; background: var(--cloud); color: var(--ink); font-size: 14px; margin: 0; }
     
     /* Layout */
@@ -20,12 +19,22 @@
     .topbar { height: 64px; background: var(--white); border-bottom: 1px solid var(--border); position: fixed; top: 0; left: var(--sidebar-w); right: 0; display: flex; align-items: center; padding: 0 24px; z-index: 999; transition: left 0.3s ease; }
     .main-content { margin-left: var(--sidebar-w); padding: 88px 24px 24px; transition: margin 0.3s ease; }
 
-    /* Mobile Toggle */
+    /* Mobile Overlay & Toggle */
+    .sidebar-overlay { display: none; position: fixed; top:0; left:0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999; }
     .mobile-toggle { display: none; background: none; border: none; font-size: 24px; margin-right: 15px; color: var(--ink); }
     
+    /* Clean Notification Button */
+    .notification-btn { 
+        background: var(--cloud); border: none; width: 40px; height: 40px; 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: var(--ink); position: relative; transition: all 0.2s;
+    }
+    .notification-btn:hover { background: var(--border); }
+
     @media (max-width: 991px) {
       .sidebar { transform: translateX(-100%); }
       .sidebar.active { transform: translateX(0); }
+      .sidebar.active + .sidebar-overlay { display: block; }
       .topbar { left: 0; }
       .main-content { margin-left: 0; padding-top: 80px; }
       .mobile-toggle { display: block; }
@@ -53,45 +62,35 @@
       <div class="brand-name">Buy Buzz</div>
       <div class="brand-sub" style="color: var(--gold);" >HR CRM</div>
     </div>
-
     <nav style="padding-bottom: 24px;">
       <div class="sidebar-section">Overview</div>
-      <a href="{% url 'index' %}" class="nav-item-custom {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
-        <i class="bi bi-grid-1x2"></i> Dashboard
-      </a>
-
+      <a href="{% url 'index' %}" class="nav-item-custom {% if request.resolver_match.url_name == 'index' %}active{% endif %}"><i class="bi bi-grid-1x2"></i> Dashboard</a>
       <div class="sidebar-section">Management</div>
       <a href="/branches" class="nav-item-custom"><i class="bi bi-buildings"></i> Branches</a>
       <a href="/users" class="nav-item-custom"><i class="bi bi-people"></i> Users</a>
-
       <div class="sidebar-section">System</div>
       <a href="/profile" class="nav-item-custom"><i class="bi bi-gear"></i> My Profile</a>
     </nav>
-
     <div class="sidebar-footer">
-      <a href="{% url 'logout_view' %}" class="nav-item-custom" style="color: #7A7A72;">
-        <i class="bi bi-box-arrow-left"></i> Logout
-      </a>
+      <a href="{% url 'logout_view' %}" class="nav-item-custom" style="color: #7A7A72;"><i class="bi bi-box-arrow-left"></i> Logout</a>
     </div>
   </aside>
+
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
   <header class="topbar">
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
     <h1 class="page-header-title">{% block page_header %}HR Panel{% endblock %}</h1>
     <div class="d-flex align-items-center gap-3">
-    
-<div class="dropdown notification-wrapper">
-  <button class="notification-btn" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="bi bi-bell-fill"></i>
-    <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size: 8px;">0</span>
-  </button>
-
-  <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown" id="notification-list">
-    <li class="dropdown-header fw-bold">Notifications</li>
-    <li><div class="text-center p-3 text-muted">Loading...</div></li>
-  </ul>
-</div>
-      
+        <div class="dropdown">
+            <button class="notification-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell-fill"></i>
+                <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size: 8px;">0</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" id="notification-list" style="width: 280px; border-radius: 12px;">
+                <li class="dropdown-header fw-bold">Notifications</li>
+            </ul>
+        </div>
       <div class="admin-profile">
         <div style="width: 8px; height: 8px; background: var(--sage); border-radius: 50%;"></div>
         {{ request.user.get_full_name|default:"Minaketan Mishra" }}
@@ -99,61 +98,15 @@
     </div>
   </header>
 
-  <main>
+  <main class="main-content">
     {% block content %}{% endblock %}
   </main>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
   <script>
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('active');
     }
   </script>
-  <script>
-  // 1. Initialize Bootstrap Dropdowns
-  document.addEventListener("DOMContentLoaded", function() {
-    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-    // If you aren't using data-bs-toggle, this manual trigger helps:
-    var dropdowns = document.querySelectorAll('.dropdown');
-    dropdowns.forEach(function(el) {
-        el.addEventListener('click', function() {
-            var menu = this.querySelector('.dropdown-menu');
-            menu.classList.toggle('show');
-        });
-    });
-
-    // 2. Load Notifications (Your existing function)
-    loadNotifications();
-    setInterval(loadNotifications, 15000);
-  });
-
-  function loadNotifications() {
-      fetch("/get_notifications") // Ensure this URL name exists in your urls.py
-          .then(response => response.json())
-          .then(data => {
-              const badge = document.getElementById("notification-badge");
-              const list = document.getElementById("notification-list");
-              
-              if (data.unread_count > 0) {
-                  badge.style.display = "inline-block";
-                  badge.innerText = data.unread_count;
-              } else {
-                  badge.style.display = "none";
-              }
-
-              let html = `<li class="dropdown-header fw-bold">Notifications</li>`;
-              if (data.notifications.length === 0) {
-                  html += `<li><div class="text-center p-3 text-muted">No new notifications</div></li>`;
-              } else {
-                  data.notifications.forEach(item => {
-                      html += `<li><div class="notification-item ${item.is_read ? '' : 'notification-unread'}" onclick="markNotificationRead(${item.id})">
-                                  <div class="notification-title">${item.title}</div>
-                                  <div class="notification-desc">${item.description}</div>
-                              </div></li>`;
-                  });
-              }
-              list.innerHTML = html;
-          });
-  }
-</script>
 </body>
 </html>
