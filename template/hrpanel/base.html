@@ -51,7 +51,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-name">Buy Buzz</div>
-      <div class="brand-sub">Admin CRM</div>
+      <div class="brand-sub" style="color: var(--gold);" >HR CRM</div>
     </div>
 
     <nav style="padding-bottom: 24px;">
@@ -80,7 +80,19 @@
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
     <h1 class="page-header-title">{% block page_header %}HR Panel{% endblock %}</h1>
     <div class="d-flex align-items-center gap-3">
-      <button class="notification-btn" style="background:none; border:none;"><i class="bi bi-bell-fill fs-5"></i></button>
+    
+<div class="dropdown notification-wrapper">
+  <button class="notification-btn" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell-fill"></i>
+    <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size: 8px;">0</span>
+  </button>
+
+  <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown" id="notification-list">
+    <li class="dropdown-header fw-bold">Notifications</li>
+    <li><div class="text-center p-3 text-muted">Loading...</div></li>
+  </ul>
+</div>
+      
       <div class="admin-profile">
         <div style="width: 8px; height: 8px; background: var(--sage); border-radius: 50%;"></div>
         {{ request.user.get_full_name|default:"Minaketan Mishra" }}
@@ -97,5 +109,52 @@
       document.getElementById('sidebar').classList.toggle('active');
     }
   </script>
+  <script>
+  // 1. Initialize Bootstrap Dropdowns
+  document.addEventListener("DOMContentLoaded", function() {
+    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+    // If you aren't using data-bs-toggle, this manual trigger helps:
+    var dropdowns = document.querySelectorAll('.dropdown');
+    dropdowns.forEach(function(el) {
+        el.addEventListener('click', function() {
+            var menu = this.querySelector('.dropdown-menu');
+            menu.classList.toggle('show');
+        });
+    });
+
+    // 2. Load Notifications (Your existing function)
+    loadNotifications();
+    setInterval(loadNotifications, 15000);
+  });
+
+  function loadNotifications() {
+      fetch("{% url 'get_notifications' %}") // Ensure this URL name exists in your urls.py
+          .then(response => response.json())
+          .then(data => {
+              const badge = document.getElementById("notification-badge");
+              const list = document.getElementById("notification-list");
+              
+              if (data.unread_count > 0) {
+                  badge.style.display = "inline-block";
+                  badge.innerText = data.unread_count;
+              } else {
+                  badge.style.display = "none";
+              }
+
+              let html = `<li class="dropdown-header fw-bold">Notifications</li>`;
+              if (data.notifications.length === 0) {
+                  html += `<li><div class="text-center p-3 text-muted">No new notifications</div></li>`;
+              } else {
+                  data.notifications.forEach(item => {
+                      html += `<li><div class="notification-item ${item.is_read ? '' : 'notification-unread'}" onclick="markNotificationRead(${item.id})">
+                                  <div class="notification-title">${item.title}</div>
+                                  <div class="notification-desc">${item.description}</div>
+                              </div></li>`;
+                  });
+              }
+              list.innerHTML = html;
+          });
+  }
+</script>
 </body>
 </html>
