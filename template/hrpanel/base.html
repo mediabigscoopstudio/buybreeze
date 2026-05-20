@@ -258,7 +258,7 @@
       </a>
 
       <div class="sidebar-section">System</div>
-      <a href="{% url 'profile' %}" class="nav-item-custom {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="/profile" class="nav-item-custom {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
         <i class="bi bi-gear"></i> My profile
       </a>
     </nav>
