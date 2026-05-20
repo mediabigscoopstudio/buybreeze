@@ -11,4 +11,5 @@ urlpatterns = [
     path('assign-to-tl/', views.assign_to_tl, name='assign_to_tl'),
     path('unassign_lead/<int:lead_id>/', views.unassign_lead, name='unassign_lead'),
     path('tl_performance/<int:id>/', views.tl_performance, name='tl_performance'),
+    path('profile_settings', views.profile_settings, name='profile_settings'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

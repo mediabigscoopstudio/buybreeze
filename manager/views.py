@@ -355,3 +355,31 @@ def tl_performance(request, id):
         'new_leads': new_leads,
         'closed_leads': closed_leads,
     })
+
+
+from dash.models import UserProfile 
+@user_passes_test(manager_required, login_url='/login/')
+def profile_settings(request):
+    user = request.user
+    profile = user.profile
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name  = request.POST.get('last_name')
+        email      = request.POST.get('email')
+        phone      = request.POST.get('phone')
+        # Update User model
+        user.first_name = first_name
+        user.last_name  = last_name
+        user.email      = email
+        user.save()
+        # Update UserProfile model
+        profile.phone = phone
+        if request.FILES.get('profile_pic'):
+            profile.profile_pic = request.FILES['profile_pic']
+        profile.save()
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('profile_settings')
+
+    return render(request, 'manager/profile.html', {
+        'profile': profile
+    })
