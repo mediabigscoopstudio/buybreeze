@@ -403,8 +403,9 @@ def profile(request):
 
 @user_passes_test(tl_required, login_url='/login/')
 def view_lead(request, id):
-    tl = request.user.profile   # logged-in TL
+    tl = request.user.profile
 
+    # get lead first
     item = get_object_or_404(
         Lead.objects.select_related(
             'assigned_to',
@@ -413,9 +414,12 @@ def view_lead(request, id):
             'assigned_to__reports_to__user',
             'branch'
         ),
-        id=id,
-        assigned_to_id=tl.id   # filter by logged-in TL id
+        id=id
     )
+
+    # security check → TL can only open if lead belongs to him
+    if not item.assigned_to or item.assigned_to.id != tl.id:
+        return render(request, '404.html', status=404)
 
     # hierarchy
     assigned_tl = item.assigned_to
