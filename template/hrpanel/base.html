@@ -1,315 +1,339 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block page_title %}CoreCRM — HR Panel{% endblock %}</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}HR Panel — Buy Buzz CRM{% endblock %}</title>
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist+Mono:wght@600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    /* ── GROVE CSS VARIABLES ── */
+    :root {
+      --sage:     #1A6B55;   /* Primary brand / CTA / active states */
+      --sage-lt:  #E6F2EE;   /* Hover fills / chip backgrounds / tag bg */
+      --sage-mid: #D4EDE5;   /* Qualified status / mint fills */
+      --gold:     #C9A84C;   /* Premium accent / highlights / warnings */
+      --gold-lt:  #FBF4E0;   /* Gold tint backgrounds */
+      --ink:      #0D0D0D;   /* Headlines / body / navigation */
+      --charcoal: #2C2C2A;   /* Sidebar background */
+      --stone:    #7A7A72;   /* Body text / captions / secondary */
+      --cloud:    #F5F5F3;   /* Page background */
+      --white:    #FFFFFF;   /* Cards / surface */
+      --border:   #E4E4E0;   /* Dividers / input borders / card borders */
+      --sidebar-w: 240px;
+    }
 
-    <style>
-        /* ── GROVE UI KIT: GLOBAL VARIABLES ── */
-        :root {
-            --brand-bg: #f7f3f0;
-            --brand-accent: #6F8F9F;
-            --brand-ink: #2E2E2E;
-            --sage: #4f7942;
-            --sage-lt: #dce7d9;
-            --white: #ffffff;
-            --border: rgba(111, 143, 159, 0.2);
-            --accent-light: rgba(111, 143, 159, 0.1);
-        }
+    /* ── GLOBAL TYPOGRAPHY & RESET ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Geist', sans-serif;
+      background: var(--cloud);
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    h1, h2, h3 { font-weight: 700; color: var(--ink); }
+    .display-font { font-family: 'DM Serif Display', serif; }
+    .mono-font { font-family: 'Geist Mono', monospace; font-weight: 600; }
 
-        body {
-            background-color: var(--brand-bg);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: var(--brand-ink);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp .5s ease both; }
+    .fade-up:nth-child(1) { animation-delay: .05s; }
+    .fade-up:nth-child(2) { animation-delay: .10s; }
+    .fade-up:nth-child(3) { animation-delay: .15s; }
+    .fade-up:nth-child(4) { animation-delay: .20s; }
 
-        /* ── NAVBAR (DASH APP STYLE) ── */
-        .dash-navbar {
-            background-color: var(--white);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            position: sticky;
-            top: 0;
-            z-index: 1020;
-        }
+    /* ── LAYOUT SHELL ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--charcoal);
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+    }
+    .topbar {
+      height: 64px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: var(--sidebar-w); right: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 99;
+    }
+    .main-content {
+      margin-left: var(--sidebar-w);
+      padding-top: calc(64px + 24px);
+      padding-left: 24px;
+      padding-right: 24px;
+      padding-bottom: 24px;
+      min-height: 100vh;
+    }
 
-        .navbar-brand {
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--brand-ink) !important;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    /* ── SIDEBAR COMPONENTS ── */
+    .sidebar-brand {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .brand-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .sidebar-section {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--stone);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 24px 24px 8px 24px;
+    }
+    .nav-item-custom {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      color: #999;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    .nav-item-custom:hover {
+      color: var(--white);
+      background: rgba(255,255,255,0.03);
+    }
+    .nav-item-custom.active {
+      color: var(--white);
+      background: rgba(255,255,255,0.05);
+      border-left-color: var(--sage);
+    }
+    .nav-item-custom i { font-size: 16px; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 0;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
 
-        .navbar-brand-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: var(--accent-light);
-            color: var(--brand-accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
+    /* ── TOPBAR COMPONENTS ── */
+    .page-header-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--ink);
+      flex: 1;
+      margin: 0;
+    }
+    .admin-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--cloud);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
 
-        /* Navbar Navigation Links */
-        .navbar-nav .nav-link {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--brand-accent);
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    /* ── NOTIFICATIONS ── */
+    .notification-btn {
+      background: white; border: none; border-radius: 10px; padding: 8px 12px;
+    }
+    .notification-btn:hover { background: #f8f9fa; }
+    .notification-dropdown {
+      width: 380px; max-height: 500px; overflow-y: auto; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    }
+    .notification-item {
+      cursor: pointer; padding: 12px 15px; border-bottom: 1px solid #eee; transition: all .2s ease;
+    }
+    .notification-item:hover { background: #f8f9fa; }
+    .notification-unread { background: #eef6ff; border-left: 4px solid #0d6efd; }
+    .notification-title { font-weight: 600; font-size: 14px; }
+    .notification-desc { font-size: 13px; color: #666; }
+    .notification-time { font-size: 11px; color: #999; }
 
-        .navbar-nav .nav-link:hover, 
-        .navbar-nav .nav-link.active {
-            color: var(--brand-ink);
-            background: var(--brand-bg);
-        }
+    /* ── GLOBAL ALERTS ── */
+    .grove-alert {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border: 1px solid var(--border);
+    }
+    .grove-alert-success { background: var(--sage-lt); border-left: 4px solid var(--sage); color: #0d4f3c; }
+    .grove-alert-warning { background: #FFF3CD; border-left: 4px solid var(--gold); color: #856404; }
+    .grove-alert-error { background: #F8D7DA; border-left: 4px solid #E53E3E; color: #721C24; }
+  </style>
 
-        /* Profile Dropdown Styling */
-        .nav-avatar-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 6px 12px 6px 6px;
-            border-radius: 30px;
-            border: 1px solid var(--border);
-            background: var(--white);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        
-        .nav-avatar-box:hover { 
-            background: var(--brand-bg); 
-            border-color: var(--brand-accent); 
-        }
-
-        .nav-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--brand-accent);
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .nav-avatar-info { 
-            display: none; 
-            flex-direction: column; 
-            justify-content: center; 
-        }
-
-        @media (min-width: 768px) { 
-            .nav-avatar-info { display: flex; } 
-        }
-
-        .nav-avatar-name { 
-            font-size: 13px; 
-            font-weight: 700; 
-            color: var(--brand-ink); 
-            line-height: 1.2; 
-        }
-        
-        .nav-avatar-role { 
-            font-size: 10px; 
-            font-weight: 600; 
-            color: var(--brand-accent); 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px; 
-        }
-
-        .dropdown-menu-custom {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            padding: 8px 0;
-            min-width: 240px;
-            background: var(--white);
-        }
-
-        .dropdown-item-custom {
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--brand-ink);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-        }
-        .dropdown-item-custom:hover { 
-            background: var(--accent-light); 
-            color: var(--brand-accent); 
-        }
-        .dropdown-item-custom.text-danger:hover { 
-            background: #F8D7DA; 
-            color: #721C24 !important; 
-        }
-
-        /* Utilities */
-        .content-area {
-            padding: 24px;
-        }
-        
-        .alert-custom {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--white);
-        }
-        
-        .alert-danger-custom {
-            background: rgba(239, 68, 68, 0.05);
-            border-color: rgba(239, 68, 68, 0.2);
-            color: #DC2626;
-        }
-        
-        .alert-success-custom {
-            background: rgba(16, 185, 129, 0.05);
-            border-color: rgba(16, 185, 129, 0.2);
-            color: #059669;
-        }
-
-        .navbar-toggler {
-            border: none;
-            color: var(--brand-ink);
-        }
-        
-        .navbar-toggler:focus {
-            box-shadow: none;
-            outline: none;
-        }
-    </style>
-    
-    {% block css %}{% endblock css %}
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg dash-navbar">
-        <div class="container-fluid px-0 px-md-3">
-            
-            <a class="navbar-brand" href="{% url 'index' %}">
-                <div class="navbar-brand-icon"><i class="bi bi-person-badge-fill"></i></div>
-                <span class="d-none d-sm-block">HR Panel Operations</span>
-            </a>
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#hrNavbar" aria-controls="hrNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <i class="bi bi-list fs-3"></i>
-            </button>
-
-            <div class="collapse navbar-collapse" id="hrNavbar">
-                
-                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1 mt-3 mt-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'index' %}">
-                            <i class="bi bi-grid-1x2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'branch' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'branch' %}">
-                            <i class="bi bi-building"></i> Branches
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'users' %}">
-                            <i class="bi bi-people"></i> Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'settings' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'settings' %}">
-                            <i class="bi bi-gear"></i> Settings
-                        </a>
-                    </li>
-                </ul>
-
-                <ul class="navbar-nav ms-auto align-items-lg-center flex-row gap-3 mt-3 mt-lg-0">
-                    <li class="nav-item dropdown w-100">
-                        <a class="nav-avatar-box" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="nav-avatar">{{ request.user.get_full_name|default:request.user.username|make_list|first|upper|default:"H" }}</div>
-                            <div class="nav-avatar-info">
-                                <span class="nav-avatar-name">{{ request.user.get_full_name|default:request.user.username|default:"HR Administrator" }}</span>
-                                <span class="nav-avatar-role">System Admin</span>
-                            </div>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom mt-3">
-                            <li class="px-3 py-2 border-bottom border-dashed" style="border-color: var(--border) !important;">
-                                <span class="d-block fw-bold" style="color: var(--brand-ink); font-size: 14px;">{{ request.user.get_full_name|default:request.user.username }}</span>
-                                <span class="d-block" style="color: var(--brand-accent); font-size: 12px;">hr.admin@corecrm.infra</span>
-                            </li>
-                            <li><a class="dropdown-item-custom" href="{% url 'settings' %}"><i class="bi bi-sliders dropdown-icon"></i> Preferences</a></li>
-                            <li><hr class="dropdown-divider" style="margin: 8px 0;"></li>
-                            <li><a class="dropdown-item-custom text-danger fw-bold" href="{% url 'logout_view' %}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                
-            </div>
-        </div>
-    </nav>
-
-    <div class="main-content">
-        <div class="content-area container-fluid mx-auto" style="max-width: 1400px;">
-            
-            {% if messages %}
-                <div class="mb-4">
-                {% for message in messages %}
-                    <div class="alert alert-custom {% if message.tags == 'error' %}alert-danger-custom{% else %}alert-success-custom{% endif %} alert-dismissible fade show" role="alert">
-                        <i class="bi {% if message.tags == 'error' %}bi-exclamation-octagon-fill{% else %}bi-check-circle-fill{% endif %}"></i>
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-                </div>
-            {% endif %}
-
-            {% block content %}{% endblock %}
-
-        </div>
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-name">Buy Buzz</div>
+      <div class="brand-sub">HR Panel</div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // CSRF Helper
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+    <nav style="padding-bottom: 24px;">
+      <div class="sidebar-section">Overview</div>
+      <a href="{% url 'index' %}" class="nav-item-custom {% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+        <i class="bi bi-grid-1x2"></i> Dashboard
+      </a>
+
+      <div class="sidebar-section">Operations</div>
+      <a href="{% url 'attendance' %}" class="nav-item-custom {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-clock-history"></i> Attendance
+      </a>
+      <a href="{% url 'leaves' %}" class="nav-item-custom {% if 'leave' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-calendar-check"></i> Leaves
+      </a>
+      <a href="{% url 'payroll' %}" class="nav-item-custom {% if 'payroll' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-wallet2"></i> Payroll
+      </a>
+
+      <div class="sidebar-section">Management</div>
+      <a href="{% url 'branch' %}" class="nav-item-custom {% if 'branch' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-buildings"></i> Branches
+      </a>
+      <a href="{% url 'users' %}" class="nav-item-custom {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-people"></i> Employees
+      </a>
+
+      <div class="sidebar-section">System</div>
+      <a href="{% url 'settings' %}" class="nav-item-custom {% if 'settings' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="bi bi-gear"></i> Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="{% url 'logout_view' %}" class="nav-item-custom" style="color: var(--stone);">
+        <i class="bi bi-box-arrow-left"></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <header class="topbar">
+    <h1 class="page-header-title">{% block page_header %}HR Dashboard{% endblock %}</h1>
+
+    <div class="d-flex align-items-center gap-3">
+      <div class="dropdown notification-wrapper">
+        <button class="btn notification-btn position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-bell-fill fs-5"></i>
+          <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown" id="notification-list">
+          <li class="dropdown-header fw-bold">Notifications</li>
+          <li><div class="text-center p-3 text-muted">Loading...</div></li>
+        </ul>
+      </div>
+
+      <div class="admin-profile">
+        <div style="width: 8px; height: 8px; background: var(--sage); border-radius: 50%;"></div>
+        {{ request.user.get_full_name|default:request.user.username|default:"HR Admin" }}
+      </div>
+    </div>
+  </header>
+
+  {% if messages %}
+    <div style="position:fixed;top:80px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;min-width:320px;">
+      {% for message in messages %}
+        <div class="grove-alert grove-alert-{{ message.tags }}" style="animation:fadeUp .3s ease;">
+          <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% elif message.tags == 'error' %}x-circle-fill{% else %}info-circle-fill{% endif %}"></i>
+          {{ message }}
+          <button style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:16px;color:inherit;" onclick="this.parentElement.remove()">×</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}
+  <div class="main-content">
+  </div>
+  {% endblock %}
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function loadNotifications() {
+        fetch("{% url 'get_notifications' %}")
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById("notification-badge");
+                const list = document.getElementById("notification-list");
+
+                if (data.unread_count > 0) {
+                    badge.style.display = "inline-block";
+                    badge.innerText = data.unread_count;
+                } else {
+                    badge.style.display = "none";
                 }
-            }
-            return cookieValue;
-        }
-    </script>
-    {% block scripts %}{% endblock scripts %}
+
+                let html = `<li class="dropdown-header fw-bold">Notifications</li>`;
+
+                if (data.notifications.length === 0) {
+                    html += `<li><div class="text-center p-3 text-muted">No notifications</div></li>`;
+                } else {
+                    data.notifications.forEach(item => {
+                        html += `
+                            <li>
+                                <div class="notification-item ${item.is_read ? '' : 'notification-unread'}" onclick="markNotificationRead(${item.id})">
+                                    <div class="notification-title">${item.title}</div>
+                                    <div class="notification-desc">${item.description}</div>
+                                    <div class="notification-time">${item.created_at}</div>
+                                </div>
+                            </li>
+                        `;
+                    });
+                }
+                list.innerHTML = html;
+            });
+    }
+
+    function markNotificationRead(notificationId) {
+        fetch(`/notifications/read/${notificationId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) loadNotifications();
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadNotifications();
+        setInterval(loadNotifications, 15000);
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
