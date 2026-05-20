@@ -3,119 +3,101 @@
 
 {% block title %}HR Panel — Dashboard{% endblock %}
 
+{# We are placing styles directly here to ensure they override anything else #}
 {% block extra_css %}
 <style>
-  /* ── GROVE STAT CARDS ── */
+  /* ── HR DASHBOARD CORE STYLES ── */
   .grove-stat-card {
     background: var(--white);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 24px;
     height: 100%;
-    transition: transform .2s, box-shadow .2s;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .grove-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  }
-  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
-  .grove-stat-card.top-gold { border-top: 4px solid var(--gold); }
-  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
-  .grove-stat-card.top-charcoal { border-top: 4px solid var(--charcoal); }
-  
   .stat-icon-box {
-    width: 40px; height: 40px;
-    border-radius: 12px;
+    width: 44px; height: 44px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; margin-bottom: 16px;
+    font-size: 20px; margin-bottom: 16px;
   }
-  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
-  .stat-icon-box.gold { background: var(--gold-lt); color: var(--gold); }
-  .stat-icon-box.stone { background: #F5F5F5; color: var(--stone); }
-  .stat-icon-box.charcoal { background: #EEEEEE; color: var(--charcoal); }
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--stone); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-  .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-size: 13px; color: var(--stone); font-weight: 500; }
-
-  /* ── SUB-NAVIGATION CARD LINKS ── */
-  .grove-nav-card {
-    display: block;
-    text-decoration: none;
-    background: var(--white);
+  /* Table Customization */
+  .leads-table { width: 100%; border-collapse: collapse; }
+  .leads-table th { padding: 16px 24px; font-size: 10px; color: var(--stone); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+  .leads-table td { padding: 16px 24px; border-bottom: 1px solid var(--cloud); vertical-align: middle; }
+  
+  .grove-input {
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
   }
-  .grove-nav-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--sage);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
-  }
-
-  /* ── STATUS PILLS (Roles & Tags) ── */
-  .status-pill {
-    display: inline-flex; align-items: center; gap: 6px; 
-    padding: 4px 10px; border-radius: 20px; 
-    font-size: 11px; font-weight: 600; white-space: nowrap;
-  }
-  .s-new  { background: var(--sage-lt); color: var(--sage); }
-  .s-prog { background: #FFF3CD; color: #856404; }
-  .s-qual { background: var(--sage-mid); color: #0d4f3c; }
-  .s-hot  { background: var(--gold-lt); color: #8B6914; }
-  .s-lost { background: #F8D7DA; color: #721C24; }
-  .s-cold { background: var(--cloud); color: var(--stone); }
-  .s-blue { background: #EFF6FF; color: #2563EB; }
+  
+  .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .s-new { background: var(--sage-lt); color: var(--sage); }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
-  <div class="mb-4">
-    <h2 style="font-size: 24px; font-weight: 700;">Operational Workspace</h2>
-    <div style="font-size: 13px; color: var(--stone);">Employee management across all branches</div>
+  
+  {# HEADER #}
+  <div class="mb-4 fade-up">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Operational Workspace</h2>
+    <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Employee management across all branches</div>
   </div>
 
-  <div class="row g-4 mb-4">
-    <div class="col-md-3"><div class="grove-stat-card"><div class="stat-icon-box" style="background: var(--sage-lt);"><i class="bi bi-people" style="color:var(--sage)"></i></div><div class="stat-value">{{ total_employees }}</div><div class="stat-label">Total Employees</div></div></div>
-    <div class="col-md-3"><div class="grove-stat-card"><div class="stat-icon-box" style="background: #E6F2EE;"><i class="bi bi-check-circle" style="color:var(--sage)"></i></div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div></div>
-    <div class="col-md-3"><div class="grove-stat-card"><div class="stat-icon-box" style="background: var(--gold-lt);"><i class="bi bi-calendar-x" style="color:var(--gold)"></i></div><div class="stat-value">{{ on_leave_today }}</div><div class="stat-label">On Leave Today</div></div></div>
-    <div class="col-md-3"><div class="grove-stat-card"><div class="stat-icon-box" style="background: #F8D7DA;"><i class="bi bi-hourglass-split" style="color:#DC2626"></i></div><div class="stat-value" style="color:#DC2626">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div></div>
-  </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-md-4"><a href="{% url 'attendance' %}" class="grove-nav-card"><i class="bi bi-clock-history fs-4" style="color:var(--sage)"></i> <div><div class="fw-bold">Attendance</div><div class="small text-muted">View punch logs</div></div></a></div>
-    <div class="col-md-4"><a href="{% url 'leaves' %}" class="grove-nav-card"><i class="bi bi-calendar-check fs-4" style="color:var(--gold)"></i> <div><div class="fw-bold">Leave Management</div><div class="small text-muted">Approve requests</div></div></a></div>
-    <div class="col-md-4"><a href="{% url 'payroll' %}" class="grove-nav-card"><i class="bi bi-wallet2 fs-4" style="color:var(--ink)"></i> <div><div class="fw-bold">Payroll</div><div class="small text-muted">Salary records</div></div></a></div>
-  </div>
-
-  <div class="brand-panel">
-    <div class="table-header p-3 border-bottom d-flex justify-content-between">
-      <h6 class="m-0 fw-bold">Employee Directory</h6>
-      <form method="GET" class="d-flex gap-2">
-        <input type="text" name="q" class="grove-input" placeholder="Search..." value="{{ search }}">
-        <button class="btn btn-primary-sage">Filter</button>
-      </form>
+  {# STAT CARDS #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col fade-up">
+      <div class="grove-stat-card">
+        <div class="stat-icon-box" style="background:#eee; color:#2C2C2A;"><i class="bi bi-people-fill"></i></div>
+        <div class="stat-value">{{ total_employees }}</div>
+        <div class="stat-label">Total Employees</div>
+      </div>
     </div>
-    <table class="table-custom">
-      <thead>
-        <tr><th>#</th><th>Employee</th><th>Role</th><th>Branch</th><th>Phone</th><th>Actions</th></tr>
-      </thead>
-      <tbody>
-        {% for e in employees %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td class="fw-bold">{{ e.user.get_full_name }}</td>
-          <td><span class="status-pill s-role">{{ e.get_role_display }}</span></td>
-          <td>{{ e.branch.name }}</td>
-          <td class="mono-font">{{ e.phone }}</td>
-          <td>
-            <a href="{% url 'employee_detail' e.id %}" class="btn btn-sm btn-outline-secondary">View</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="col fade-up">
+      <div class="grove-stat-card">
+        <div class="stat-icon-box" style="background:var(--sage-lt); color:var(--sage);"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="stat-value">{{ present_today }}</div>
+        <div class="stat-label">Present Today</div>
+      </div>
+    </div>
+  </div>
+
+  {# DIRECTORY #}
+  <div class="fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+      <h6 class="m-0 fw-bold"><i class="bi bi-people" style="color: var(--sage); margin-right: 8px;"></i>Employee Directory</h6>
+    </div>
+
+    <div class="table-responsive">
+      <table class="leads-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Employee</th><th>Role</th><th>Branch</th><th>Phone</th><th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in employees %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td class="fw-bold">{{ e.user.get_full_name }}</td>
+            <td><span class="status-pill s-new">{{ e.get_role_display }}</span></td>
+            <td>{{ e.branch.name|default:"—" }}</td>
+            <td class="mono-font">{{ e.phone|default:"-" }}</td>
+            <td class="text-end">
+              <a href="{% url 'employee_detail' e.id %}" class="btn btn-sm btn-outline-secondary">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %}
