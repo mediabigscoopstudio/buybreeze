@@ -13,4 +13,6 @@ urlpatterns = [
     path('tl_performance/<int:id>/', views.tl_performance, name='tl_performance'),
     path('profile_settings', views.profile_settings, name='profile_settings'),
     path('view_lead/<int:id>/', views.view_lead, name='view_lead'),
+    path('apr-reports/', views.apr_reports, name='apr_reports'),
+    path('apr-report/<int:id>/', views.view_apr_report, name='view_apr_report'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

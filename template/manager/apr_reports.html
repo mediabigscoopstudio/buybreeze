@@ -1,0 +1,236 @@
+{% extends "manager/base.html" %}
+
+{% block title %}APR Directory — Buy Buzz CRM{% endblock %}
+
+{% block css %}
+<style>
+    /* ── GROVE UI: APR DIRECTORY ── */
+    .brand-panel {
+        background: var(--white, #ffffff);
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.015);
+    }
+    
+    .apr-stat-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .apr-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--accent-light, rgba(111, 143, 159, 0.1));
+        color: var(--brand-accent, #6F8F9F);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .stat-text h4 { font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0; }
+    .stat-text p { font-size: 12px; font-weight: 600; color: var(--brand-accent); text-transform: uppercase; margin: 0; letter-spacing: 0.5px; }
+
+    /* Filters & Inputs */
+    .brand-input {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: var(--brand-ink);
+        transition: all 0.2s;
+    }
+    .brand-input:focus {
+        outline: none;
+        border-color: var(--brand-accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    /* Table & Badges */
+    .table-custom th {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--brand-accent);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        padding: 16px 12px;
+        background: var(--brand-bg, #f7f3f0);
+    }
+    .table-custom td {
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--brand-ink);
+    }
+    
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .score-excellent { background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .score-good { background: rgba(59, 130, 246, 0.1); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .score-average { background: rgba(245, 158, 11, 0.1); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .score-poor { background: rgba(239, 68, 68, 0.1); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+    .dot-active { background-color: #10B981; }
+    .dot-inactive { background-color: #EF4444; }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4 mx-auto" style="max-width: 1400px;">
+
+    {# ── HEADER ── #}
+    <div class="mb-4 fade-up">
+        <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">Agent Performance Reports</h2>
+        <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Comprehensive HR & performance analytics for your active branch hierarchy</div>
+    </div>
+
+    {# ── QUICK INSIGHTS ── #}
+    <div class="row g-4 mb-4 fade-up" style="animation-delay: 0.05s;">
+        <div class="col-12 col-md-4">
+            <div class="apr-stat-card">
+                <div class="stat-icon"><i class="bi bi-people"></i></div>
+                <div class="stat-text"><h4>{{ total_employees|default:"0" }}</h4><p>Total Agents</p></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="apr-stat-card">
+                <div class="stat-icon" style="color: #2563EB; background: rgba(59, 130, 246, 0.1);"><i class="bi bi-graph-up-arrow"></i></div>
+                <div class="stat-text"><h4>{{ avg_score|default:"0.0" }}</h4><p>Branch Avg Score</p></div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="apr-stat-card">
+                <div class="stat-icon" style="color: #059669; background: rgba(16, 185, 129, 0.1);"><i class="bi bi-award"></i></div>
+                <div class="stat-text"><h4>{{ top_performers|default:"0" }}</h4><p>Top Performers (>90)</p></div>
+            </div>
+        </div>
+    </div>
+
+    {# ── DATA DIRECTORY ── #}
+    <div class="brand-panel p-0 fade-up" style="animation-delay: 0.1s; overflow: hidden;">
+        
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-4 border-bottom" style="border-color: var(--border);">
+            <div class="position-relative w-100" style="max-width: 320px;">
+                <i class="bi bi-search position-absolute" style="left: 14px; top: 50%; transform: translateY(-50%); color: var(--brand-accent);"></i>
+                <input type="text" class="brand-input w-100" style="padding-left: 40px;" placeholder="Search employee or TL...">
+            </div>
+            <div class="d-flex gap-2 w-100 w-md-auto">
+                <select class="brand-input" style="width: auto; min-width: 140px;">
+                    <option value="">All Roles</option>
+                    <option value="agent">Agent</option>
+                    <option value="senior">Senior Agent</option>
+                </select>
+                <select class="brand-input" style="width: auto; min-width: 140px;">
+                    <option value="">All Teams</option>
+                    {% for tl in team_leaders %}<option value="{{ tl.id }}">{{ tl.user.username }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-custom align-middle mb-0 text-nowrap">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th class="ps-4">Employee Details</th>
+                        <th>Role</th>
+                        <th>Team Leader</th>
+                        <th>Branch</th>
+                        <th class="text-center">APR Score</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in apr_records %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--brand-ink); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">
+                                    {{ emp.name|make_list|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold" style="color: var(--brand-ink); font-size: 14px;">{{ emp.name }}</div>
+                                    <div style="font-size: 11px; color: var(--brand-accent); font-family: 'Geist Mono', monospace;">{{ emp.employee_id|default:"#EMP-000" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ emp.role|default:"Sales Agent" }}</td>
+                        <td>
+                            <span class="d-inline-flex align-items-center gap-2">
+                                <i class="bi bi-person-circle text-muted"></i> {{ emp.team_leader|default:"-" }}
+                            </span>
+                        </td>
+                        <td>{{ emp.branch|default:"-" }}</td>
+                        <td class="text-center">
+                            {% if emp.apr_score >= 90 %}
+                                <div class="score-badge score-excellent">{{ emp.apr_score }}</div>
+                            {% elif emp.apr_score >= 75 %}
+                                <div class="score-badge score-good">{{ emp.apr_score }}</div>
+                            {% elif emp.apr_score >= 50 %}
+                                <div class="score-badge score-average">{{ emp.apr_score }}</div>
+                            {% else %}
+                                <div class="score-badge score-poor">{{ emp.apr_score }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="d-inline-flex align-items-center" style="font-size: 12px; font-weight: 600; color: var(--brand-ink);">
+                                <span class="status-dot {% if emp.is_active %}dot-active{% else %}dot-inactive{% endif %}"></span>
+                                {{ emp.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td style="font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--brand-accent);">
+                            {{ emp.last_updated|date:"M d, Y" }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'apr_detail' emp.id %}" class="btn btn-outline-brand" style="border-radius: 8px; padding: 6px 12px; font-size: 12px;">
+                                View Report <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="bi bi-folder-x fs-2" style="color: var(--brand-accent);"></i>
+                            <div class="mt-2 fw-bold" style="color: var(--brand-ink);">No APR records found</div>
+                            <div class="small" style="color: var(--brand-accent);">Ensure employees have active performance matrices generated.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock body %}
