@@ -2,7 +2,7 @@
 
 {% block title %}Edit Profile — Buy Buzz CRM{% endblock %}
 
-{% block css %}
+{% block content %}
 <style>
     /* ── GROVE UI: PROFILE EDIT PAGE ── */
     .grove-panel {
@@ -68,9 +68,6 @@
     
     .btn-primary-sage:hover { opacity: 0.9; transform: translateY(-1px); }
 </style>
-{% endblock css %}
-
-{% block body %}
 <div class="container-fluid py-4 px-3 px-md-4 mx-auto" style="max-width: 900px;">
 
     {# ── HEADER ── #}
@@ -149,9 +146,6 @@
         </div>
     </form>
 </div>
-{% endblock body %}
-
-{% block script %}
 <script>
     document.getElementById('profile_pic_input').addEventListener('change', function(e) {
         if(e.target.files && e.target.files[0]) {
@@ -165,4 +159,4 @@
         }
     });
 </script>
-{% endblock script %}
+{% endblock %}
