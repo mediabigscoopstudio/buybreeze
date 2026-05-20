@@ -358,7 +358,6 @@
                                 <div class="data-grid" style="grid-template-columns: 1fr;">
                                     <div class="data-item"><span class="data-label">Assigned To</span>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="data-value">Manager : {{ assigned_manager.user.get_full_name|default:"Not Assigned" }}</span>
                                             <span class="data-value">Team Leader : {{ tl.user.get_full_name|default:"Not Assigned" }}</span>
                                             <span class="data-value">Employee: {{ employee.user.get_full_name|default:"Unassigned" }}</span>
                                         </div>
@@ -536,12 +535,6 @@
                 <div class="summary-stat-row">
                     <span class="summary-stat-label">Lead Status</span>
                     <span class="summary-stat-value">{{ lead.status|default:"Active" }}</span>
-                </div>
-                <div class="summary-stat-row">
-                    <span class="summary-stat-label">Assigned Manager</span>
-                    <span class="summary-stat-value text-end">
-                        {{ lead.assigned_to.reports_to.reports_to.user.get_full_name|default:"Not Assigned" }}
-                    </span>
                 </div>
                 <div class="summary-stat-row">
                     <span class="summary-stat-label">Assigned Team Leader</span>
