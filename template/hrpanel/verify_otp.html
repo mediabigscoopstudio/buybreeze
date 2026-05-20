@@ -3,97 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP</title>
-
+    <title>Verify OTP — HR Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <style>
-
-        body{
-            margin:0;
-            padding:0;
-            background:#f5f5f5;
-            font-family:Arial, sans-serif;
-            height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
+        :root {
+            --brand-bg: #f7f3f0;
+            --brand-ink: #2E2E2E;
+            --brand-accent: #6F8F9F;
+            --sage: #4f7942;
+            --sage-lt: #dce7d9;
+            --white: #ffffff;
+            --border: rgba(111, 143, 159, 0.2);
         }
 
-        .otp-card{
-            background:white;
-            padding:40px;
-            border-radius:10px;
-            width:350px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
+        body {
+            background-color: var(--brand-bg) !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
         }
 
-        h2{
-            text-align:center;
-            margin-bottom:20px;
+        .auth-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        input{
-            width:100%;
-            padding:12px;
-            margin-top:10px;
-            border:1px solid #ccc;
-            border-radius:5px;
-            font-size:16px;
-            box-sizing:border-box;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .auth-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.025);
+            text-align: center;
+        }
+        
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--sage-lt);
+            color: var(--sage);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
         }
 
-        button{
-            width:100%;
-            padding:12px;
-            background:black;
-            color:white;
-            border:none;
-            border-radius:5px;
-            margin-top:20px;
-            cursor:pointer;
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--brand-ink);
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
+        
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--brand-accent);
+            margin-bottom: 32px;
         }
 
-        .message{
-            background:#ffe5e5;
-            color:red;
-            padding:10px;
-            margin-bottom:15px;
-            border-radius:5px;
+        .grove-field { margin-bottom: 24px; }
+        
+        .grove-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--brand-accent);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .input-icon-wrapper { position: relative; }
+        
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--brand-accent);
+            font-size: 16px;
+            z-index: 5;
+        }
+        
+        .grove-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 14px 14px 44px;
+            font-size: 20px;
+            color: var(--brand-ink);
+            background: var(--brand-bg);
+            transition: all 0.2s ease;
+            text-align: center;
+            font-family: 'Geist Mono', monospace, sans-serif; 
+            letter-spacing: 6px;
+            font-weight: 700;
+        }
+        
+        .grove-input:focus {
+            outline: none;
+            border-color: var(--sage);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--sage-lt);
         }
 
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--brand-ink);
+            border: none;
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-submit:hover {
+            background: var(--sage);
+            box-shadow: 0 4px 12px rgba(79, 121, 66, 0.15);
+        }
+        
+        .alert-error {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #DC2626;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .divider {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px dashed var(--border);
+            text-align: center;
+            font-size: 11px;
+            color: var(--brand-accent);
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
     </style>
-
 </head>
 <body>
 
-<div class="otp-card">
+<div class="auth-wrapper">
+  <div class="auth-card">
+    
+    <div class="role-badge">
+        <i class="bi bi-shield-lock-fill"></i> HR Portal Access
+    </div>
 
-    <h2>OTP Verification</h2>
+    <h1 class="card-title">OTP Verification</h1>
+    <div class="card-subtitle">Enter the unique system credentials sent to your device</div>
 
     {% if messages %}
-        {% for message in messages %}
-            <div class="message">
-                {{ message }}
-            </div>
-        {% endfor %}
+      {% for message in messages %}
+        <div class="alert-error">
+          <i class="bi bi-exclamation-circle-fill"></i> {{ message }}
+        </div>
+      {% endfor %}
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" action="">
+      {% csrf_token %}
+      
+      <div class="grove-field">
+        <label class="grove-label">Authentication Code</label>
+        <div class="input-icon-wrapper">
+          <i class="bi bi-key-fill"></i>
+          <input 
+            type="text" 
+            name="otp" 
+            class="grove-input" 
+            placeholder="000000" 
+            maxlength="6"
+            required 
+            autofocus
+            autocomplete="one-time-code"
+          >
+        </div>
+      </div>
 
-        {% csrf_token %}
-
-        <input
-            type="text"
-            name="otp"
-            placeholder="Enter OTP"
-            required
-        >
-
-        <button type="submit">
-            Verify OTP
-        </button>
-
+      <button type="submit" class="btn-submit">
+        Verify & Access Workspace <i class="bi bi-check-lg"></i>
+      </button>
     </form>
-
+    
+    <div class="divider">CoreCRM · Encrypted Identity Handshake</div>
+    
+  </div>
 </div>
 
 </body>

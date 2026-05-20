@@ -1,174 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CoreCRM — HR Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CoreCRM — HR Authentication</title>
 
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 
-  <style>
-    body {
-      min-height: 100vh;
-      background: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-    }
+    <style>
+        :root {
+            --brand-bg: #f7f3f0;
+            --brand-ink: #2E2E2E;
+            --brand-accent: #6F8F9F;
+            --sage: #4f7942;
+            --sage-lt: #dce7d9;
+            --white: #ffffff;
+            --border: rgba(111, 143, 159, 0.2);
+        }
 
-    .login-box {
-      background: #fff;
-      border-radius: 14px;
-      padding: 40px 36px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--brand-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
 
-    .brand {
-      margin-bottom: 28px;
-    }
+        .auth-wrapper {
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
 
-    .brand h1 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -0.5px;
-    }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    .brand p {
-      font-size: 0.8rem;
-      color: #64748b;
-      margin: 4px 0 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+        .auth-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.025);
+        }
 
-    .form-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 5px;
-    }
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--sage-lt);
+            color: var(--sage);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
 
-    .form-control {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 10px 13px;
-      font-size: 0.88rem;
-      color: #1e293b;
-    }
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--brand-ink);
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
 
-    .form-control:focus {
-      border-color: #1a56db;
-      box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-    }
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--brand-accent);
+            margin-bottom: 32px;
+        }
 
-    .btn-login {
-      background: #1a56db;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 11px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      width: 100%;
-      margin-top: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+        .grove-field {
+            margin-bottom: 24px;
+        }
+        
+        .grove-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--brand-accent);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-    .btn-login:hover {
-      background: #1344b5;
-    }
+        .input-icon-wrap {
+            position: relative;
+        }
 
-    .alert {
-      font-size: 0.82rem;
-      border-radius: 8px;
-    }
+        .input-icon-wrap i {
+            position: absolute;
+            top: 50%;
+            left: 16px;
+            transform: translateY(-50%);
+            color: var(--brand-accent);
+            font-size: 16px;
+        }
 
-    .divider {
-      font-size: 0.7rem;
-      color: #94a3b8;
-      text-align: center;
-      margin: 20px 0 0;
-    }
+        .grove-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px 14px 44px;
+            font-size: 14px;
+            color: var(--brand-ink);
+            background: var(--white);
+            transition: all 0.2s ease;
+        }
 
-    .input-icon {
-      position: relative;
-    }
+        .grove-input::placeholder {
+            color: rgba(111, 143, 159, 0.5);
+        }
 
-    .input-icon i {
-      position: absolute;
-      top: 50%;
-      left: 12px;
-      transform: translateY(-50%);
-      color: #64748b;
-    }
+        .grove-input:focus {
+            outline: none;
+            border-color: var(--sage);
+            box-shadow: 0 0 0 4px var(--sage-lt);
+        }
 
-    .input-icon input {
-      padding-left: 38px;
-    }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--brand-ink);
+            border: none;
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
 
-  </style>
+        .btn-submit:hover {
+            background: var(--sage);
+            box-shadow: 0 4px 12px rgba(79, 121, 66, 0.15);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #DC2626;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .divider {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px dashed var(--border);
+            text-align: center;
+            font-size: 11px;
+            color: var(--brand-accent);
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
+    </style>
 </head>
 
 <body>
 
-  <div class="login-box">
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            
+            <div class="role-badge">
+                <i class="bi bi-person-gear"></i> HR Panel Portal
+            </div>
 
-    <div class="brand">
-      <h1>CoreCRM</h1>
-      <p>HR Panel Portal</p>
-    </div>
+    <div class="brand-title">BuyBuzz Infra</div>
+    <div class="brand-subtitle">System Access</div>
 
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert alert-danger">
-          {{ message }}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-error">
+                        <i class="bi bi-exclamation-circle-fill"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'login_view' %}">
+                {% csrf_token %}
+                
+                <div class="grove-field">
+                    <label class="grove-label">Phone Number</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-telephone"></i>
+                        <input 
+                            type="text" 
+                            name="phone" 
+                            class="grove-input" 
+                            placeholder="Enter your registered number" 
+                            required 
+                            autofocus
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Request Secure OTP <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="divider">
+                CoreCRM · Real Estate Infrastructure
+            </div>
         </div>
-      {% endfor %}
-    {% endif %}
-
-    <form method="POST" action="{% url 'login_view' %}">
-      {% csrf_token %}
-
-      <div class="mb-4">
-
-        <label class="form-label">
-          Phone Number
-        </label>
-
-        <div class="input-icon">
-
-          <i class="bi bi-telephone"></i>
-
-          <input
-            type="text"
-            name="phone"
-            class="form-control"
-            placeholder="Enter phone number"
-            required
-            autofocus
-          >
-
-        </div>
-
-      </div>
-
-      <button type="submit" class="btn-login">
-        Send OTP
-      </button>
-
-    </form>
-
-    <div class="divider">
-      CoreCRM · Real Estate CRM · BigScoop Studio
     </div>
-
-  </div>
 
 </body>
 </html>
