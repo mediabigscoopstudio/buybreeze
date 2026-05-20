@@ -1,68 +1,90 @@
 {% extends 'hrpanel/base.html' %}
-{% block page_title %}Edit Branch{% endblock %}
+{% load static %}
+
+{% block title %}Edit Branch — Buy Buzz CRM{% endblock %}
+{% block page_header %}Edit Branch Details{% endblock %}
+
 {% block content %}
+<style>
+  .form-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 700px; }
+  .form-section-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 20px; border-left: 4px solid var(--sage); padding-left: 12px; }
+  .form-label { font-size: 11px; font-weight: 700; color: var(--stone); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .grove-input, .grove-textarea { 
+      width: 100%; border: 1px solid var(--border); border-radius: 8px; 
+      padding: 10px 14px; font-size: 14px; color: var(--ink); outline: none; background: var(--white);
+  }
+  .grove-input:focus, .grove-textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-lt); }
+  
+  .btn-primary-sage { background: var(--sage); color: var(--white); border: none; border-radius: 8px; font-weight: 600; padding: 10px 24px; transition: opacity 0.2s; }
+  .btn-primary-sage:hover { opacity: 0.9; color: var(--white); }
+  .btn-outline-stone { border: 1px solid var(--border); background: var(--white); color: var(--stone); font-weight: 600; padding: 10px 24px; border-radius: 8px; text-decoration: none; }
+  .btn-outline-stone:hover { background: var(--cloud); }
+</style>
 
-<div class="page-header">
-  <div>
-    <h4>Edit Branch</h4>
-    <div class="sub">Update branch details</div>
+<div class="main-content">
+
+  {# ── HEADER ── #}
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Edit Branch</h2>
+      <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Update details for {{ data.name }}</div>
+    </div>
+    <a href="{% url 'branch' %}" class="btn-outline-stone">
+      <i class="bi bi-arrow-left"></i> Back to Hubs
+    </a>
   </div>
-  <a href="{% url 'branch' %}" class="btn btn-sm btn-action">
-    <i class="bi bi-arrow-left me-1"></i> Back
-  </a>
-</div>
 
-<div class="card" style="max-width:680px;">
-  <div class="card-body">
+  {# ── FORM ── #}
+  <div class="form-card fade-up" style="animation-delay: 0.1s;">
     <form method="POST">
       {% csrf_token %}
-
-      <div class="form-section">Basic Info</div>
-      <div class="row g-3 mb-3">
+      
+      <div class="form-section-title">Basic Information</div>
+      <div class="row g-4 mb-5">
         <div class="col-md-6">
           <label class="form-label">Branch Name *</label>
-          <input type="text" name="name" class="form-control" required value="{{ data.name }}">
+          <input type="text" name="name" class="grove-input" required value="{{ data.name }}">
         </div>
         <div class="col-md-6">
           <label class="form-label">Location *</label>
-          <input type="text" name="location" class="form-control" required value="{{ data.location }}">
+          <input type="text" name="location" class="grove-input" required value="{{ data.location }}">
         </div>
         <div class="col-12">
           <label class="form-label">Address</label>
-          <textarea name="address" class="form-control" rows="2">{{ data.address }}</textarea>
+          <textarea name="address" class="grove-textarea" rows="2">{{ data.address }}</textarea>
         </div>
         <div class="col-md-6">
           <label class="form-label">Phone</label>
-          <input type="text" name="phone" class="form-control" value="{{ data.phone }}">
+          <input type="text" name="phone" class="grove-input" value="{{ data.phone }}">
         </div>
         <div class="col-md-6">
           <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" value="{{ data.email }}">
+          <input type="email" name="email" class="grove-input" value="{{ data.email }}">
         </div>
       </div>
 
-      <div class="form-section">HR GPS Settings</div>
-      <div class="row g-3 mb-4">
+      <div class="form-section-title">HR Geofencing Settings</div>
+      <div class="row g-4 mb-5">
         <div class="col-md-4">
           <label class="form-label">GPS Latitude</label>
-          <input type="text" name="gps_lat" class="form-control" value="{{ data.gps_lat }}">
+          <input type="text" name="gps_lat" class="grove-input" value="{{ data.gps_lat }}">
         </div>
         <div class="col-md-4">
           <label class="form-label">GPS Longitude</label>
-          <input type="text" name="gps_lng" class="form-control" value="{{ data.gps_lng }}">
+          <input type="text" name="gps_lng" class="grove-input" value="{{ data.gps_lng }}">
         </div>
         <div class="col-md-4">
-          <label class="form-label">Punch-in Radius (m)</label>
-          <input type="number" name="gps_radius" class="form-control" value="{{ data.gps_radius }}" min="50" max="1000">
+          <label class="form-label">Punch Radius (meters)</label>
+          <input type="number" name="gps_radius" class="grove-input" value="{{ data.gps_radius }}" min="50" max="1000">
         </div>
       </div>
 
-      <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary btn-sm px-4">Update Branch</button>
-        <a href="{% url 'branch' %}" class="btn btn-sm btn-action">Cancel</a>
+      <div class="d-flex gap-3 pt-3 border-top">
+        <button type="submit" class="btn-primary-sage">Update Branch</button>
+        <a href="{% url 'branch' %}" class="btn-outline-stone">Cancel</a>
       </div>
     </form>
   </div>
-</div>
 
+</div>
 {% endblock %}
