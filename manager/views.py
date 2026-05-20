@@ -395,26 +395,31 @@ from dash.models import (
 
 @user_passes_test(manager_required, login_url='/login/')
 def view_lead(request, id):
-    profile = request.user.profile
+    manager_profile = request.user.profile
 
-    item = get_object_or_404(
+    lead = get_object_or_404(
         Lead.objects.select_related(
             'assigned_to_manager',
             'assigned_to_tl',
             'assigned_to',
             'branch'
-        ),
-        id=id,
-        assigned_to_manager_id=profile.id   # only this manager's leads
+        ).filter(
+            id=id,
+            assigned_to_manager_id=manager_profile.id
+        )
     )
 
-    calls = item.calls.order_by('-created_at')
-    followups = item.followups.order_by('followup_at')
-    wrapups = item.wrapups.order_by('-created_at')
+    calls = lead.calls.all().order_by('-created_at')
+    followups = lead.followups.all().order_by('followup_at')
+    wrapups = lead.wrapups.all().order_by('-created_at')
 
-    return render(request, 'manager/lead.html', {
-        'lead': item,
-        'calls': calls,
-        'followups': followups,
-        'wrapups': wrapups
-    })
+    return render(
+        request,
+        'manager/lead.html',
+        {
+            'lead': lead,
+            'calls': calls,
+            'followups': followups,
+            'wrapups': wrapups,
+        }
+    )
