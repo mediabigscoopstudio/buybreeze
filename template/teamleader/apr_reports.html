@@ -1,0 +1,252 @@
+{% extends "teamleader/base.html" %}
+
+{% block title %}APR Reports — Team Leader Portal{% endblock %}
+
+{% block css %}
+<style>
+    /* ── GROVE UI: TEAM LEADER APR DIRECTORY ── */
+    .brand-panel {
+        background: var(--white, #ffffff);
+        border: 1px solid var(--border, rgba(111, 143, 159, 0.2));
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.015);
+    }
+    
+    .apr-stat-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .apr-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.03);
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--accent-light, rgba(111, 143, 159, 0.1));
+        color: var(--brand-accent, #6F8F9F);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    .stat-text h4 { font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0; }
+    .stat-text p { font-size: 12px; font-weight: 600; color: var(--brand-accent); text-transform: uppercase; margin: 0; letter-spacing: 0.5px; }
+
+    /* Filters & Inputs */
+    .brand-input {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: var(--brand-ink);
+        background: var(--white);
+        transition: all 0.2s;
+    }
+    .brand-input:focus {
+        outline: none;
+        border-color: var(--brand-accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    /* Table & Badges */
+    .table-custom th {
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--brand-accent);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        padding: 16px 12px;
+        background: var(--brand-bg, #f7f3f0);
+    }
+    .table-custom td {
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--brand-ink);
+    }
+    
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-family: 'Geist Mono', monospace;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .score-excellent { background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .score-good { background: rgba(59, 130, 246, 0.1); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .score-average { background: rgba(245, 158, 11, 0.1); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .score-poor { background: rgba(239, 68, 68, 0.1); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    .emp-link {
+        color: var(--brand-ink);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    .emp-link:hover {
+        color: var(--sage, #4f7942);
+    }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4 mx-auto" style="max-width: 1400px;">
+
+    {# ── HEADER ── #}
+    <div class="mb-4 fade-up">
+        <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">Agent Performance Reports (APR)</h2>
+        <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Monitor attendance and core metrics for your assigned team members</div>
+    </div>
+
+    {# ── QUICK INSIGHTS (SUMMARY CARDS) ── #}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4 fade-up" style="animation-delay: 0.05s;">
+        <div class="col">
+            <div class="apr-stat-card">
+                <div class="stat-icon" style="background: #f5f5f5; color: #333;"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-text"><h4>{{ total_employees|default:"0" }}</h4><p>Total Employees</p></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="apr-stat-card">
+                <div class="stat-icon" style="color: #2563EB; background: rgba(59, 130, 246, 0.1);"><i class="bi bi-percent"></i></div>
+                <div class="stat-text"><h4>{{ avg_attendance|default:"0.0" }}%</h4><p>Avg Attendance</p></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="apr-stat-card">
+                <div class="stat-icon" style="color: #059669; background: rgba(16, 185, 129, 0.1);"><i class="bi bi-calendar-check-fill"></i></div>
+                <div class="stat-text"><h4>{{ total_present|default:"0" }}</h4><p>Total Present</p></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="apr-stat-card">
+                <div class="stat-icon" style="color: #D97706; background: rgba(245, 158, 11, 0.1);"><i class="bi bi-calendar-minus-fill"></i></div>
+                <div class="stat-text"><h4>{{ total_leave|default:"0" }}</h4><p>Total Leaves</p></div>
+            </div>
+        </div>
+    </div>
+
+    {# ── DATA DIRECTORY TABLE ── #}
+    <div class="brand-panel p-0 fade-up" style="animation-delay: 0.1s; overflow: hidden;">
+        
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 p-4 border-bottom" style="border-color: var(--border) !important;">
+            <div class="position-relative w-100" style="max-width: 320px;">
+                <i class="bi bi-search position-absolute" style="left: 14px; top: 50%; transform: translateY(-50%); color: var(--brand-accent);"></i>
+                <input type="text" class="brand-input w-100" style="padding-left: 40px;" placeholder="Search employee name or phone...">
+            </div>
+            <div class="d-flex gap-2 w-100 w-md-auto">
+                <select class="brand-input" style="width: auto; min-width: 140px;">
+                    <option value="">All Branches</option>
+                    <option value="current">My Branch Only</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-custom align-middle mb-0 text-nowrap">
+                <thead style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th class="ps-4">Employee Details</th>
+                        <th>Branch</th>
+                        <th>Phone</th>
+                        <th class="text-center">Present</th>
+                        <th class="text-center">Absent</th>
+                        <th class="text-center">Leave</th>
+                        <th class="text-center">Late</th>
+                        <th class="text-center">Attendance %</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in apr_records %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center gap-3">
+                                {% if emp.profile_pic %}
+                                    <img src="{{ emp.profile_pic.url }}" alt="Profile" style="width: 40px; height: 40px; border-radius: 10px; object-fit: cover;">
+                                {% else %}
+                                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--brand-bg); border: 1px solid var(--border); color: var(--brand-ink); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
+                                        {{ emp.name|make_list|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <a href="{% url 'employee_apr_report' emp.id %}" class="emp-link fw-bold" style="font-size: 14px;">{{ emp.name }}</a>
+                                    <div style="font-size: 11px; color: var(--brand-accent);">{{ emp.role|default:"Agent" }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ emp.branch|default:"-" }}</td>
+                        <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--brand-accent);">{{ emp.phone|default:"-" }}</td>
+                        <td class="text-center fw-bold" style="color: #059669;">{{ emp.present_days|default:"0" }}</td>
+                        <td class="text-center fw-bold" style="color: #DC2626;">{{ emp.absent_days|default:"0" }}</td>
+                        <td class="text-center fw-bold" style="color: var(--brand-accent);">{{ emp.leave_days|default:"0" }}</td>
+                        <td class="text-center fw-bold" style="color: #D97706;">{{ emp.late_marks|default:"0" }}</td>
+                        <td class="text-center">
+                            {% if emp.attendance_percentage >= 90 %}
+                                <div class="score-badge score-excellent">{{ emp.attendance_percentage }}%</div>
+                            {% elif emp.attendance_percentage >= 75 %}
+                                <div class="score-badge score-good">{{ emp.attendance_percentage }}%</div>
+                            {% elif emp.attendance_percentage >= 50 %}
+                                <div class="score-badge score-average">{{ emp.attendance_percentage }}%</div>
+                            {% else %}
+                                <div class="score-badge score-poor">{{ emp.attendance_percentage }}%</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{% url 'employee_apr_report' emp.id %}" class="btn btn-outline-brand" style="border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; border: 1px solid var(--border); color: var(--brand-ink); text-decoration: none; display: inline-flex; align-items: center;">
+                                View Report <i class="bi bi-arrow-right ms-2"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <i class="bi bi-folder-x fs-2 d-block mb-3" style="color: var(--brand-accent);"></i>
+                            <div class="fw-bold" style="color: var(--brand-ink); font-size: 15px;">No APR records found</div>
+                            <div class="small mt-1" style="color: var(--brand-accent);">You currently have no direct reports with active performance matrices.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="p-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--border) !important; background: var(--white);">
+            <div class="small" style="color: var(--brand-accent);">Showing performance matrix data</div>
+        </div>
+    </div>
+
+</div>
+{% endblock body %}
+
+{% block script %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fadeElements = document.querySelectorAll('.fade-up');
+        fadeElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(15px)';
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 60 * index);
+        });
+    });
+</script>
+{% endblock script %}

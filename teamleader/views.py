@@ -394,7 +394,7 @@ def profile(request):
 
     return render(
         request,
-        'tl/profile.html',
+        'teamleader/profile.html',
         {
             'profile': profile,
             'user_obj': user,
@@ -453,5 +453,91 @@ def view_lead(request, id):
             'calls': calls,
             'followups': followups,
             'wrapups': wrapups,
+        }
+    )
+
+from dash.models import UserProfile
+from employee.models import Attendance
+
+@user_passes_test(tl_required, login_url='/login/')
+def apr_reports(request):
+    tl = request.user.profile
+
+    employees = UserProfile.objects.filter(
+        reports_to=tl,
+        role='employee',
+        status='Enabled'
+    ).select_related('user', 'branch')
+
+    employee_data = []
+
+    for employee in employees:
+        attendance = Attendance.objects.filter(employee=employee)
+
+        total_days = attendance.count()
+        present = attendance.filter(status='Present').count()
+        absent = attendance.filter(status='Absent').count()
+        leave = attendance.filter(status='Leave').count()
+        late = attendance.filter(is_late=True).count()
+
+        attendance_percentage = 0
+        if total_days > 0:
+            attendance_percentage = round((present / total_days) * 100, 2)
+
+        employee_data.append({
+            'employee': employee,
+            'total_days': total_days,
+            'present': present,
+            'absent': absent,
+            'leave': leave,
+            'late': late,
+            'attendance_percentage': attendance_percentage,
+        })
+
+    return render(
+        request,
+        'tl/apr_reports.html',
+        {
+            'employee_data': employee_data
+        }
+    )
+
+@user_passes_test(tl_required, login_url='/login/')
+def employee_apr_report(request, id):
+    tl = request.user.profile
+
+    employee = get_object_or_404(
+        UserProfile.objects.select_related('user', 'branch'),
+        id=id,
+        reports_to=tl,
+        role='employee'
+    )
+
+    attendance = Attendance.objects.filter(
+        employee=employee
+    ).order_by('-date')
+
+    total_days = attendance.count()
+    present = attendance.filter(status='Present').count()
+    absent = attendance.filter(status='Absent').count()
+    leave = attendance.filter(status='Leave').count()
+    late = attendance.filter(is_late=True).count()
+
+    attendance_percentage = 0
+    if total_days > 0:
+        attendance_percentage = round((present / total_days) * 100, 2)
+
+    return render(
+        request,
+        'tl/employee_apr_report.html',
+        {
+            'employee': employee,
+            'attendance': attendance,
+            'total_days': total_days,
+            'present': present,
+            'absent': absent,
+            'leave': leave,
+            'late': late,
+            'attendance_percentage': attendance_percentage,
         }
     )

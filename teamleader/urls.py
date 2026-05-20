@@ -12,4 +12,7 @@ urlpatterns = [
     path('assign-to-employee/', views.assign_to_employee, name='assign_to_employee'),
     path('employee_performance/<int:id>/', views.employee_performance, name='employee_performance'),
     path('view_lead/<int:id>/', views.view_lead, name='view_lead'),
+    path('apr-reports/', views.apr_reports, name='apr_reports'),
+    path('apr-report/<int:id>/', views.employee_apr_report, name='employee_apr_report'),
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
