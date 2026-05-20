@@ -397,7 +397,7 @@ from dash.models import (
 def view_lead(request, id):
     profile = request.user.profile
 
-    lead = get_object_or_404(
+    item = get_object_or_404(
         Lead.objects.select_related(
             'assigned_to_manager',
             'assigned_to_tl',
@@ -405,53 +405,16 @@ def view_lead(request, id):
             'branch'
         ),
         id=id,
-        assigned_to_manager=profile
+        assigned_to_manager=profile   # only this manager's leads
     )
 
-    # Assignment history
-    assignment_history = LeadAssignmentHistory.objects.filter(
-        lead=lead
-    ).select_related(
-        'assigned_from',
-        'assigned_to'
-    ).order_by('-created_at')
+    calls = item.calls.order_by('-created_at')
+    followups = item.followups.order_by('followup_at')
+    wrapups = item.wrapups.order_by('-created_at')
 
-    # Call logs
-    call_logs = CallLog.objects.filter(
-        lead=lead
-    ).select_related(
-        'called_by',
-        'branch'
-    ).order_by('-created_at')
-
-    # Call wrapups
-    wrapups = CallWrapUp.objects.filter(
-        lead=lead
-    ).select_related(
-        'call',
-        'submitted_by'
-    ).order_by('-created_at')
-
-    # Followups
-    followups = FollowUp.objects.filter(
-        lead=lead
-    ).select_related(
-        'assigned_to',
-        'branch'
-    ).order_by('-followup_at')
-
-    context = {
-        'lead': lead,
-        'assigned_user': lead.assigned_to,
-        'branch': lead.branch,
-        'assignment_history': assignment_history,
-        'call_logs': call_logs,
-        'wrapups': wrapups,
+    return render(request, 'manager/lead.html', {
+        'lead': item,
+        'calls': calls,
         'followups': followups,
-    }
-
-    return render(
-        request,
-        'manager/view_lead.html',
-        context
-    )
+        'wrapups': wrapups
+    })
