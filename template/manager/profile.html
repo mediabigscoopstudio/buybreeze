@@ -1,8 +1,8 @@
 {% extends "manager/base.html" %}
 
-{% block 'title' %}Welcome back to Manager Dashboard!{% endblock 'title' %}
+{% block title %}Welcome back to Manager Dashboard!{% endblock title %}
 
-{% block 'css' %}
+{% block css %}
 <style>
   /* ── GROVE UI COMPONENT SYSTEM ── */
   
@@ -201,9 +201,9 @@
       }
   }
 </style>
-{% endblock 'css' %}
+{% endblock css %}
 
-{% block 'body' %}
+{% block body %}
 <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
 
     {# ── PAGE HEADER ── #}
@@ -387,9 +387,9 @@
     </div>
 
 </div>
-{% endblock 'body' %}
+{% endblock body %}
 
-{% block 'script' %}
+{% block script %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('btnAssign');
@@ -492,4 +492,4 @@
         });
     });
 </script>
-{% endblock 'script' %}
+{% endblock script %}
