@@ -162,24 +162,7 @@
       border: 1px solid var(--border);
     }
 
-    /* ── NOTIFICATIONS ── */
-    .notification-btn {
-      background: white; border: none; border-radius: 10px; padding: 8px 12px;
-    }
-    .notification-btn:hover { background: #f8f9fa; }
-    .notification-dropdown {
-      width: 380px; max-height: 500px; overflow-y: auto; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.12);
-    }
-    .notification-item {
-      cursor: pointer; padding: 12px 15px; border-bottom: 1px solid #eee; transition: all .2s ease;
-    }
-    .notification-item:hover { background: #f8f9fa; }
-    .notification-unread { background: #eef6ff; border-left: 4px solid #0d6efd; }
-    .notification-title { font-weight: 600; font-size: 14px; }
-    .notification-desc { font-size: 13px; color: #666; }
-    .notification-time { font-size: 11px; color: #999; }
-
-    /* ── GLOBAL ALERTS ── */
+    /* ── GLOBAL ALERTS & NOTIFICATIONS ── */
     .grove-alert {
       background: var(--white);
       border-radius: 12px;
@@ -195,6 +178,16 @@
     .grove-alert-success { background: var(--sage-lt); border-left: 4px solid var(--sage); color: #0d4f3c; }
     .grove-alert-warning { background: #FFF3CD; border-left: 4px solid var(--gold); color: #856404; }
     .grove-alert-error { background: #F8D7DA; border-left: 4px solid #E53E3E; color: #721C24; }
+
+    .notification-btn { background: white; border: none; border-radius: 10px; padding: 8px 12px; }
+    .notification-btn:hover { background: #f8f9fa; }
+    .notification-dropdown { width: 380px; max-height: 500px; overflow-y: auto; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+    .notification-item { cursor: pointer; padding: 12px 15px; border-bottom: 1px solid #eee; transition: all .2s ease; }
+    .notification-item:hover { background: #f8f9fa; }
+    .notification-unread { background: #eef6ff; border-left: 4px solid #0d6efd; }
+    .notification-title { font-weight: 600; font-size: 14px; }
+    .notification-desc { font-size: 13px; color: #666; }
+    .notification-time { font-size: 11px; color: #999; }
   </style>
 
   {% block extra_css %}{% endblock %}
@@ -215,10 +208,10 @@
 
       <div class="sidebar-section">Operations</div>
       <a href="{% url 'attendance' %}" class="nav-item-custom {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="bi bi-clock-history"></i> Attendance
+        <i class="bi bi-clock-history"></i> Attendance Log
       </a>
       <a href="{% url 'leaves' %}" class="nav-item-custom {% if 'leave' in request.resolver_match.url_name %}active{% endif %}">
-        <i class="bi bi-calendar-check"></i> Leaves
+        <i class="bi bi-calendar-x"></i> Leaves
       </a>
       <a href="{% url 'payroll' %}" class="nav-item-custom {% if 'payroll' in request.resolver_match.url_name %}active{% endif %}">
         <i class="bi bi-wallet2"></i> Payroll
@@ -254,6 +247,7 @@
           <i class="bi bi-bell-fill fs-5"></i>
           <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
         </button>
+
         <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown" id="notification-list">
           <li class="dropdown-header fw-bold">Notifications</li>
           <li><div class="text-center p-3 text-muted">Loading...</div></li>
@@ -262,7 +256,7 @@
 
       <div class="admin-profile">
         <div style="width: 8px; height: 8px; background: var(--sage); border-radius: 50%;"></div>
-        {{ request.user.get_full_name|default:request.user.username|default:"HR Admin" }}
+        {{ request.user.get_full_name|default:request.user.username|default:"Admin User" }}
       </div>
     </div>
   </header>
@@ -287,7 +281,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
   <script>
     function loadNotifications() {
-        fetch("/get_notifications")
+        fetch("{% url 'get_notifications' %}")
             .then(response => response.json())
             .then(data => {
                 const badge = document.getElementById("notification-badge");
@@ -325,15 +319,20 @@
         fetch(`/notifications/read/${notificationId}/`)
             .then(response => response.json())
             .then(data => {
-                if (data.success) loadNotifications();
+                if (data.success) {
+                    loadNotifications();
+                }
             });
     }
 
     document.addEventListener("DOMContentLoaded", function () {
         loadNotifications();
-        setInterval(loadNotifications, 15000);
+        setInterval(function () {
+            loadNotifications();
+        }, 15000);
     });
   </script>
+  
   {% block extra_js %}{% endblock %}
 </body>
 </html>
