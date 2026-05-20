@@ -1,161 +1,637 @@
 {% extends "teamleader/base.html" %}
 
-{% block title %}Lead Profile: {{ lead.name|default:"Lead Details" }} — Team Leader Portal{% endblock %}
+{% block title %}Lead Profile: {{ lead.name|default:"Details" }} — Team Leader Portal{% endblock %}
 
 {% block css %}
 <style>
-    /* ── GROVE UI: TL VIEW LEAD SYSTEM ── */
-    
-    .grove-panel {
+    /* ── GROVE UI: ENTERPRISE LEAD PROFILE ── */
+
+    /* Layout & Utilities */
+    .lead-profile-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Action Bar */
+    .action-bar {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .action-buttons .btn {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-grove-primary {
+        background: var(--brand-ink);
+        color: var(--white);
+        border: 1px solid var(--brand-ink);
+    }
+    .btn-grove-primary:hover {
+        background: var(--brand-accent);
+        border-color: var(--brand-accent);
+        color: var(--white);
+    }
+
+    .btn-grove-secondary {
+        background: var(--white);
+        color: var(--brand-ink);
+        border: 1px solid var(--border);
+    }
+    .btn-grove-secondary:hover {
+        background: var(--brand-bg);
+        border-color: var(--brand-accent);
+    }
+
+    /* Sidebar Summary Card */
+    .summary-card {
         background: var(--white);
         border: 1px solid var(--border);
         border-radius: 16px;
         padding: 24px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        position: sticky;
+        top: 90px; /* Offset for navbar */
     }
-
-    .lead-hero {
-        background: var(--white);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 32px;
+    .summary-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
         margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+    }
+    .summary-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: var(--brand-ink);
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .summary-stat-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--border);
+    }
+    .summary-stat-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .summary-stat-label { font-size: 12px; color: var(--brand-accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .summary-stat-value { font-size: 14px; font-weight: 700; color: var(--brand-ink); }
+
+    /* Collapsible Panels */
+    .collapse-panel {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+        transition: box-shadow 0.2s ease;
+    }
+    .collapse-panel:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    }
+    .panel-header {
+        padding: 16px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--white);
+        border-radius: 12px;
+        transition: background 0.2s ease;
+        user-select: none;
+    }
+    .panel-header:hover {
+        background: var(--brand-bg);
+    }
+    .panel-header:not(.collapsed) {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .panel-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--brand-ink);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .panel-title i {
+        color: var(--brand-accent);
+        font-size: 16px;
+    }
+    .panel-chevron {
+        transition: transform 0.3s ease;
+        color: var(--brand-accent);
+    }
+    .panel-header.collapsed .panel-chevron {
+        transform: rotate(-90deg);
+    }
+    .panel-body {
+        padding: 24px;
+    }
+
+    /* Data Grids inside panels */
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 20px;
     }
+    .data-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .data-label {
+        font-size: 11px;
+        color: var(--brand-accent);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .data-value {
+        font-size: 14px;
+        color: var(--brand-ink);
+        font-weight: 600;
+        word-break: break-word;
+    }
+    .data-value.mono { font-family: 'Geist Mono', monospace; font-size: 13px; }
 
-    .lead-title { font-size: 28px; font-weight: 700; color: var(--brand-ink); margin-bottom: 8px; }
+    /* Badges & Pills */
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .s-hot { background: rgba(229, 62, 62, 0.1); color: #E53E3E; }
+    .s-warm { background: rgba(217, 119, 6, 0.1); color: #D97706; }
+    .s-cold { background: var(--accent-light); color: var(--brand-accent); }
+    .s-stage { border: 1px solid var(--border); color: var(--brand-ink); background: var(--white); }
+
+    /* Timelines */
+    .timeline {
+        position: relative;
+        padding-left: 24px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 6px;
+        bottom: 0;
+        width: 2px;
+        background: var(--border);
+        border-radius: 2px;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 24px;
+    }
+    .timeline-item:last-child { margin-bottom: 0; }
+    .timeline-marker {
+        position: absolute;
+        left: -24px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--white);
+        border: 3px solid var(--brand-accent);
+        z-index: 2;
+    }
+    .timeline-content {
+        background: var(--brand-bg);
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+    .timeline-date {
+        font-family: 'Geist Mono', monospace;
+        font-size: 11px;
+        color: var(--brand-accent);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    /* Wrapup Cards */
+    .wrapup-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-left: 4px solid var(--brand-accent);
+    }
+    .wrapup-card:last-child { margin-bottom: 0; }
     
-    .info-label { font-size: 10px; font-weight: 700; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
-    .info-value { font-size: 14px; font-weight: 600; color: var(--brand-ink); }
-    .info-value.mono { font-family: 'Geist Mono', monospace; }
-
-    .summary-sidebar {
-        background: var(--brand-ink);
-        color: var(--white);
-        border-radius: 16px;
-        padding: 24px;
-        position: sticky;
-        top: 90px;
-    }
-
+    /* Tables */
     .table-custom th {
-        font-size: 10px; font-weight: 700; color: var(--brand-accent);
-        text-transform: uppercase; border-bottom: 1px solid var(--border);
-        padding: 14px; background: var(--brand-bg);
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--brand-accent);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        background: var(--brand-bg);
     }
-    .table-custom td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
-
-    .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-    .bg-status-hot { background: #F8D7DA; color: #721C24; }
-    .bg-status-warm { background: #FFF3CD; color: #856404; }
-    .bg-status-cold { background: var(--brand-bg); color: var(--brand-accent); }
+    .table-custom td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+        font-size: 13px;
+        font-weight: 500;
+    }
 </style>
 {% endblock css %}
 
 {% block body %}
-<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+<div class="lead-profile-wrapper py-4 px-3 px-md-4">
 
-    {# ── HERO HEADER ── #}
-    <div class="lead-hero">
-        <div>
-            <a href="javascript:history.back()" class="text-decoration-none small" style="color: var(--brand-accent);"><i class="bi bi-arrow-left"></i> Back to Leads</a>
-            <h1 class="lead-title mt-2">{{ lead.name }}</h1>
-            <div class="d-flex gap-2">
-                <span class="status-pill bg-status-hot">{{ lead.status|default:"Active" }}</span>
-                <span class="status-pill bg-status-cold" style="border: 1px solid var(--border);">{{ lead.source|default:"Direct" }}</span>
+    {# ── TOP ACTION BAR ── #}
+    <div class="action-bar fade-up">
+        <div class="d-flex align-items-center gap-3">
+            <button onclick="history.back()" class="btn btn-grove-secondary" style="border: none; box-shadow: none; padding: 6px;">
+                <i class="bi bi-arrow-left fs-5"></i>
+            </button>
+            <div>
+                <h3 class="m-0 fw-bold" style="font-size: 20px; color: var(--brand-ink);">{{ lead.name|default:"Lead Name" }}</h3>
+                <span class="text-muted small" style="font-family: 'Geist Mono', monospace;">ID: #LD-{{ lead.id|default:"10045" }}</span>
             </div>
         </div>
-        <div class="d-flex gap-2">
-            <a href="#" class="btn btn-outline-brand"><i class="bi bi-pencil"></i> Edit</a>
-            <a href="tel:{{ lead.phone }}" class="btn btn-primary-brand"><i class="bi bi-telephone"></i> Call Lead</a>
+        
+        <div class="action-buttons d-flex flex-wrap gap-2">
+            <button class="btn btn-grove-secondary"><i class="bi bi-pencil"></i> Edit Lead</button>
+            <button class="btn btn-grove-secondary"><i class="bi bi-telephone-plus"></i> Add Call Log</button>
+            <button class="btn btn-grove-secondary"><i class="bi bi-calendar-plus"></i> Add Followup</button>
+            <div class="dropdown">
+                <button class="btn btn-grove-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots"></i> More
+                </button>
+                <ul class="dropdown-menu shadow-sm border-0" style="border: 1px solid var(--border) !important; border-radius: 12px;">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-download me-2 text-muted"></i> Export Data</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-printer me-2 text-muted"></i> Print Profile</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 
+    {# ── MAIN LAYOUT GRID ── #}
     <div class="row g-4">
-        {# ── LEFT COLUMN: DETAILS ── #}
-        <div class="col-12 col-lg-8">
+        
+        {# ── LEFT COLUMN (DETAILS) ── #}
+        <div class="col-12 col-lg-8 fade-up" style="animation-delay: 0.1s;">
             
-            <div class="grove-panel">
-                <h5 class="panel-title mb-4"><i class="bi bi-person-badge"></i> Lead Information</h5>
-                <div class="row g-4">
-                    <div class="col-md-4"><span class="info-label">Full Name</span><div class="info-value">{{ lead.name }}</div></div>
-                    <div class="col-md-4"><span class="info-label">Phone</span><div class="info-value mono">{{ lead.phone|default:"-" }}</div></div>
-                    <div class="col-md-4"><span class="info-label">Email</span><div class="info-value">{{ lead.email|default:"-" }}</div></div>
-                    <div class="col-md-4"><span class="info-label">Company</span><div class="info-value">{{ lead.company_name|default:"-" }}</div></div>
-                    <div class="col-md-4"><span class="info-label">Budget</span><div class="info-value">₹ {{ lead.budget|default:"0" }}</div></div>
-                    <div class="col-md-4"><span class="info-label">Priority</span><div class="info-value">{{ lead.priority|default:"Normal" }}</div></div>
+            <div class="collapse-panel">
+                <div class="panel-header" data-bs-toggle="collapse" data-bs-target="#panelBasicInfo">
+                    <div class="panel-title"><i class="bi bi-person-vcard"></i> Basic Information</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelBasicInfo" class="collapse show">
+                    <div class="panel-body data-grid">
+                        <div class="data-item"><span class="data-label">Lead Name</span><span class="data-value">{{ lead.name|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Phone</span><span class="data-value mono">{{ lead.phone|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Email</span><span class="data-value">{{ lead.email|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Company</span><span class="data-value">{{ lead.company_name|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Source</span><span class="data-value">{{ lead.source|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Campaign Name</span><span class="data-value">{{ lead.campaign_name|default:"-" }}</span></div>
+                        
+                        <div class="w-100 mt-3 pt-3 border-top" style="grid-column: 1 / -1; border-color: var(--border) !important;">
+                            <span class="data-label mb-3 d-block"><i class="bi bi-megaphone me-1"></i> Marketing Attributes</span>
+                            <div class="data-grid">
+                                <div class="data-item"><span class="data-label">Ad Set</span><span class="data-value">{{ lead.ad_set|default:"-" }}</span></div>
+                                <div class="data-item"><span class="data-label">Ad Creative</span><span class="data-value">{{ lead.ad_creative|default:"-" }}</span></div>
+                                <div class="data-item"><span class="data-label">GCLID</span><span class="data-value mono" style="font-size: 11px;">{{ lead.gclid|default:"-"|truncatechars:15 }}</span></div>
+                                <div class="data-item"><span class="data-label">Landing Page URL</span><span class="data-value text-primary text-truncate" style="max-width: 200px;">{{ lead.landing_page_url|default:"-" }}</span></div>
+                                <div class="data-item"><span class="data-label">Meta Campaign ID</span><span class="data-value mono">{{ lead.meta_campaign_id|default:"-" }}</span></div>
+                                <div class="data-item"><span class="data-label">Google AdGroup ID</span><span class="data-value mono">{{ lead.google_adgroup_id|default:"-" }}</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="grove-panel">
-                <h5 class="panel-title"><i class="bi bi-journal-text"></i> Lead Notes</h5>
-                <div class="p-3 rounded" style="background: var(--brand-bg);">{{ lead.notes|default:"No notes added." }}</div>
-            </div>
-
-            <div class="grove-panel p-0 overflow-hidden">
-                <ul class="nav nav-tabs px-3 pt-3" role="tablist">
-                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#calls">Call Logs</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#followups">Follow-ups</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#wrapups">Wrap-ups</button></li>
-                </ul>
-                <div class="tab-content p-3">
-                    <div class="tab-pane fade show active" id="calls">
-                        <table class="table table-custom mb-0">
-                            <thead><tr><th>Date</th><th>Duration</th><th>Outcome</th><th>Created By</th></tr></thead>
-                            <tbody>
-                                {% for call in lead.calls.all %}
-                                <tr><td>{{ call.date|date:"M d, H:i" }}</td><td>{{ call.duration }}</td><td>{{ call.outcome }}</td><td>{{ call.created_by }}</td></tr>
-                                {% empty %}<tr><td colspan="4" class="text-center py-3">No call history found</td></tr>{% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tab-pane fade" id="followups">
-                        <table class="table table-custom mb-0">
-                            <thead><tr><th>Date</th><th>Type</th><th>Status</th><th>Notes</th></tr></thead>
-                            <tbody>
-                                {% for fu in lead.followups.all %}
-                                <tr><td>{{ fu.date|date:"M d, Y" }}</td><td>{{ fu.type }}</td><td>{{ fu.status }}</td><td>{{ fu.notes }}</td></tr>
-                                {% empty %}<tr><td colspan="4" class="text-center py-3">No followups available</td></tr>{% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="tab-pane fade" id="wrapups">
-                        <table class="table table-custom mb-0">
-                            <thead><tr><th>Date</th><th>Remark</th><th>Created By</th></tr></thead>
-                            <tbody>
-                                {% for w in lead.wrapups.all %}
-                                <tr><td>{{ w.date|date:"M d, Y" }}</td><td>{{ w.remark }}</td><td>{{ w.created_by }}</td></tr>
-                                {% empty %}<tr><td colspan="3" class="text-center py-3">No wrapups available</td></tr>{% endfor %}
-                            </tbody>
-                        </table>
+            <div class="collapse-panel">
+                <div class="panel-header" data-bs-toggle="collapse" data-bs-target="#panelProperty">
+                    <div class="panel-title"><i class="bi bi-building"></i> Property Preferences</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelProperty" class="collapse show">
+                    <div class="panel-body data-grid">
+                        <div class="data-item"><span class="data-label">Property Type</span><span class="data-value">{{ lead.property_type|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">BHK Preference</span><span class="data-value">{{ lead.bhk_preference|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Budget Min</span><span class="data-value mono">₹{{ lead.budget_min|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Budget Max</span><span class="data-value mono">₹{{ lead.budget_max|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Preferred Location</span><span class="data-value">{{ lead.property_location|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Purpose</span><span class="data-value">{{ lead.purpose|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Timeline</span><span class="data-value">{{ lead.timeline|default:"-" }}</span></div>
+                        <div class="data-item"><span class="data-label">Readiness</span><span class="data-value">{{ lead.readiness|default:"-" }}</span></div>
                     </div>
                 </div>
             </div>
+
+            <div class="collapse-panel">
+                <div class="panel-header collapsed" data-bs-toggle="collapse" data-bs-target="#panelCRMState">
+                    <div class="panel-title"><i class="bi bi-sliders"></i> CRM Status & Assignment</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelCRMState" class="collapse">
+                    <div class="panel-body">
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6 data-grid" style="grid-template-columns: 1fr 1fr;">
+                                <div class="data-item"><span class="data-label">Temperature</span>
+                                    <div><span class="status-pill s-{{ lead.temperature|lower|default:'cold' }}">{{ lead.temperature|default:"Cold" }}</span></div>
+                                </div>
+                                <div class="data-item"><span class="data-label">Stage</span>
+                                    <div><span class="status-pill s-stage">{{ lead.stage|default:"New" }}</span></div>
+                                </div>
+                                <div class="data-item"><span class="data-label">Status</span><span class="data-value">{{ lead.status|default:"Active" }}</span></div>
+                                <div class="data-item"><span class="data-label">Created At</span><span class="data-value mono">{{ lead.created_at|date:"M d, Y" }}</span></div>
+                            </div>
+                            
+                            <div class="col-md-6 border-start ps-md-4" style="border-color: var(--border) !important;">
+                                <span class="data-label mb-3 d-block">Assignment Details</span>
+                                <div class="data-grid" style="grid-template-columns: 1fr;">
+                                    <div class="data-item"><span class="data-label">Assigned Employee</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--brand-ink); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">
+                                                {{ lead.assigned_to.user.get_full_name|make_list|first|default:"U" }}
+                                            </div>
+                                            <span class="data-value">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="data-item"><span class="data-label">Assigned Team Leader</span><span class="data-value">{{ request.user.get_full_name|default:"-" }}</span></div>
+                                    <div class="data-item"><span class="data-label">Assigned Manager</span><span class="data-value">{{ manager_name|default:"-" }}</span></div>
+                                    <div class="data-item"><span class="data-label">Branch</span><span class="data-value">{{ lead.branch.name|default:"Global" }}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse-panel">
+                <div class="panel-header collapsed" data-bs-toggle="collapse" data-bs-target="#panelNotes">
+                    <div class="panel-title"><i class="bi bi-journal-text"></i> System Notes</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelNotes" class="collapse">
+                    <div class="panel-body">
+                        <div style="background: var(--brand-bg); padding: 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; color: var(--brand-ink);">
+                            {{ lead.notes|default:"No system notes attached to this lead."|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse-panel">
+                <div class="panel-header collapsed" data-bs-toggle="collapse" data-bs-target="#panelWrapups">
+                    <div class="panel-title"><i class="bi bi-headset"></i> Call Wrapups</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelWrapups" class="collapse">
+                    <div class="panel-body" style="background: var(--brand-bg);">
+                        {% for wrapup in wrapups %}
+                        <div class="wrapup-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="status-pill s-stage">{{ wrapup.outcome|default:"Logged" }}</span>
+                                    <span class="text-muted ms-2" style="font-size: 12px;"><i class="bi bi-clock"></i> {{ wrapup.duration|default:"-" }}s</span>
+                                </div>
+                                <span class="data-label"><i class="bi bi-lock-fill"></i> {{ wrapup.locked_status|yesno:"Locked,Editable" }}</span>
+                            </div>
+                            <p class="mb-3" style="font-size: 13px;">{{ wrapup.detailed_notes|default:wrapup.remark }}</p>
+                            
+                            <div class="data-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); background: var(--cloud); padding: 12px; border-radius: 8px;">
+                                <div class="data-item"><span class="data-label">Followup Date</span><span class="data-value mono">{{ wrapup.date|date:"M d, Y" }}</span></div>
+                                <div class="data-item"><span class="data-label">Submitted By</span><span class="data-value">{{ wrapup.created_by }}</span></div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4"><span class="data-label">No wrapups available.</span></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse-panel">
+                <div class="panel-header collapsed" data-bs-toggle="collapse" data-bs-target="#panelCallLogs">
+                    <div class="panel-title"><i class="bi bi-telephone-inbound"></i> Call Logs History</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelCallLogs" class="collapse">
+                    <div class="panel-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-custom mb-0 text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Duration</th>
+                                        <th>Outcome / Notes</th>
+                                        <th>Created By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for call in calls %}
+                                    <tr>
+                                        <td class="mono text-muted">{{ call.date|date:"M d, H:i" }}</td>
+                                        <td><i class="bi {% if call.call_type == 'Inbound' %}bi-arrow-down-left text-success{% else %}bi-arrow-up-right text-primary{% endif %}"></i> {{ call.call_type }}</td>
+                                        <td class="mono">{{ call.duration|default:"-" }}</td>
+                                        <td class="text-truncate" style="max-width: 200px;">{{ call.notes|default:"-" }}</td>
+                                        <td>{{ call.created_by }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="5" class="text-center py-4 text-muted small">No call history found.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse-panel">
+                <div class="panel-header collapsed" data-bs-toggle="collapse" data-bs-target="#panelTimelines">
+                    <div class="panel-title"><i class="bi bi-calendar-event"></i> Followups & Assignment History</div>
+                    <i class="bi bi-chevron-down panel-chevron"></i>
+                </div>
+                <div id="panelTimelines" class="collapse">
+                    <div class="panel-body row g-4">
+                        
+                        <div class="col-md-6">
+                            <span class="data-label mb-3 d-block"><i class="bi bi-calendar-check"></i> Followups</span>
+                            <div class="timeline">
+                                {% for fu in followups %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker"></div>
+                                    <div class="timeline-content">
+                                        <span class="timeline-date">{{ fu.followup_date|date:"M d, Y · h:i A" }}</span>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <strong style="font-size: 13px;">{{ fu.type }}</strong>
+                                            <span class="status-pill s-stage" style="font-size: 9px; padding: 2px 6px;">{{ fu.status }}</span>
+                                        </div>
+                                        <p class="mb-2" style="font-size: 12px; color: var(--brand-ink);">{{ fu.notes }}</p>
+                                        <div style="font-size: 10px; color: var(--brand-accent);">Created By: {{ fu.created_by }}</div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-muted small">No followups available.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 border-start ps-md-4" style="border-color: var(--border) !important;">
+                            <span class="data-label mb-3 d-block"><i class="bi bi-arrow-left-right"></i> Assignment History</span>
+                            <div class="timeline">
+                                {% for hist in lead.assignment_history.all %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker" style="border-color: var(--brand-ink);"></div>
+                                    <div class="timeline-content" style="background: var(--white);">
+                                        <span class="timeline-date">{{ hist.date|date:"M d, Y · h:i A" }}</span>
+                                        <div style="font-size: 13px;">
+                                            Transferred to <strong>{{ hist.assigned_to }}</strong> 
+                                            <div class="text-muted mt-1" style="font-size: 11px;">From: {{ hist.assigned_from }}</div>
+                                            <div class="text-muted" style="font-size: 11px;">By: {{ hist.assigned_by_role }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-muted small">No assignment history.</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        {# ── RIGHT SIDEBAR ── #}
-        <div class="col-12 col-lg-4">
+        {# ── RIGHT COLUMN (QUICK SUMMARY SIDEBAR) ── #}
+        <div class="col-12 col-lg-4 fade-up" style="animation-delay: 0.2s;">
             <div class="summary-card">
-                <div class="summary-header d-flex align-items-center gap-3 mb-4">
+                
+                <div class="summary-header">
                     <div class="summary-avatar">
-                        {{ lead.name|make_list|first|upper }}
+                        {{ lead.name|make_list|first|upper|default:"L" }}
                     </div>
                     <div>
-                        <h6 class="m-0">Quick Summary</h6>
-                        <span class="small opacity-75">#LD-{{ lead.id }}</span>
+                        <h4 style="font-size: 16px; font-weight: 700; color: var(--brand-ink); margin: 0 0 4px 0;">Quick Summary</h4>
+                        <span class="status-pill s-{{ lead.temperature|lower|default:'cold' }}">{{ lead.temperature|default:"Cold" }}</span>
                     </div>
                 </div>
-                <div class="summary-row"><span class="summary-label">Status</span><span class="summary-val">{{ lead.status }}</span></div>
-                <div class="summary-row"><span class="summary-label">Assigned Rep</span><span class="summary-val">{{ lead.assigned_to.user.get_full_name }}</span></div>
-                <div class="summary-row"><span class="summary-label">Branch</span><span class="summary-val">{{ lead.branch.name }}</span></div>
-                <div class="summary-row"><span class="summary-label">Manager</span><span class="summary-val">{{ manager_name }}</span></div>
+
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Lead Stage</span>
+                    <span class="summary-stat-value"><span class="status-pill s-stage" style="padding: 2px 8px;">{{ lead.stage|default:"New" }}</span></span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Lead Status</span>
+                    <span class="summary-stat-value">{{ lead.status|default:"Active" }}</span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Priority</span>
+                    <span class="summary-stat-value">{{ lead.priority|default:"Normal" }}</span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Assigned Employee</span>
+                    <span class="summary-stat-value text-end">
+                        {{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}
+                    </span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Assigned TL</span>
+                    <span class="summary-stat-value text-end">
+                        {{ request.user.get_full_name|default:"Unassigned" }}
+                    </span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Assigned Manager</span>
+                    <span class="summary-stat-value text-end">
+                        {{ manager_name|default:"-" }}
+                    </span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Branch</span>
+                    <span class="summary-stat-value text-end">
+                        {{ lead.branch.name|default:"Global" }}
+                    </span>
+                </div>
+                
+                <div class="summary-stat-row mt-3">
+                    <span class="summary-stat-label">Total Calls</span>
+                    <span class="summary-stat-value">{{ calls.count|default:"0" }}</span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Total Followups</span>
+                    <span class="summary-stat-value">{{ followups.count|default:"0" }}</span>
+                </div>
+                <div class="summary-stat-row">
+                    <span class="summary-stat-label">Total Wrapups</span>
+                    <span class="summary-stat-value">{{ wrapups.count|default:"0" }}</span>
+                </div>
+                
+                <div class="summary-stat-row mt-2 pt-3 border-top" style="border-top: 1px solid var(--border) !important;">
+                    <span class="summary-stat-label"><i class="bi bi-clock-history"></i> Last Updated</span>
+                    <span class="summary-stat-value" style="font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--brand-accent);">{{ lead.updated_at|date:"M d, Y" }}</span>
+                </div>
+
+                <div class="mt-4 pt-3">
+                    <a href="tel:{{ lead.phone }}" class="btn btn-grove-primary w-100 mb-2"><i class="bi bi-telephone-outbound"></i> Call Lead</a>
+                    <button class="btn btn-grove-secondary w-100 text-success border-success" style="background: transparent;"><i class="bi bi-whatsapp"></i> Send WhatsApp</button>
+                </div>
+                
             </div>
         </div>
+
     </div>
 </div>
 {% endblock body %}
+
+{% block script %}
+<script>
+    // Fade Up Animation Initialization
+    document.addEventListener("DOMContentLoaded", function() {
+        const fadeElements = document.querySelectorAll('.fade-up');
+        fadeElements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(15px)';
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 60 * index);
+        });
+    });
+</script>
+{% endblock script %}
