@@ -444,7 +444,7 @@ def view_lead(request, id):
 
     return render(
         request,
-        'tl/lead.html',
+        'teamleader/lead.html',
         {
             'lead': item,
             'employee': employee,
