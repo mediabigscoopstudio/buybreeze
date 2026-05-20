@@ -473,32 +473,38 @@ def apr_reports(request):
 
     for employee in employees:
         attendance = Attendance.objects.filter(
-            employee=employee.user   # FIX
+            employee=employee.user
         )
 
         total_days = attendance.count()
-        present = attendance.filter(status='Present').count()
-        absent = attendance.filter(status='Absent').count()
-        leave = attendance.filter(status='Leave').count()
-        late = attendance.filter(is_late=True).count()
+
+        # Present = has punch in
+        present = attendance.exclude(
+            punch_in_time__isnull=True
+        ).count()
+
+        # Absent = no punch in
+        absent = attendance.filter(
+            punch_in_time__isnull=True
+        ).count()
 
         attendance_percentage = 0
         if total_days > 0:
-            attendance_percentage = round((present / total_days) * 100, 2)
+            attendance_percentage = round(
+                (present / total_days) * 100, 2
+            )
 
         employee_data.append({
             'employee': employee,
             'total_days': total_days,
             'present': present,
             'absent': absent,
-            'leave': leave,
-            'late': late,
             'attendance_percentage': attendance_percentage,
         })
 
     return render(
         request,
-        'tl/apr_reports.html',
+        'teamleader/apr_reports.html',
         {
             'employee_data': employee_data
         }
@@ -515,7 +521,9 @@ def employee_apr_report(request, id):
         role='employee'
     )
 
-    attendance = Attendance.objects.filter(employee=employee.user).order_by('-date')
+    attendance = Attendance.objects.filter(
+    employee=employee.user
+    ).order_by('-date')
 
     total_days = attendance.count()
     present = attendance.filter(status='Present').count()
