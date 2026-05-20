@@ -311,17 +311,6 @@
                         <div class="data-item"><span class="data-label">Source</span><span class="data-value">{{ lead.source|default:"-" }}</span></div>
                         <div class="data-item"><span class="data-label">Campaign Name</span><span class="data-value">{{ lead.campaign_name|default:"-" }}</span></div>
                         
-                        <div class="w-100 mt-3 pt-3 border-top" style="grid-column: 1 / -1; border-color: var(--border) !important;">
-                            <span class="data-label mb-3 d-block"><i class="bi bi-megaphone me-1"></i> Marketing Attributes</span>
-                            <div class="data-grid">
-                                <div class="data-item"><span class="data-label">Ad Set</span><span class="data-value">{{ lead.ad_set|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">Ad Creative</span><span class="data-value">{{ lead.ad_creative|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">GCLID</span><span class="data-value mono" style="font-size: 11px;">{{ lead.gclid|default:"-"|truncatechars:15 }}</span></div>
-                                <div class="data-item"><span class="data-label">Landing Page URL</span><span class="data-value text-primary text-truncate" style="max-width: 200px;">{{ lead.landing_page_url|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">Meta Campaign ID</span><span class="data-value mono">{{ lead.meta_campaign_id|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">Google AdGroup ID</span><span class="data-value mono">{{ lead.google_adgroup_id|default:"-" }}</span></div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

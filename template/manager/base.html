@@ -343,17 +343,17 @@
                 <li class="nav-item dropdown">
                     <a class="nav-avatar-box" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="nav-avatar">
-                            {{ user.username|make_list|first|upper|default:"M" }}
+                            {{ user.get_full_name|make_list|first|upper|default:"M" }}
                         </div>
                         <div class="nav-avatar-info">
-                            <span class="nav-avatar-name">{{ user.username|default:"Manager" }}</span>
+                            <span class="nav-avatar-name">{{ user.get_full_name|default:"Manager" }}</span>
                             <span class="nav-avatar-role">Manager Profile</span>
                         </div>
                     </a>
                     
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom mt-3">
                         <div class="dropdown-header-custom">
-                            <span class="d-block fw-bold" style="color: var(--brand-ink); font-size: 14px;">{{ user.username|default:"Manager Account" }}</span>
+                            <span class="d-block fw-bold" style="color: var(--brand-ink); font-size: 14px;">{{ user.get_full_name|default:"Manager Account" }}</span>
                             <span class="d-block" style="color: var(--brand-accent); font-size: 12px; margin-top: 2px;">{{ user.email|default:"manager@buybuzz.infra" }}</span>
                         </div>
                         
