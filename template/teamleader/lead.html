@@ -288,20 +288,7 @@
             </div>
         </div>
         
-        <div class="action-buttons d-flex flex-wrap gap-2">
-            <button class="btn btn-grove-secondary"><i class="bi bi-pencil"></i> Edit Lead</button>
-            <button class="btn btn-grove-secondary"><i class="bi bi-telephone-plus"></i> Add Call Log</button>
-            <button class="btn btn-grove-secondary"><i class="bi bi-calendar-plus"></i> Add Followup</button>
-            <div class="dropdown">
-                <button class="btn btn-grove-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-three-dots"></i> More
-                </button>
-                <ul class="dropdown-menu shadow-sm border-0" style="border: 1px solid var(--border) !important; border-radius: 12px;">
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-download me-2 text-muted"></i> Export Data</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-printer me-2 text-muted"></i> Print Profile</a></li>
-                </ul>
-            </div>
-        </div>
+        
     </div>
 
     {# ── MAIN LAYOUT GRID ── #}
@@ -324,17 +311,7 @@
                         <div class="data-item"><span class="data-label">Source</span><span class="data-value">{{ lead.source|default:"-" }}</span></div>
                         <div class="data-item"><span class="data-label">Campaign Name</span><span class="data-value">{{ lead.campaign_name|default:"-" }}</span></div>
                         
-                        <div class="w-100 mt-3 pt-3 border-top" style="grid-column: 1 / -1; border-color: var(--border) !important;">
-                            <span class="data-label mb-3 d-block"><i class="bi bi-megaphone me-1"></i> Marketing Attributes</span>
-                            <div class="data-grid">
-                                <div class="data-item"><span class="data-label">Ad Set</span><span class="data-value">{{ lead.ad_set|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">Ad Creative</span><span class="data-value">{{ lead.ad_creative|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">GCLID</span><span class="data-value mono" style="font-size: 11px;">{{ lead.gclid|default:"-"|truncatechars:15 }}</span></div>
-                                <div class="data-item"><span class="data-label">Landing Page URL</span><span class="data-value text-primary text-truncate" style="max-width: 200px;">{{ lead.landing_page_url|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">Meta Campaign ID</span><span class="data-value mono">{{ lead.meta_campaign_id|default:"-" }}</span></div>
-                                <div class="data-item"><span class="data-label">Google AdGroup ID</span><span class="data-value mono">{{ lead.google_adgroup_id|default:"-" }}</span></div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -388,9 +365,6 @@
                                             <span class="data-value">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</span>
                                         </div>
                                     </div>
-                                    <div class="data-item"><span class="data-label">Assigned Team Leader</span><span class="data-value">{{ request.user.get_full_name|default:"-" }}</span></div>
-                                    <div class="data-item"><span class="data-label">Assigned Manager</span><span class="data-value">{{ manager_name|default:"-" }}</span></div>
-                                    <div class="data-item"><span class="data-label">Branch</span><span class="data-value">{{ lead.branch.name|default:"Global" }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -566,18 +540,6 @@
                     <span class="summary-stat-label">Assigned Employee</span>
                     <span class="summary-stat-value text-end">
                         {{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}
-                    </span>
-                </div>
-                <div class="summary-stat-row">
-                    <span class="summary-stat-label">Assigned TL</span>
-                    <span class="summary-stat-value text-end">
-                        {{ request.user.get_full_name|default:"Unassigned" }}
-                    </span>
-                </div>
-                <div class="summary-stat-row">
-                    <span class="summary-stat-label">Assigned Manager</span>
-                    <span class="summary-stat-value text-end">
-                        {{ manager_name|default:"-" }}
                     </span>
                 </div>
                 <div class="summary-stat-row">
