@@ -56,6 +56,10 @@ urlpatterns = [
     path('settings', views.settings_view, name='settings'),
 
     path('apr-reports/', views.apr_reports, name='apr_reports'),
-    path('apr-reports/<int:id>/',views.employee_apr_report,name='employee_apr_report'),
+    path(
+    'apr-report/<int:id>/',
+    views.employee_apr_report,
+    name='employee_apr_report'
+    ),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

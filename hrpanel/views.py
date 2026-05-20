@@ -754,25 +754,23 @@ def apr_reports(request):
     hr = request.user.profile
 
     employees = UserProfile.objects.filter(
-        role='employee',
-        branch=hr.branch
-    ).select_related('user')
+        branch=hr.branch,
+        role='employee'
+    ).select_related('user', 'branch')
 
-    employee_data = []
+    apr_data = []
 
     for emp in employees:
-        attendance = Attendance.objects.filter(
-            employee=emp.user
-        )
+        records = Attendance.objects.filter(employee=emp)
 
-        total_days = attendance.count()
-        present_days = attendance.exclude(
-            punch_in_time__isnull=True
+        total_days = records.count()
+        present_days = records.filter(
+            punch_in_time__isnull=False
         ).count()
 
         absent_days = total_days - present_days
 
-        employee_data.append({
+        apr_data.append({
             'employee': emp,
             'total_days': total_days,
             'present_days': present_days,
@@ -782,12 +780,8 @@ def apr_reports(request):
     return render(
         request,
         'hrpanel/apr_reports.html',
-        {
-            'employees': employee_data
-        }
+        {'employees': apr_data}
     )
-
-
 # ==========================================
 # INDIVIDUAL APR REPORT
 # ==========================================
@@ -796,33 +790,31 @@ def employee_apr_report(request, id):
     hr = request.user.profile
 
     employee = get_object_or_404(
-        UserProfile.objects.select_related('user'),
+        UserProfile.objects.select_related('user', 'branch'),
         id=id,
-        role='employee',
-        branch=hr.branch
+        branch=hr.branch,
+        role='employee'
     )
 
     records = Attendance.objects.filter(
-        employee=employee.user
+        employee=employee
     ).order_by('-date')
 
     total_days = records.count()
-    present_days = records.exclude(
-        punch_in_time__isnull=True
+    present_days = records.filter(
+        punch_in_time__isnull=False
     ).count()
 
     absent_days = total_days - present_days
 
-    context = {
-        'employee': employee,
-        'records': records,
-        'total_days': total_days,
-        'present_days': present_days,
-        'absent_days': absent_days,
-    }
-
     return render(
         request,
         'hrpanel/employee_apr_report.html',
-        context
+        {
+            'employee': employee,
+            'records': records,
+            'total_days': total_days,
+            'present_days': present_days,
+            'absent_days': absent_days,
+        }
     )
