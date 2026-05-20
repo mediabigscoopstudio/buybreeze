@@ -1,505 +1,495 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Dashboard — Buy Buzz CRM</title>
+{% extends "manager/base.html" %}
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+{% block title %}Welcome back to Manager Dashboard!{% endblock title %}
 
-    <style>
-        /* ── STRICT BRAND COLOR PALETTE ── */
-        :root {
-            --brand-bg: #f7f3f0;
-            --brand-accent: #6F8F9F;
-            --brand-ink: #2E2E2E;
-            --white: #ffffff;
-            --border: rgba(111, 143, 159, 0.2);
-            --accent-light: rgba(111, 143, 159, 0.1);
-        }
+{% block css %}
+<style>
+  /* ── GROVE UI COMPONENT SYSTEM ── */
+  
+  /* Panels & Structural */
+  .grove-panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
 
-        body {
-            background-color: var(--brand-bg);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            color: var(--brand-ink);
-            margin: 0;
-            padding: 0;
-        }
+  /* Stat Cards */
+  .grove-stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      height: 100%;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .grove-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  }
+  .grove-stat-card.top-charcoal { border-top: 4px solid #333333; }
+  .grove-stat-card.top-stone { border-top: 4px solid var(--stone); }
+  .grove-stat-card.top-sage { border-top: 4px solid var(--sage); }
+  .grove-stat-card.top-gold { border-top: 4px solid #b8860b; }
 
-        /* ── NAVBAR (DASH APP STYLE) ── */
-        .dash-navbar {
-            background-color: var(--brand-ink);
-            color: var(--brand-bg);
-            padding: 12px 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-        .dash-navbar a, .dash-navbar .nav-link {
-            color: var(--brand-bg);
-            text-decoration: none;
-        }
-        .dash-navbar .navbar-brand {
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: var(--white) !important;
-        }
-        .nav-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--brand-accent);
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-        }
+  /* Stat Icons & Typography */
+  .stat-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+  }
+  .stat-icon-box.charcoal { background: #f5f5f5; color: #333333; }
+  .stat-icon-box.stone { background: #eff6ff; color: var(--stone); }
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: #fdf5e6; color: #b8860b; }
 
-        /* ── STRUCTURAL WRAPPERS & PANELS ── */
-        .brand-panel {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        }
+  .stat-value {
+      font-family: 'Geist Mono', monospace, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 6px;
+  }
+  .stat-label {
+      font-size: 13px;
+      color: var(--stone);
+      font-weight: 600;
+  }
 
-        .brand-stat-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            height: 100%;
-            border-top: 3px solid var(--brand-accent);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .brand-stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-        }
+  /* Form Elements */
+  .grove-input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--white);
+      transition: all 0.2s ease;
+  }
+  .grove-input:focus {
+      outline: none;
+      border: 1.8px solid var(--sage);
+      box-shadow: 0 0 0 4px var(--sage-lt);
+  }
+  
+  select.grove-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237A7A72' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+  }
 
-        .stat-icon-box {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            margin-bottom: 16px;
-            background: var(--accent-light);
-            color: var(--brand-accent);
-        }
+  /* Buttons */
+  .btn-primary-sage {
+      background: var(--sage);
+      color: var(--white);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s ease;
+  }
+  .btn-primary-sage:hover:not([disabled]) {
+      opacity: 0.9;
+      color: var(--white);
+  }
+  .btn-primary-sage[disabled] {
+      background: var(--border);
+      color: var(--stone);
+      cursor: not-allowed;
+  }
 
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--brand-ink);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-        .stat-label {
-            font-size: 13px;
-            color: var(--brand-accent);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+  .grove-btn-outline {
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--ink);
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 16px;
+      transition: all 0.2s;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+  }
+  .grove-btn-outline:hover {
+      background: var(--cloud);
+      border-color: var(--stone);
+      color: var(--ink);
+  }
 
-        /* ── INTERFACE COMPONENTS ── */
-        .brand-input {
-            width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 14px;
-            color: var(--brand-ink);
-            background: var(--white);
-            transition: all 0.2s ease;
-        }
-        .brand-input:focus {
-            outline: none;
-            border-color: var(--brand-accent);
-            box-shadow: 0 0 0 3px var(--accent-light);
-        }
+  /* Tables & Pills */
+  .table-custom th {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--stone);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 12px;
+      background: var(--cloud);
+  }
+  .table-custom td {
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      font-size: 14px;
+  }
 
-        .btn-primary-brand {
-            background: var(--brand-ink);
-            color: var(--white);
-            border: 1px solid var(--brand-ink);
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-        .btn-primary-brand:hover:not([disabled]) {
-            background: var(--white);
-            color: var(--brand-ink);
-        }
-        .btn-primary-brand[disabled] {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+  .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+  }
+  .s-hot { background: #f8d7da; color: #721c24; }
+  .s-warm { background: #fff3cd; color: #856404; }
+  .s-cold { background: var(--cloud); color: var(--stone); }
 
-        .btn-outline-brand {
-            border: 1px solid var(--border);
-            background: var(--white);
-            color: var(--brand-ink);
-            font-weight: 600;
-            border-radius: 8px;
-            padding: 8px 16px;
-            transition: all 0.2s;
-            font-size: 13px;
-        }
-        .btn-outline-brand:hover {
-            background: var(--brand-bg);
-            border-color: var(--brand-accent);
-        }
+  .form-check-input {
+      width: 1.2em;
+      height: 1.2em;
+      accent-color: var(--sage);
+      cursor: pointer;
+      border-color: var(--border);
+  }
 
-        /* ── TABLES & PILLS ── */
-        .table-custom th {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--brand-accent);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border);
-            padding: 16px 12px;
-            background: var(--brand-bg);
-        }
-        .table-custom td {
-            padding: 16px 12px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-            font-size: 14px;
-        }
+  /* Mobile Responsiveness */
+  .table-responsive { scrollbar-width: thin; }
+  
+  @media (max-width: 768px) {
+      .grove-panel, .grove-stat-card {
+          padding: 16px;
+      }
+      .stat-value {
+          font-size: 24px;
+      }
+      .assign-controls {
+          flex-direction: column;
+          align-items: stretch !important;
+          width: 100%;
+          max-width: 100% !important;
+      }
+      .assign-controls select, .assign-controls button {
+          width: 100% !important;
+      }
+      .header-actions {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+      }
+  }
+</style>
+{% endblock css %}
 
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .s-hot { background: rgba(229, 62, 62, 0.1); color: #E53E3E; }
-        .s-warm { background: rgba(217, 119, 6, 0.1); color: #D97706; }
-        .s-cold { background: var(--accent-light); color: var(--brand-accent); }
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
 
-        .form-check-input {
-            width: 1.2em;
-            height: 1.2em;
-            accent-color: var(--brand-ink);
-            cursor: pointer;
-            border-color: var(--brand-accent);
-        }
-        .table-responsive { scrollbar-width: thin; }
-    </style>
-</head>
-<body>
-
-    {# ── DASH APP HEADER / NAVBAR ── #}
-    <nav class="navbar navbar-expand dash-navbar sticky-top">
-        <div class="container-fluid p-0">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-                <i class="bi bi-layers-half" style="color: var(--brand-accent);"></i>
-                BuyBuzz Operations
-            </a>
-
-            <ul class="navbar-nav ms-auto align-items-center gap-4">
-                <li class="nav-item">
-                    <a href="/apr-report/" class="btn-outline-brand d-flex align-items-center gap-2" style="border-color: rgba(255,255,255,0.2); background: transparent; color: var(--brand-bg);">
-                        <i class="bi bi-bar-chart-fill"></i> APR Reports
-                    </a>
-                </li>    
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link d-flex align-items-center gap-2 p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="nav-avatar">
-                            {{ user.username|make_list|first|upper|default:"M" }}
-                        </div>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2 rounded-3" style="background: var(--white); border: 1px solid var(--border);">
-                        <li class="px-3 py-2 border-bottom" style="border-color: var(--border) !important;">
-                            <span class="d-block fw-bold" style="color: var(--brand-ink);">{{ user.username|default:"Manager Account" }}</span>
-                            <span class="d-block small" style="color: var(--brand-accent); font-size: 11px;">manager@buybuzz.infra</span>
-                        </li>
-                        <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item py-2 small" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                        <li><hr class="dropdown-divider" style="border-color: var(--border);"></li>
-                        <li><a class="dropdown-item py-2 small" href="/logout" style="color: #E53E3E;"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                    </ul>
-                </li>
-            </ul>
+    {# ── PAGE HEADER ── #}
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 header-actions">
+        <div>
+            <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Manager Portal</h2>
+            <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Strategic oversight of cross-branch performance</div>
         </div>
-    </nav>
+    </div>
 
-    {# ── MAIN WORKSPACE ── #}
-    <div class="container-fluid py-4 px-4" style="max-width: 1400px;">
-
-        <div class="mb-4">
-            <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">Manager Portal</h2>
-            <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Strategic oversight of cross-branch performance</div>
-        </div>
-
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
-            <div class="col">
-                <div class="brand-stat-card">
-                    <div class="stat-icon-box"><i class="bi bi-briefcase"></i></div>
-                    <div class="stat-value">{{ total_leads|default:"0" }}</div>
-                    <div class="stat-label">Total Leads</div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="brand-stat-card">
-                    <div class="stat-icon-box"><i class="bi bi-fire"></i></div>
-                    <div class="stat-value">{{ hot_leads|default:"0" }}</div>
-                    <div class="stat-label">Hot Opportunities</div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="brand-stat-card">
-                    <div class="stat-icon-box"><i class="bi bi-plus-circle"></i></div>
-                    <div class="stat-value">{{ new_leads|default:"0" }}</div>
-                    <div class="stat-label">New Pipeline Entries</div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="brand-stat-card">
-                    <div class="stat-icon-box"><i class="bi bi-check2-circle"></i></div>
-                    <div class="stat-value">{{ closed_leads|default:"0" }}</div>
-                    <div class="stat-label">Closed Transactions</div>
-                </div>
+    {# ── KPI STAT CARDS ── #}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
+        <div class="col">
+            <div class="grove-stat-card top-charcoal">
+                <div class="stat-icon-box charcoal"><i class="bi bi-briefcase-fill"></i></div>
+                <div class="stat-value">{{ total_leads|default:"0" }}</div>
+                <div class="stat-label">Total Assigned Leads</div>
             </div>
         </div>
-
-        <div class="brand-panel mb-5 p-0" style="overflow: hidden;">
-            
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
-                <h5 class="mb-0 fw-bold" style="font-size: 16px;">
-                    <i class="bi bi-list-task" style="color: var(--brand-accent); margin-right: 8px;"></i> Lead Distribution Matrix
-                </h5>
-                
-                <div class="d-flex align-items-center gap-2 flex-wrap" style="max-width: 500px;">
-                    <select id="tlSelect" class="brand-input m-0" style="width: auto; min-width: 200px;">
-                        <option value="">Select Team Leader...</option>
-                        {% for tl in team_leaders %}
-                            <option value="{{ tl.id }}">{{ tl.user.username }}</option>
-                        {% endfor %}
-                    </select>
-                    <button id="btnAssign" class="btn-primary-brand text-nowrap m-0" disabled>
-                        Assign to TL
-                    </button>
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-custom align-middle mb-0 text-nowrap text-start" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="ps-4" style="width: 60px;">
-                                <input class="form-check-input" type="checkbox" id="selectAll">
-                            </th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Phone</th>
-                            <th scope="col">Source</th>
-                            <th scope="col">Campaign</th>
-                            <th scope="col">Temp</th>
-                            <th scope="col">Stage</th>
-                            <th scope="col" class="pe-4 text-end">Assigned TL</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lead in leads %}
-                        <tr>
-                            <td class="ps-4">
-                                <input class="form-check-input lead-checkbox" type="checkbox" value="{{ lead.id }}">
-                            </td>
-                            <td class="fw-bold">{{ lead.name }}</td>
-                            <td style="color: var(--brand-accent);">{{ lead.phone }}</td>
-                            <td style="color: var(--brand-accent);">{{ lead.source }}</td>
-                            <td style="color: var(--brand-accent);">{{ lead.campaign_name|default:"—" }}</td>
-                            <td>
-                                {% if lead.temperature|lower == 'hot' %}
-                                    <span class="status-pill s-hot">Hot</span>
-                                {% elif lead.temperature|lower == 'warm' %}
-                                    <span class="status-pill s-warm">Warm</span>
-                                {% else %}
-                                    <span class="status-pill s-cold">Cold</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="status-pill s-cold" style="background: transparent; border: 1px solid var(--border);">{{ lead.stage }}</span>
-                            </td>
-                            <td class="pe-4 text-end">
-                                {% if lead.assigned_tl %}
-                                    <div class="d-inline-flex align-items-center gap-2 justify-content-end">
-                                        <div class="nav-avatar" style="width: 24px; height: 24px; font-size: 10px;">
-                                            {{ lead.assigned_tl.user.username|make_list|first|upper }}
-                                        </div>
-                                        <span style="font-size: 13px; font-weight: 600;">{{ lead.assigned_tl.user.username }}</span>
-                                    </div>
-                                {% else %}
-                                    <span style="font-size: 12px; color: var(--brand-accent); font-style: italic;">Unassigned</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <i class="bi bi-inbox fs-3 d-block mb-2" style="color: var(--brand-accent);"></i>
-                                <div style="font-size: 14px; font-weight: 600;">No operational leads available</div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="col">
+            <div class="grove-stat-card top-stone">
+                <div class="stat-icon-box stone" style="background: #F8D7DA; color: #721C24;"><i class="bi bi-fire"></i></div>
+                <div class="stat-value" style="color: #721C24;">{{ hot_leads|default:"0" }}</div>
+                <div class="stat-label">Hot Opportunities</div>
             </div>
         </div>
-
-        <div class="mb-4 d-flex align-items-center gap-2">
-            <h5 class="fw-bold m-0" style="font-size: 16px;"><i class="bi bi-diagram-3" style="color: var(--brand-accent); margin-right: 6px;"></i> Hierarchical Chain Nodes</h5>
+        <div class="col">
+            <div class="grove-stat-card top-sage">
+                <div class="stat-icon-box sage"><i class="bi bi-plus-circle-fill"></i></div>
+                <div class="stat-value" style="color: var(--sage);">{{ new_leads|default:"0" }}</div>
+                <div class="stat-label">New Pipeline Entries</div>
+            </div>
         </div>
+        <div class="col">
+            <div class="grove-stat-card top-gold">
+                <div class="stat-icon-box gold"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="stat-value" style="color: #b8860b;">{{ closed_leads|default:"0" }}</div>
+                <div class="stat-label">Closed Transactions</div>
+            </div>
+        </div>
+    </div>
+
+    {# ── LEAD DISTRIBUTION MATRIX ── #}
+    <div class="grove-panel mb-5 p-0" style="overflow: hidden;">
         
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-5">
-            {% for tl in team_leaders %}
-            <div class="col">
-                <div class="brand-panel h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3" style="border-color: var(--border) !important;">
-                            <div class="nav-avatar" style="width: 44px; height: 44px; font-size: 16px;">
-                                {{ tl.user.username|make_list|first|upper }}
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+            <h5 class="mb-0 fw-bold" style="font-size: 16px; color: var(--ink);">
+                <i class="bi bi-list-task" style="color: var(--sage); margin-right: 8px;"></i> Lead Distribution Matrix
+            </h5>
+            
+            <div class="d-flex align-items-center gap-2 flex-wrap assign-controls" style="max-width: 500px;">
+                <select id="tlSelect" class="grove-input m-0" style="width: auto; min-width: 220px; min-height: 42px;">
+                    <option value="">Select Team Leader...</option>
+                    {% for tl in team_leaders %}
+                        <option value="{{ tl.id }}">{{ tl.user.username }}</option>
+                    {% endfor %}
+                </select>
+                <button id="btnAssign" class="btn-primary-sage m-0" style="min-height: 42px;" disabled>
+                    <i class="bi bi-person-plus-fill"></i> Assign to TL
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-custom align-middle mb-0 text-nowrap text-start" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th scope="col" class="ps-4" style="width: 60px;">
+                            <input class="form-check-input" type="checkbox" id="selectAll">
+                        </th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Phone</th>
+                        <th scope="col">Source</th>
+                        <th scope="col">Campaign</th>
+                        <th scope="col">Temp</th>
+                        <th scope="col">Stage</th>
+                        <th scope="col" class="pe-4 text-end">Assigned TL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                        <td class="ps-4">
+                            <input class="form-check-input lead-checkbox" type="checkbox" value="{{ lead.id }}">
+                        </td>
+                        <td class="fw-bold" style="color: var(--ink);">{{ lead.name }}</td>
+                        <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--ink);">{{ lead.phone }}</td>
+                        <td style="font-size: 13px; color: var(--stone);">{{ lead.source }}</td>
+                        <td style="font-size: 13px; color: var(--stone);">{{ lead.campaign_name|default:"—" }}</td>
+                        <td>
+                            {% if lead.temperature|lower == 'hot' %}
+                                <span class="status-pill s-hot">Hot</span>
+                            {% elif lead.temperature|lower == 'warm' %}
+                                <span class="status-pill s-warm">Warm</span>
+                            {% else %}
+                                <span class="status-pill s-cold">Cold</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-pill s-cold" style="background: transparent; border: 1px solid var(--border);">{{ lead.stage }}</span>
+                        </td>
+                        <td class="pe-4 text-end">
+                            {% if lead.assigned_tl %}
+                                <div class="d-inline-flex align-items-center gap-2 justify-content-end">
+                                    <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                                        {{ lead.assigned_tl.user.username|make_list|first|upper }}
+                                    </div>
+                                    <span style="font-size: 13px; font-weight: 600; color: var(--ink);">{{ lead.assigned_tl.user.username }}</span>
+                                </div>
+                            {% else %}
+                                <span style="font-size: 12px; color: var(--stone); font-style: italic;">Unassigned</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div style="width: 48px; height: 48px; background: var(--cloud); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto;">
+                                <i class="bi bi-inbox fs-4" style="color: var(--stone);"></i>
                             </div>
-                            <div>
-                                <h6 class="fw-bold mb-0" style="font-size: 14px;">{{ tl.user.username }}</h6>
-                                <span class="status-pill s-cold mt-1" style="font-size: 9px;">Supervisor Node</span>
-                            </div>
+                            <div style="font-size: 14px; font-weight: 600; color: var(--ink);">No operational leads available</div>
+                            <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">You currently have no leads mapped to your queue.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# ── HIERARCHICAL CHAIN NODES (TEAM LEADERS) ── #}
+    <div class="mb-4 d-flex align-items-center gap-2">
+        <h5 class="fw-bold m-0" style="font-size: 16px; color: var(--ink);">
+            <i class="bi bi-diagram-3-fill" style="color: var(--sage); margin-right: 6px;"></i> Hierarchical Chain Nodes
+        </h5>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-5">
+        {% for tl in team_leaders %}
+        <div class="col">
+            <div class="grove-panel h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-3 border-bottom pb-3 mb-3" style="border-color: var(--cloud) !important;">
+                        <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; border: 1px solid var(--border);">
+                            {{ tl.user.username|make_list|first|upper }}
                         </div>
-                        
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="font-size: 12px; color: var(--brand-accent);">Total Pool</span>
-                            <span style="font-size: 13px; font-weight: 700;">{{ tl.total_leads|default:"0" }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span style="font-size: 12px; color: var(--brand-accent);">Hot Leads</span>
-                            <span style="font-size: 13px; font-weight: 700;">{{ tl.hot_leads|default:"0" }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between mb-4">
-                            <span style="font-size: 12px; color: var(--brand-accent);">New Assigned</span>
-                            <span style="font-size: 13px; font-weight: 700;">{{ tl.new_leads|default:"0" }}</span>
+                        <div>
+                            <h6 class="fw-bold mb-0" style="font-size: 14px; color: var(--ink);">{{ tl.user.username }}</h6>
+                            <span class="status-pill s-cold mt-1" style="font-size: 9px; padding: 2px 8px;">Supervisor Node</span>
                         </div>
                     </div>
                     
-                    <a href="/tl_performance/{{ tl.id }}" class="btn-outline-brand text-center text-decoration-none d-block">
-                        View Performance <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Total Pool</span>
+                        <span style="font-size: 13px; font-weight: 700; color: var(--ink);">{{ tl.total_leads|default:"0" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span style="font-size: 12px; color: var(--stone); font-weight: 500;">Hot Leads</span>
+                        <span style="font-size: 13px; font-weight: 700; color: #721C24;">{{ tl.hot_leads|default:"0" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span style="font-size: 12px; color: var(--stone); font-weight: 500;">New Assigned</span>
+                        <span style="font-size: 13px; font-weight: 700; color: var(--sage);">{{ tl.new_leads|default:"0" }}</span>
+                    </div>
                 </div>
+                
+                <a href="/tl_performance/{{ tl.id }}" class="grove-btn-outline w-100 text-center">
+                    View Performance <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
-            {% empty %}
-            <div class="col-12">
-                <div class="text-center py-5 brand-panel">
-                    <p class="mb-0" style="color: var(--brand-accent); font-weight: 500;">No corporate team leaders compiled inside your branch routing tree.</p>
-                </div>
-            </div>
-            {% endfor %}
         </div>
-
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5 grove-panel">
+                <i class="bi bi-people fs-3 mb-2" style="color: var(--stone);"></i>
+                <p class="mb-0" style="color: var(--ink); font-weight: 600; font-size: 14px;">No Team Leaders Found</p>
+                <p class="mb-0" style="color: var(--stone); font-size: 12px; margin-top: 4px;">No corporate team leaders compiled inside your branch routing tree.</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+{% endblock body %}
 
-    <script>
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('btnAssign');
+        const tlSelect = document.getElementById('tlSelect');
+        const checkboxes = document.querySelectorAll('.lead-checkbox');
+        const selectAll = document.getElementById('selectAll');
+
+        // Helper: Get CSRF Token
         function getCookie(name) {
             let cookieValue = null;
-            document.cookie.split(';').forEach(cookie => {
-                cookie = cookie.trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
-            });
+            }
             return cookieValue;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('btnAssign');
-            const tl = document.getElementById('tlSelect');
-            const checkboxes = document.querySelectorAll('.lead-checkbox');
-            const selectAll = document.getElementById('selectAll');
+        // Helper: Get Selected Lead IDs
+        function getSelected() {
+            return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
+        }
 
-            function getSelected() {
-                return Array.from(document.querySelectorAll('.lead-checkbox:checked')).map(cb => cb.value);
-            }
+        // Update button state based on selection & dropdown
+        function update() {
+            const selectedCount = getSelected().length;
+            btn.disabled = !(selectedCount > 0 && tlSelect.value !== "");
+        }
 
-            function update() {
-                const selectedCount = getSelected().length;
-                btn.disabled = !(selectedCount && tl.value);
-            }
-
-            if (selectAll) {
-                selectAll.addEventListener('change', e => {
-                    checkboxes.forEach(cb => cb.checked = e.target.checked);
-                    update();
-                });
-            }
-
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', () => {
-                    const allChecked = Array.from(checkboxes).every(c => c.checked);
-                    const someChecked = Array.from(checkboxes).some(c => c.checked);
-                    if(selectAll) {
-                        selectAll.checked = allChecked;
-                        selectAll.indeterminate = someChecked && !allChecked;
-                    }
-                    update();
-                });
+        // "Select All" Logic
+        if (selectAll) {
+            selectAll.addEventListener('change', e => {
+                checkboxes.forEach(cb => cb.checked = e.target.checked);
+                update();
             });
+        }
 
-            tl.addEventListener('change', update);
-
-            btn.addEventListener('click', async () => {
-                const selected = getSelected();
-                const tlName = tl.options[tl.selectedIndex].text;
-
-                if (!confirm(`Assign ${selected.length} lead(s) across to ${tlName}?`)) return;
-
-                btn.disabled = true;
-                btn.innerText = "Assigning...";
-
-                try {
-                    const res = await fetch('/assign-to-tl/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken')
-                        },
-                        body: JSON.stringify({
-                            lead_ids: selected,
-                            tl_id: tl.value
-                        })
-                    });
-
-                    const data = await res.json();
-
-                    if (data.status === 'success') {
-                        location.reload();
-                    } else {
-                        alert(data.message);
-                        btn.disabled = false;
-                        btn.innerText = "Assign to TL";
-                    }
-                } catch (err) {
-                    console.error("Assignment error:", err);
-                    alert("System exception mapping distribution pipelines.");
-                    btn.disabled = false;
-                    btn.innerText = "Assign to TL";
+        // Individual Checkbox Logic
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                const allChecked = Array.from(checkboxes).every(c => c.checked);
+                const someChecked = Array.from(checkboxes).some(c => c.checked);
+                
+                if(selectAll) {
+                    selectAll.checked = allChecked;
+                    selectAll.indeterminate = someChecked && !allChecked;
                 }
+                update();
             });
         });
-    </script>
-</body>
-</html>
+
+        // Dropdown Logic
+        tlSelect.addEventListener('change', update);
+
+        // API Submission Logic
+        btn.addEventListener('click', async () => {
+            const selected = getSelected();
+            const tlName = tlSelect.options[tlSelect.selectedIndex].text;
+
+            if (!confirm(`Assign ${selected.length} lead(s) to ${tlName}?`)) return;
+
+            // Loading state
+            btn.disabled = true;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Assigning...`;
+
+            try {
+                const res = await fetch('/assign-to-tl/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        lead_ids: selected,
+                        tl_id: tlSelect.value
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to assign leads.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                }
+            } catch (err) {
+                console.error("Assignment error:", err);
+                alert("System exception mapping distribution pipelines.");
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        });
+    });
+</script>
+{% endblock script %}
