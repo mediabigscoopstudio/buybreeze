@@ -3,98 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP</title>
+    <title>Verify OTP — Team Leader Portal</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
-
-        body{
-            margin:0;
-            padding:0;
-            background:#f5f5f5;
-            font-family:Arial, sans-serif;
-            height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
+        :root {
+            --brand-bg: #f7f3f0;
+            --brand-ink: #2E2E2E;
+            --brand-accent: #6F8F9F;
+            --sage: #4f7942;
+            --sage-lt: #dce7d9;
+            --white: #ffffff;
+            --border: rgba(111, 143, 159, 0.2);
         }
 
-        .otp-card{
-            background:white;
-            padding:40px;
-            border-radius:10px;
-            width:350px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--brand-bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
         }
 
-        h2{
-            text-align:center;
-            margin-bottom:20px;
+        .auth-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 24px;
         }
 
-        input{
-            width:100%;
-            padding:12px;
-            margin-top:10px;
-            border:1px solid #ccc;
-            border-radius:5px;
-            font-size:16px;
-            box-sizing:border-box;
+        .auth-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            text-align: center;
         }
 
-        button{
-            width:100%;
-            padding:12px;
-            background:black;
-            color:white;
-            border:none;
-            border-radius:5px;
-            margin-top:20px;
-            cursor:pointer;
+        .card-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--brand-ink);
+            margin-bottom: 8px;
         }
 
-        .message{
-            background:#ffe5e5;
-            color:red;
-            padding:10px;
-            margin-bottom:15px;
-            border-radius:5px;
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--brand-accent);
+            margin-bottom: 32px;
         }
 
+        .grove-field { margin-bottom: 24px; }
+        
+        .grove-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--brand-accent);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .grove-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 20px;
+            color: var(--brand-ink);
+            text-align: center;
+            letter-spacing: 8px;
+            background: var(--brand-bg);
+            transition: all 0.2s;
+            font-family: 'Geist Mono', monospace;
+        }
+
+        .grove-input:focus {
+            outline: none;
+            border-color: var(--sage);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--sage-lt);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--brand-ink);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover { background: var(--sage); }
+
+        .alert-error {
+            background: rgba(229, 62, 62, 0.1);
+            border: 1px solid rgba(229, 62, 62, 0.2);
+            color: #C53030;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            margin-top: 32px;
+            font-size: 11px;
+            color: var(--brand-accent);
+        }
     </style>
-
 </head>
+
 <body>
 
-<div class="otp-card">
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            
+            <div class="card-title">Verification</div>
+            <div class="card-subtitle">Enter the 6-digit code sent to your device</div>
 
-    <h2>OTP Verification</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-error">
+                        <i class="bi bi-exclamation-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="message">
-                {{ message }}
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="grove-field">
+                    <label class="grove-label">Authentication Code</label>
+                    <input 
+                        type="text" 
+                        name="otp" 
+                        class="grove-input" 
+                        placeholder="000000" 
+                        maxlength="6" 
+                        required 
+                        autofocus
+                    >
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Verify & Access Portal <i class="bi bi-check-lg"></i>
+                </button>
+            </form>
+
+            <div class="footer">
+                © 2026 BuyBreeze · Secure Access
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <form method="POST">
-
-        {% csrf_token %}
-
-        <input
-            type="text"
-            name="otp"
-            placeholder="Enter OTP"
-            required
-        >
-
-        <button type="submit">
-            Verify OTP
-        </button>
-
-    </form>
-
-</div>
+        </div>
+    </div>
 
 </body>
 </html>
