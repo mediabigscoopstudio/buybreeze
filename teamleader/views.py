@@ -405,7 +405,13 @@ def profile(request):
 def view_lead(request, id):
     tl = request.user.profile
 
-    # get lead first
+    # employees under this TL
+    team_ids = UserProfile.objects.filter(
+        reports_to=tl
+    ).values_list('id', flat=True)
+
+    allowed_user_ids = list(team_ids) + [tl.id]
+
     item = get_object_or_404(
         Lead.objects.select_related(
             'assigned_to',
@@ -414,16 +420,23 @@ def view_lead(request, id):
             'assigned_to__reports_to__user',
             'branch'
         ),
-        id=id
+        id=id,
+        assigned_to_id__in=allowed_user_ids
     )
 
-    # security check → TL can only open if lead belongs to him
-    if not item.assigned_to or item.assigned_to.id != tl.id:
-        return render(request, '404.html', status=404)
-
     # hierarchy
-    assigned_tl = item.assigned_to
-    assigned_manager = assigned_tl.reports_to if assigned_tl else None
+    employee = item.assigned_to
+    assigned_tl = None
+    assigned_manager = None
+
+    if employee:
+        if employee.role == 'employee':
+            assigned_tl = employee.reports_to
+        elif employee.role == 'tl':
+            assigned_tl = employee
+
+    if assigned_tl:
+        assigned_manager = assigned_tl.reports_to
 
     calls = item.calls.order_by('-created_at')
     followups = item.followups.order_by('followup_at')
@@ -434,6 +447,7 @@ def view_lead(request, id):
         'tl/lead.html',
         {
             'lead': item,
+            'employee': employee,
             'tl': assigned_tl,
             'assigned_manager': assigned_manager,
             'calls': calls,
