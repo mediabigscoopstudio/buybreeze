@@ -472,7 +472,9 @@ def apr_reports(request):
     employee_data = []
 
     for employee in employees:
-        attendance = Attendance.objects.filter(employee=employee)
+        attendance = Attendance.objects.filter(
+            employee=employee.user   # FIX
+        )
 
         total_days = attendance.count()
         present = attendance.filter(status='Present').count()
@@ -513,9 +515,7 @@ def employee_apr_report(request, id):
         role='employee'
     )
 
-    attendance = Attendance.objects.filter(
-        employee=employee
-    ).order_by('-date')
+    attendance = Attendance.objects.filter(employee=employee.user).order_by('-date')
 
     total_days = attendance.count()
     present = attendance.filter(status='Present').count()
@@ -529,7 +529,7 @@ def employee_apr_report(request, id):
 
     return render(
         request,
-        'tl/employee_apr_report.html',
+        'teamleader/employee_apr_report.html',
         {
             'employee': employee,
             'attendance': attendance,
