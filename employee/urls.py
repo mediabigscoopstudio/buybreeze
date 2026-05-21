@@ -13,8 +13,10 @@ urlpatterns = [
     path("verify-otp/", views.verify_otp, name="verify_otp"),
     path("logout/", views.logout_view, name="logout_view"),
     #android APP
-    path("api/employee-login/", android.employee_login, name="employee_login"),
-    path("api/verify-employee-otp/", android.verify_employee_otp, name="verify_employee_otp"),
+    path("api/auth/send-otp/",android.send_otp, "send_otp"),
+    path("api/auth/verify-otp/",android.verify_otp, "verify_otp"),
+    path("api/attendance/punch-out/",android.punch_out, "punch_out"),
+    path("api/attendance/status/",android.attendance_status, "attendance_status"),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
