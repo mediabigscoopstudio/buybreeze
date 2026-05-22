@@ -10,11 +10,30 @@ urlpatterns = [
     path("login/", views.login_view, name="login_view"),
     path("verify-otp/", views.verify_otp, name="web_verify_otp"),
     path("logout/", views.logout_view, name="logout_view"),
-    # android API
+
+    # android — auth
     path("api/auth/send-otp/", android.send_otp, name="api_send_otp"),
     path("api/auth/verify-otp/", android.verify_otp, name="api_verify_otp"),
+
+    # android — attendance
     path("api/attendance/punch-out/", android.punch_out, name="api_punch_out"),
     path("api/attendance/status/", android.attendance_status, name="api_attendance_status"),
-    path("api/leads/", android.get_leads, name="api_get_leads"),
+
+    # android — profile
     path("api/profile/", android.get_profile, name="api_get_profile"),
+    path("api/profile/update/", android.update_profile, name="api_update_profile"),
+
+    # android — leads
+    path("api/leads/", android.get_leads, name="api_get_leads"),
+
+    # android — calls
+    path("api/calls/save/", android.save_call, name="api_save_call"),
+
+    # android — route tracking
+    path("api/route/save/", android.save_route, name="api_save_route"),
+    path("api/route/history/", android.route_history, name="api_route_history"),
+
+    # android — dashboard
+    path("api/dashboard/stats/", android.dashboard_stats, name="api_dashboard_stats"),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
