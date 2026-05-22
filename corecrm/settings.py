@@ -21,13 +21,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     # Core Apps
+    'rest_framework',
     'dash',
     'hrpanel',
     'employee',
     
     # Third-party
     'django_hosts',
-    'rest_framework',
 ]
 
 # ============================================================
