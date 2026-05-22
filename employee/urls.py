@@ -16,4 +16,5 @@ urlpatterns = [
     path("api/attendance/punch-out/", android.punch_out, name="api_punch_out"),
     path("api/attendance/status/", android.attendance_status, name="api_attendance_status"),
     path("api/leads/", android.get_leads, name="api_get_leads"),
+    path("api/profile/", android.get_profile, name="api_get_profile"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

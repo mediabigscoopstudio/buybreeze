@@ -243,6 +243,45 @@ def attendance_status(request):
 
 
 # -----------------------------------------
+# GET PROFILE
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_profile(request):
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response(
+            {"success": False, "message": "Phone required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.select_related(
+            "user", "branch", "reports_to__user"
+        ).get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    return Response({
+        "success": True,
+        "first_name": profile.user.first_name,
+        "last_name": profile.user.last_name,
+        "email": profile.user.email,
+        "phone": profile.phone,
+        "role": profile.role,
+        "branch": profile.branch.name if profile.branch else "Not Assigned",
+        "reports_to": profile.reports_to.user.get_full_name() if profile.reports_to else "Super Admin",
+        "status": profile.status,
+        "profile_pic": profile.profile_pic.url if profile.profile_pic else None,
+    })
+
+
+# -----------------------------------------
 # GET LEADS FOR EMPLOYEE
 # -----------------------------------------
 @csrf_exempt
