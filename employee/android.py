@@ -6,8 +6,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.views.decorators.csrf import csrf_exempt 
-from dash.models import UserProfile, Attendance
+from django.views.decorators.csrf import csrf_exempt
+
+from dash.models import UserProfile, Attendance, Lead
+
 
 # -----------------------------------------
 # HAVERSINE DISTANCE
@@ -75,10 +77,7 @@ def send_otp(request):
 
     if distance > branch.gps_radius:
         return Response(
-            {
-                "success": False,
-                "message": "Outside branch range"
-            },
+            {"success": False, "message": "Outside branch range"},
             status=status.HTTP_403_FORBIDDEN
         )
 
@@ -161,12 +160,26 @@ def verify_otp(request):
 # -----------------------------------------
 @csrf_exempt
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def punch_out(request):
     lat = request.data.get("latitude")
     lng = request.data.get("longitude")
+    phone = request.data.get("phone")
 
-    profile = request.user.profile
+    if not phone:
+        return Response(
+            {"success": False, "message": "Phone required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
     today = timezone.now().date()
 
     try:
@@ -189,7 +202,7 @@ def punch_out(request):
     return Response({
         "success": True,
         "message": "Punch out successful",
-        "hours": attendance.total_hours
+        "hours": str(attendance.total_hours)
     })
 
 
@@ -198,9 +211,18 @@ def punch_out(request):
 # -----------------------------------------
 @csrf_exempt
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def attendance_status(request):
-    profile = request.user.profile
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response({"punched_in": False})
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response({"punched_in": False})
+
     today = timezone.now().date()
 
     attendance = Attendance.objects.filter(
@@ -209,14 +231,42 @@ def attendance_status(request):
     ).first()
 
     if not attendance:
-        return Response({
-            "punched_in": False
-        })
+        return Response({"punched_in": False})
 
     return Response({
         "punched_in": bool(attendance.punch_in),
         "punched_out": bool(attendance.punch_out),
-        "punch_in": attendance.punch_in,
-        "punch_out": attendance.punch_out,
-        "hours": attendance.total_hours
+        "punch_in": str(attendance.punch_in) if attendance.punch_in else None,
+        "punch_out": str(attendance.punch_out) if attendance.punch_out else None,
+        "hours": str(attendance.total_hours) if attendance.total_hours else None
     })
+
+
+# -----------------------------------------
+# GET LEADS FOR EMPLOYEE
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_leads(request):
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response({"success": False, "message": "Phone required"})
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+        leads = Lead.objects.filter(
+            assigned_to=profile,
+            status="Enabled"
+        ).values(
+            "id", "name", "phone", "email",
+            "stage", "temperature", "location",
+            "created_at"
+        )
+        return Response({
+            "success": True,
+            "leads": list(leads)
+        })
+    except UserProfile.DoesNotExist:
+        return Response({"success": False, "message": "Employee not found"})
