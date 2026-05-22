@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.views.decorators.csrf import csrf_exempt 
 from dash.models import UserProfile, Attendance
 
 # -----------------------------------------
@@ -32,6 +32,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 # -----------------------------------------
 # SEND OTP
 # -----------------------------------------
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def send_otp(request):
@@ -98,6 +99,7 @@ def send_otp(request):
 # -----------------------------------------
 # VERIFY OTP + AUTO PUNCH IN
 # -----------------------------------------
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def verify_otp(request):
@@ -157,6 +159,7 @@ def verify_otp(request):
 # -----------------------------------------
 # PUNCH OUT
 # -----------------------------------------
+@csrf_exempt
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def punch_out(request):
