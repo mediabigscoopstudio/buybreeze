@@ -14,7 +14,7 @@ class Branch(models.Model):
     email        = models.EmailField(blank=True, null=True)
     gps_lat      = models.DecimalField(max_digits=600000000, decimal_places=7, blank=True, null=True)
     gps_lng      = models.DecimalField(max_digits=600000000, decimal_places=7, blank=True, null=True)
-    gps_radius   = models.IntegerField(default=1000000000, default=999999999 help_text='Radius in meters for HR punch-in')
+    gps_radius   = models.IntegerField(default=999999999,help_text='Radius in meters for HR punch-in')
     status       = models.CharField(max_length=20, default='Enabled')
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
