@@ -117,9 +117,11 @@ WRAPUP_EDIT_WINDOW_MINUTES = 10
 FAST2SMS_API_KEY = config('FAST2SMS_API_KEY')
 OTP_TEST_MODE = config('OTP_TEST_MODE', default= True, cast=bool)
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
     ],
 }

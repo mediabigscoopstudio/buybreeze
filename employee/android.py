@@ -196,6 +196,7 @@ def punch_out(request):
 # -----------------------------------------
 # ATTENDANCE STATUS
 # -----------------------------------------
+@csrf_exempt
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def attendance_status(request):
