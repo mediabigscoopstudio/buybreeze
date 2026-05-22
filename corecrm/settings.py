@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     
     # Third-party
     'django_hosts',
+    'rest_framework',
 ]
 
 # ============================================================
