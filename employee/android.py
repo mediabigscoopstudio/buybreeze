@@ -7,8 +7,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import UserProfile, Attendance
-
+from dash.models import UserProfile, Attendance
 
 # -----------------------------------------
 # HAVERSINE DISTANCE
