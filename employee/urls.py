@@ -25,6 +25,7 @@ urlpatterns = [
 
     # android — leads
     path("api/leads/", android.get_leads, name="api_get_leads"),
+    path("api/leads/detail/", android.get_lead_detail, name="api_lead_detail"),
 
     # android — calls
     path("api/calls/save/", android.save_call, name="api_save_call"),

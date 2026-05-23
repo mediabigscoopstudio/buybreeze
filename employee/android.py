@@ -333,6 +333,66 @@ def get_leads(request):
 
 
 # -----------------------------------------
+# GET LEAD DETAIL
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_lead_detail(request):
+    lead_id = request.query_params.get("lead_id")
+    phone = request.query_params.get("phone")
+
+    if not lead_id or not phone:
+        return Response({
+            "success": False,
+            "message": "lead_id and phone required"
+        })
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+        lead = Lead.objects.get(id=lead_id, assigned_to=profile)
+
+        call_logs = CallLog.objects.filter(
+            lead=lead
+        ).order_by("-created_at")[:10]
+
+        call_log_data = []
+        for call in call_logs:
+            call_log_data.append({
+                "id": call.id,
+                "call_outcome": call.call_outcome,
+                "call_duration": call.call_duration,
+                "call_notes": call.call_notes,
+                "created_at": call.created_at.strftime("%d %b %Y %I:%M %p"),
+                "called_by_name": call.called_by.user.get_full_name()
+                    if call.called_by else None
+            })
+
+        return Response({
+            "success": True,
+            "id": lead.id,
+            "name": lead.name,
+            "phone": lead.phone,
+            "email": lead.email,
+            "location": lead.location,
+            "stage": lead.stage,
+            "temperature": lead.temperature,
+            "property_type": lead.property_type,
+            "budget_min": str(lead.budget_min) if lead.budget_min else None,
+            "budget_max": str(lead.budget_max) if lead.budget_max else None,
+            "purpose": lead.purpose,
+            "source": lead.source,
+            "notes": lead.notes,
+            "call_logs": call_log_data
+        })
+
+    except Lead.DoesNotExist:
+        return Response({"success": False, "message": "Lead not found"})
+    except UserProfile.DoesNotExist:
+        return Response({"success": False, "message": "Employee not found"})
+
+
+# -----------------------------------------
 # SAVE CALL + WRAPUP
 # -----------------------------------------
 @csrf_exempt
