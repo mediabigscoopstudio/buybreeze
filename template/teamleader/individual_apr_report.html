@@ -1,191 +1,106 @@
 {% extends "teamleader/base.html" %}
 
-{% block title %}APR Detail: {{ employee.user.get_full_name|default:"Employee Profile" }} — Team Leader Portal{% endblock %}
+{% block title %}APR Detail: {{ employee.user.get_full_name|default:"Employee" }} — Team Leader Portal{% endblock %}
 
 {% block css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
-    /* ── GROVE UI: EMPLOYEE APR REPORT ── */
-
-    .apr-wrapper {
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-
-    /* Action Bar */
-    .action-bar {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 24px;
-    }
+    .apr-wrapper { max-width: 1400px; margin: 0 auto; }
 
     .btn-grove-secondary {
-        background: var(--white);
-        color: var(--brand-ink);
-        border: 1px solid var(--border);
-        font-size: 13px;
-        font-weight: 600;
-        padding: 8px 16px;
-        border-radius: 8px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s ease;
-        text-decoration: none;
+        background: var(--white); color: var(--brand-ink); border: 1px solid var(--border);
+        font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 8px;
+        display: inline-flex; align-items: center; gap: 6px;
+        transition: all 0.2s ease; text-decoration: none;
     }
-    .btn-grove-secondary:hover {
-        background: var(--brand-bg);
-        border-color: var(--brand-accent);
-        color: var(--brand-ink);
-    }
+    .btn-grove-secondary:hover { background: var(--brand-bg); border-color: var(--brand-accent); color: var(--brand-ink); }
 
-    /* Panels & Cards */
     .brand-panel {
-        background: var(--white);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.015);
-        margin-bottom: 24px;
-        transition: box-shadow 0.2s ease;
-    }
-    .brand-panel:hover {
-        box-shadow: 0 8px 32px rgba(0,0,0,0.03);
+        background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+        padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.015); margin-bottom: 24px;
     }
     .panel-title {
-        font-size: 15px;
-        font-weight: 700;
-        color: var(--brand-ink);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
-        border-bottom: 1px dashed var(--border);
+        font-size: 15px; font-weight: 700; color: var(--brand-ink);
+        display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+        padding-bottom: 16px; border-bottom: 1px dashed var(--border);
     }
 
-    /* Hero Section */
     .hero-avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 20px;
-        background: var(--brand-ink);
-        color: var(--white);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        font-weight: 700;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-        object-fit: cover;
+        width: 80px; height: 80px; border-radius: 20px; background: var(--brand-ink);
+        color: var(--white); display: flex; align-items: center; justify-content: center;
+        font-size: 28px; font-weight: 700; box-shadow: 0 8px 16px rgba(0,0,0,0.08); object-fit: cover;
     }
-    .hero-layout {
-        display: flex;
-        align-items: center;
-        gap: 32px;
-    }
+    .hero-layout { display: flex; align-items: center; gap: 32px; }
     @media (max-width: 991px) {
         .hero-layout { flex-direction: column; align-items: stretch; }
         .hero-profile { border-right: none !important; border-bottom: 1px dashed var(--border); padding-bottom: 24px; margin-bottom: 8px; }
     }
 
-    /* Mini Stats */
     .mini-stat-card {
-        background: var(--brand-bg);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 16px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        transition: transform 0.2s ease;
+        background: var(--brand-bg); border: 1px solid var(--border); border-radius: 12px;
+        padding: 16px; text-align: center; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; height: 100%; transition: transform 0.2s ease;
     }
     .mini-stat-card:hover { transform: translateY(-2px); }
-    .mini-stat-value {
-        font-family: 'Geist Mono', monospace;
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--brand-ink);
-        line-height: 1;
-        margin-bottom: 4px;
-    }
-    .mini-stat-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--brand-accent);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+    .mini-stat-value { font-family: 'Geist Mono', monospace; font-size: 24px; font-weight: 700; color: var(--brand-ink); line-height: 1; margin-bottom: 4px; }
+    .mini-stat-label { font-size: 11px; font-weight: 700; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* Table & Toolbar */
-    .table-toolbar {
-        display: flex;
+    /* ── Daily Accordion ── */
+    .day-card {
+        background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+        overflow: hidden; margin-bottom: 8px; transition: box-shadow 0.2s;
+    }
+    .day-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+
+    .day-header {
+        display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+        cursor: pointer; background: var(--white); user-select: none;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 16px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--border);
     }
-    .brand-input {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 13px;
-        color: var(--brand-ink);
-        background: var(--white);
-        transition: all 0.2s ease;
-    }
-    .brand-input:focus {
-        outline: none;
-        border-color: var(--brand-accent);
-        box-shadow: 0 0 0 3px var(--accent-light);
-    }
+    .day-header:hover { background: var(--brand-bg); }
 
-    .table-custom th {
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--brand-accent);
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        border-bottom: 1px solid var(--border);
-        padding: 14px 12px;
-        background: var(--brand-bg);
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-    .table-custom td {
-        padding: 14px 12px;
-        border-bottom: 1px solid var(--border);
-        vertical-align: middle;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--brand-ink);
-    }
+    .day-date-col { min-width: 160px; font-weight: 700; font-size: 14px; color: var(--brand-ink); }
+    .day-times { font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--brand-accent); }
+    .day-chevron { margin-left: auto; color: var(--brand-accent); transition: transform 0.25s; font-size: 14px; }
+    .day-chevron.open { transform: rotate(180deg); }
 
-    /* Badges */
     .status-pill {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        white-space: nowrap;
+        display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px;
+        font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; white-space: nowrap;
     }
-    .s-present { background: rgba(16, 185, 129, 0.1); color: #059669; }
-    .s-absent { background: rgba(239, 68, 68, 0.1); color: #DC2626; }
-    .s-half { background: rgba(245, 158, 11, 0.1); color: #D97706; }
-    .s-late { background: rgba(217, 119, 6, 0.1); color: #B45309; border: 1px solid rgba(217, 119, 6, 0.2); }
-    .s-leave { background: var(--accent-light); color: var(--brand-accent); }
-    .s-role { border: 1px solid var(--border); color: var(--brand-ink); background: var(--white); }
+    .s-present { background: rgba(16,185,129,0.1); color: #059669; }
+    .s-absent  { background: rgba(239,68,68,0.1);  color: #DC2626; }
+    .s-late    { background: rgba(217,119,6,0.1);   color: #B45309; border: 1px solid rgba(217,119,6,0.2); }
+    .s-role    { border: 1px solid var(--border); color: var(--brand-ink); background: var(--white); }
+    .s-leave   { background: var(--accent-light); color: var(--brand-accent); }
+
+    .day-detail {
+        border-top: 1px solid var(--border); background: #fafaf9; padding: 20px;
+        display: none;
+    }
+
+    /* inner panels inside day-detail */
+    .inner-panel {
+        background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+        padding: 16px; height: 100%;
+    }
+    .inner-panel-title { font-size: 12px; font-weight: 700; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+    .call-table th { font-size: 10px; font-weight: 700; color: var(--brand-accent); text-transform: uppercase; letter-spacing: 0.8px; padding: 8px 10px; border-bottom: 1px solid var(--border); background: var(--brand-bg); }
+    .call-table td { font-size: 12px; padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--brand-ink); vertical-align: middle; }
+    .call-table tr:last-child td { border-bottom: none; }
+
+    .outcome-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: var(--accent-light); color: var(--brand-accent); }
+    .outcome-interested { background: rgba(16,185,129,0.1); color: #059669; }
+    .outcome-not_interested { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .outcome-callback { background: rgba(59,130,246,0.1); color: #2563EB; }
+    .outcome-converted { background: rgba(139,92,246,0.1); color: #7C3AED; }
+    .outcome-site_visit { background: rgba(245,158,11,0.1); color: #D97706; }
+
+    .day-map { height: 240px; width: 100%; border-radius: 10px; background: var(--brand-bg); }
+    .map-placeholder { height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--brand-bg); border-radius: 10px; color: var(--brand-accent); }
+
+    .badge-count { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); background: var(--white); color: var(--brand-accent); }
 </style>
 {% endblock css %}
 
@@ -193,7 +108,7 @@
 <div class="apr-wrapper py-4 px-3 px-md-4">
 
     {# ── ACTION BAR ── #}
-    <div class="action-bar fade-up">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <a href="javascript:history.back()" class="btn-grove-secondary border-0 shadow-none px-0 bg-transparent">
             <i class="bi bi-arrow-left"></i> Back to APR Reports
         </a>
@@ -203,53 +118,53 @@
         </div>
     </div>
 
-    {# ── TOP HERO CARD ── #}
-    <div class="brand-panel fade-up" style="animation-delay: 0.05s;">
+    {# ── HERO CARD ── #}
+    <div class="brand-panel">
         <div class="hero-layout">
-            
-            <div class="hero-profile d-flex align-items-center gap-4 pe-lg-4 border-end" style="min-width: 320px; border-color: var(--border) !important;">
+
+            <div class="hero-profile d-flex align-items-center gap-4 pe-lg-4 border-end" style="min-width: 300px; border-color: var(--border) !important;">
                 {% if employee.profile_pic %}
                     <img src="{{ employee.profile_pic.url }}" alt="Profile" class="hero-avatar">
                 {% else %}
                     <div class="hero-avatar">{{ employee.user.get_full_name|make_list|first|upper|default:"E" }}</div>
                 {% endif %}
                 <div>
-                    <h2 style="font-size: 22px; font-weight: 700; color: var(--brand-ink); margin: 0 0 6px 0; line-height: 1.2;">{{ employee.user.get_full_name|default:"Agent Name" }}</h2>
+                    <h2 style="font-size: 20px; font-weight: 700; color: var(--brand-ink); margin: 0 0 6px 0;">{{ employee.user.get_full_name|default:"Agent Name" }}</h2>
                     <div class="d-flex flex-wrap gap-2 mb-2">
-                        <span class="status-pill s-role">{{ employee.role|default:"Representative" }}</span>
-                        <span class="status-pill s-leave"><i class="bi bi-building me-1"></i> {{ employee.branch.name|default:"Global Branch" }}</span>
+                        <span class="status-pill s-role">{{ employee.role }}</span>
+                        <span class="status-pill s-leave"><i class="bi bi-building me-1"></i>{{ employee.branch.name|default:"Global" }}</span>
                     </div>
-                    <div style="font-family: 'Geist Mono', monospace; font-size: 13px; color: var(--brand-accent);">
-                        <i class="bi bi-telephone text-muted"></i> {{ employee.phone|default:"No phone on file" }}
+                    <div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--brand-accent);">
+                        <i class="bi bi-telephone"></i> {{ employee.phone|default:"—" }}
                     </div>
                 </div>
             </div>
 
             <div class="flex-grow-1 w-100">
-                <div class="d-grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));">
+                <div class="d-grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));">
                     <div class="mini-stat-card">
                         <span class="mini-stat-value">{{ total_days|default:"0" }}</span>
                         <span class="mini-stat-label">Total Days</span>
                     </div>
-                    <div class="mini-stat-card" style="border-color: #10B981; background: rgba(16, 185, 129, 0.05);">
-                        <span class="mini-stat-value" style="color: #059669;">{{ present_days|default:"0" }}</span>
-                        <span class="mini-stat-label" style="color: #059669;">Present</span>
+                    <div class="mini-stat-card" style="border-color:#10B981; background:rgba(16,185,129,0.05);">
+                        <span class="mini-stat-value" style="color:#059669;">{{ present_days|default:"0" }}</span>
+                        <span class="mini-stat-label" style="color:#059669;">Present</span>
                     </div>
-                    <div class="mini-stat-card" style="border-color: #EF4444; background: rgba(239, 68, 68, 0.05);">
-                        <span class="mini-stat-value" style="color: #DC2626;">{{ absent_days|default:"0" }}</span>
-                        <span class="mini-stat-label" style="color: #DC2626;">Absent</span>
+                    <div class="mini-stat-card" style="border-color:#EF4444; background:rgba(239,68,68,0.05);">
+                        <span class="mini-stat-value" style="color:#DC2626;">{{ absent_days|default:"0" }}</span>
+                        <span class="mini-stat-label" style="color:#DC2626;">Absent</span>
                     </div>
-                    <div class="mini-stat-card" style="border-color: #F59E0B; background: rgba(245, 158, 11, 0.05);">
-                        <span class="mini-stat-value" style="color: #D97706;">{{ late_marks|default:"0" }}</span>
-                        <span class="mini-stat-label" style="color: #D97706;">Late Marks</span>
+                    <div class="mini-stat-card" style="border-color:#F59E0B; background:rgba(245,158,11,0.05);">
+                        <span class="mini-stat-value" style="color:#D97706;">{{ late_marks|default:"0" }}</span>
+                        <span class="mini-stat-label" style="color:#D97706;">Late Marks</span>
                     </div>
                     <div class="mini-stat-card">
                         <span class="mini-stat-value">{{ leave_days|default:"0" }}</span>
                         <span class="mini-stat-label">Leaves</span>
                     </div>
                     <div class="mini-stat-card" style="background: var(--brand-ink);">
-                        <span class="mini-stat-value" style="color: var(--white);">{{ attendance_percentage|default:"0" }}%</span>
-                        <span class="mini-stat-label" style="color: rgba(255,255,255,0.7);">Attd %</span>
+                        <span class="mini-stat-value" style="color:#fff;">{{ attendance_percentage|default:"0" }}%</span>
+                        <span class="mini-stat-label" style="color:rgba(255,255,255,0.7);">Attd %</span>
                     </div>
                 </div>
             </div>
@@ -257,101 +172,184 @@
         </div>
     </div>
 
-    {# ── ATTENDANCE HISTORY TABLE ── #}
-    <div class="brand-panel p-0 fade-up" style="animation-delay: 0.1s; overflow: hidden;">
-        <div class="panel-title px-4 pt-4 mb-0 border-bottom-0">
-            <i class="bi bi-clock-history"></i> Attendance History Ledger
-        </div>
-        
-        <div class="table-toolbar px-4 mt-3">
-            <div class="position-relative flex-grow-1" style="max-width: 250px;">
-                <i class="bi bi-search position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--brand-accent);"></i>
-                <input type="text" class="brand-input w-100" style="padding-left: 36px;" placeholder="Search by date...">
+    {# ── DAILY RECORDS ── #}
+    <div class="panel-title" style="margin-bottom: 16px; padding-bottom: 0; border-bottom: none;">
+        <i class="bi bi-calendar3" style="color: var(--brand-accent);"></i>
+        Daily Activity Log
+        <span class="badge-count ms-2">{{ daily_data|length }} day{{ daily_data|length|pluralize }}</span>
+    </div>
+
+    {% for day in daily_data %}
+    <div class="day-card" id="card-{{ forloop.counter }}">
+
+        {# Row header #}
+        <div class="day-header" onclick="toggleDay({{ forloop.counter }})">
+
+            <div class="day-date-col">
+                <i class="bi bi-calendar2-event me-2" style="color: var(--brand-accent);"></i>
+                {{ day.date|date:"D, d M Y" }}
             </div>
-            <input type="month" class="brand-input w-auto mono" style="font-size: 13px;">
-            <select class="brand-input w-auto" style="min-width: 120px;">
-                <option value="">All Statuses</option>
-                <option value="present">Present</option>
-                <option value="absent">Absent</option>
-                <option value="late">Late</option>
-                <option value="leave">Leave</option>
-            </select>
+
+            {% if day.is_present %}
+                {% if day.is_late %}
+                    <span class="status-pill s-late">Late</span>
+                {% else %}
+                    <span class="status-pill s-present">Present</span>
+                {% endif %}
+                <span class="day-times">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>{{ day.punch_in|time:"h:i A"|default:"—" }}
+                    &nbsp;&nbsp;<i class="bi bi-box-arrow-right me-1"></i>{{ day.punch_out|time:"h:i A"|default:"—" }}
+                </span>
+            {% else %}
+                <span class="status-pill s-absent">Absent</span>
+            {% endif %}
+
+            <span class="badge-count">
+                <i class="bi bi-telephone"></i> {{ day.call_count }} call{{ day.call_count|pluralize }}
+            </span>
+            {% if day.ping_count %}
+            <span class="badge-count">
+                <i class="bi bi-geo-alt"></i> {{ day.ping_count }} location{{ day.ping_count|pluralize }}
+            </span>
+            {% endif %}
+
+            <i class="bi bi-chevron-down day-chevron" id="chevron-{{ forloop.counter }}"></i>
         </div>
 
-        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-            <table class="table table-custom align-middle mb-0 text-nowrap">
-                <thead>
-                    <tr>
-                        <th class="ps-4">Date</th>
-                        <th>Check In</th>
-                        <th>Check Out</th>
-                        <th>Status</th>
-                        <th class="pe-4 text-center">Late Mark</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for attendance in attendances %}
-                    <tr>
-                        <td class="ps-4 mono text-muted">{{ attendance.date|date:"M d, Y" }}</td>
-                        <td class="mono fw-bold">{{ attendance.check_in|time:"h:i A"|default:"—" }}</td>
-                        <td class="mono fw-bold">{{ attendance.check_out|time:"h:i A"|default:"—" }}</td>
-                        <td>
-                            {% if attendance.status|lower == 'present' %}
-                                <span class="status-pill s-present">Present</span>
-                            {% elif attendance.status|lower == 'absent' %}
-                                <span class="status-pill s-absent">Absent</span>
-                            {% elif attendance.status|lower == 'half day' %}
-                                <span class="status-pill s-half">Half Day</span>
-                            {% elif attendance.status|lower == 'leave' %}
-                                <span class="status-pill s-leave">Leave</span>
-                            {% else %}
-                                <span class="status-pill s-leave bg-transparent border">{{ attendance.status|default:"-" }}</span>
-                            {% endif %}
-                        </td>
-                        <td class="pe-4 text-center">
-                            {% if attendance.is_late %}
-                                <span class="status-pill s-late" style="padding: 2px 8px; font-size: 9px;"><i class="bi bi-exclamation-triangle-fill me-1"></i> Late</span>
-                            {% else %}
-                                <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5">
-                            <i class="bi bi-calendar-x fs-3 d-block mb-2" style="color: var(--brand-accent);"></i>
-                            <div class="fw-bold" style="color: var(--brand-ink); font-size: 14px;">No attendance records found</div>
-                            <div class="small" style="color: var(--brand-accent);">Logs will appear here once the agent punches in.</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="p-3 border-top d-flex justify-content-between align-items-center" style="border-color: var(--border) !important; background: var(--brand-bg);">
-            <div class="small" style="color: var(--brand-accent);">Showing all attendance logs</div>
+        {# Expandable detail #}
+        <div class="day-detail" id="detail-{{ forloop.counter }}">
+            <div class="row g-3">
+
+                {# ── Leads Contacted ── #}
+                <div class="col-12 col-lg-6">
+                    <div class="inner-panel">
+                        <div class="inner-panel-title">
+                            <i class="bi bi-telephone-fill"></i> Leads Contacted
+                        </div>
+                        {% if day.calls %}
+                        <div class="table-responsive">
+                            <table class="table call-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Lead</th>
+                                        <th>Outcome</th>
+                                        <th>Duration</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for call in day.calls %}
+                                    <tr>
+                                        <td class="fw-bold">{{ call.lead.name }}<br><small class="text-muted" style="font-family:'Geist Mono',monospace; font-size:10px;">{{ call.lead.phone }}</small></td>
+                                        <td>
+                                            <span class="outcome-badge outcome-{{ call.call_outcome }}">
+                                                {{ call.get_call_outcome_display }}
+                                            </span>
+                                        </td>
+                                        <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ call.duration_display }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4" style="color: var(--brand-accent);">
+                            <i class="bi bi-telephone-x d-block mb-2" style="font-size: 28px; opacity: 0.35;"></i>
+                            <span class="small fw-semibold">No calls recorded this day</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# ── Location Map ── #}
+                <div class="col-12 col-lg-6">
+                    <div class="inner-panel p-0 overflow-hidden">
+                        {% if day.ping_count %}
+                        <div class="day-map"
+                             id="map-{{ forloop.counter }}"
+                             data-coords="{{ day.ping_coords }}">
+                        </div>
+                        {% else %}
+                        <div class="map-placeholder" style="height:240px;">
+                            <i class="bi bi-map" style="font-size:36px; opacity:0.25; margin-bottom:10px;"></i>
+                            <span class="small fw-semibold">No location data for this day</span>
+                            <span class="small mt-1" style="opacity:0.6;">GPS pings will appear here once the route tracking service is active.</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
+    {% empty %}
+    <div class="brand-panel text-center py-5">
+        <i class="bi bi-calendar-x fs-1 d-block mb-3" style="color: var(--brand-accent); opacity: 0.4;"></i>
+        <div class="fw-bold" style="font-size: 16px;">No attendance records found</div>
+        <div class="small mt-1" style="color: var(--brand-accent);">Logs will appear here once the agent punches in.</div>
+    </div>
+    {% endfor %}
 
 </div>
 {% endblock body %}
 
 {% block script %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Fade Up Animation Initialization
-    document.addEventListener("DOMContentLoaded", function() {
-        const fadeElements = document.querySelectorAll('.fade-up');
-        fadeElements.forEach((el, index) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(15px)';
-            el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-            
-            setTimeout(() => {
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, 60 * index);
+    const initializedMaps = new Set();
+
+    function toggleDay(n) {
+        const detail  = document.getElementById('detail-' + n);
+        const chevron = document.getElementById('chevron-' + n);
+        const isOpen  = detail.style.display === 'block';
+
+        detail.style.display  = isOpen ? 'none' : 'block';
+        chevron.classList.toggle('open', !isOpen);
+
+        if (!isOpen) {
+            const mapEl = document.getElementById('map-' + n);
+            if (mapEl && !initializedMaps.has(n)) {
+                initializedMaps.add(n);
+                initMap(mapEl, n);
+            }
+        }
+    }
+
+    function initMap(el, n) {
+        let coords = [];
+        try { coords = JSON.parse(el.dataset.coords || '[]'); } catch(e) {}
+
+        if (coords.length === 0) return;
+
+        const centerLat = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+        const centerLng = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+
+        const map = L.map(el, { zoomControl: true }).setView([centerLat, centerLng], 15);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19,
+        }).addTo(map);
+
+        if (coords.length > 1) {
+            L.polyline(coords, { color: '#1B4F72', weight: 3, opacity: 0.75 }).addTo(map);
+        }
+
+        coords.forEach((c, i) => {
+            const isFirst = i === 0;
+            const isLast  = i === coords.length - 1;
+            L.circleMarker(c, {
+                radius:      isFirst || isLast ? 9 : 5,
+                fillColor:   isFirst ? '#10B981' : isLast ? '#EF4444' : '#3B82F6',
+                color:       '#fff',
+                weight:      2,
+                fillOpacity: 1,
+            }).bindTooltip(
+                isFirst ? 'Start' : isLast ? 'End' : `Ping ${i + 1}`,
+                { permanent: false, direction: 'top' }
+            ).addTo(map);
         });
-    });
+
+        setTimeout(() => map.invalidateSize(), 150);
+    }
 </script>
 {% endblock script %}

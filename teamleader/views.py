@@ -3,13 +3,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.db.models import Count, Q
-from dash.models import Branch, UserProfile, Lead
+from dash.models import Branch, UserProfile, Lead, CallLog
 from django.http import JsonResponse
 import json
 from dash.otp_utils import generate_otp, send_otp
 from django.utils import timezone
 from django.contrib.auth.models import User
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date, time as time_obj
+from employee.models import Attendance, LocationPing
 
 
 # ============================================================
@@ -243,47 +244,66 @@ def logout_view(request):
 @user_passes_test(tl_required, login_url='/login/')
 def index(request):
     tl = request.user.profile
+    period = request.GET.get('period', 'all')
+    today = date.today()
 
-    # Only leads assigned to this TL
-    leads = Lead.objects.filter(
-        assigned_to=tl
-    ).order_by('-created_at')
+    if period == 'today':
+        start_date, end_date, period_label = today, today, 'Today'
+    elif period == 'yesterday':
+        yd = today - timedelta(days=1)
+        start_date, end_date, period_label = yd, yd, 'Yesterday'
+    elif period == 'this_week':
+        start_date = today - timedelta(days=today.weekday())
+        end_date, period_label = today, 'This Week'
+    elif period == 'this_month':
+        start_date = today.replace(day=1)
+        end_date, period_label = today, 'This Month'
+    elif period == 'this_quarter':
+        qm = ((today.month - 1) // 3) * 3 + 1
+        start_date = today.replace(month=qm, day=1)
+        end_date, period_label = today, 'This Quarter'
+    else:
+        start_date = end_date = None
+        period_label = 'All Time'
 
-    # KPIs
-    total_leads = leads.count()
-    hot_leads = leads.filter(temperature='hot').count()
-    new_leads = leads.filter(stage='new').count()
+    leads = Lead.objects.filter(assigned_to=tl)
+    if start_date:
+        leads = leads.filter(created_at__date__range=(start_date, end_date))
+    leads = leads.order_by('-created_at')
+
+    total_leads  = leads.count()
+    hot_leads    = leads.filter(temperature='hot').count()
+    new_leads    = leads.filter(stage='new').count()
     closed_leads = leads.filter(stage='closed').count()
+
+    if start_date:
+        dr       = Q(assigned_leads__created_at__date__range=(start_date, end_date))
+        hot_q    = dr & Q(assigned_leads__temperature='hot')
+        new_q    = dr & Q(assigned_leads__stage='new')
+    else:
+        dr    = Q()
+        hot_q = Q(assigned_leads__temperature='hot')
+        new_q = Q(assigned_leads__stage='new')
+
     employees = UserProfile.objects.filter(
-    role='employee',
-    status='Enabled',
-    reports_to=tl
+        role='employee',
+        status='Enabled',
+        reports_to=tl,
     ).select_related('user').annotate(
-
-    # Leads assigned to this employee
-    total_leads=Count('assigned_leads', distinct=True),
-
-    hot_leads=Count(
-        'assigned_leads',
-        filter=Q(assigned_leads__temperature='hot'),
-        distinct=True
-    ),
-
-    # 🔥 New = leads recently assigned (or stage='new')
-    new_leads=Count(
-        'assigned_leads',
-        filter=Q(assigned_leads__stage='new'),
-        distinct=True
-    )
+        total_leads=Count('assigned_leads', filter=dr,    distinct=True),
+        hot_leads  =Count('assigned_leads', filter=hot_q, distinct=True),
+        new_leads  =Count('assigned_leads', filter=new_q, distinct=True),
     )
 
     return render(request, 'teamleader/index.html', {
-        'leads': leads,
-        'total_leads': total_leads,
-        'hot_leads': hot_leads,
-        'new_leads': new_leads,
+        'leads':        leads,
+        'total_leads':  total_leads,
+        'hot_leads':    hot_leads,
+        'new_leads':    new_leads,
         'closed_leads': closed_leads,
-        'employees':employees,
+        'employees':    employees,
+        'period':       period,
+        'period_label': period_label,
     })
 
 @user_passes_test(tl_required, login_url='/login/')
@@ -324,9 +344,6 @@ def assign_to_employee(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'error'})
-
-from django.contrib.auth.decorators import user_passes_test
-from dash.models import UserProfile, Lead
 
 @user_passes_test(tl_required, login_url='/login/')
 def employee_performance(request, id):
@@ -456,9 +473,6 @@ def view_lead(request, id):
         }
     )
 
-from dash.models import UserProfile
-from employee.models import Attendance
-
 @user_passes_test(tl_required, login_url='/login/')
 def apr_reports(request):
     tl = request.user.profile
@@ -466,86 +480,121 @@ def apr_reports(request):
     employees = UserProfile.objects.filter(
         reports_to=tl,
         role='employee',
-        status='Enabled'
+        status='Enabled',
     ).select_related('user', 'branch')
 
-    employee_data = []
+    apr_records     = []
+    total_present_all = 0
+    att_pcts        = []
 
-    for employee in employees:
-        attendance = Attendance.objects.filter(
-            employee=employee.user
+    for emp in employees:
+        qs         = Attendance.objects.filter(employee=emp.user)
+        total_days = qs.count()
+        present    = qs.filter(punch_in_time__isnull=False).count()
+        absent     = total_days - present
+
+        late_marks = sum(
+            1 for att in qs
+            if att.punch_in_time and att.punch_in_time.time() > time_obj(9, 30)
         )
 
-        total_days = attendance.count()
+        pct = round((present / total_days * 100), 1) if total_days else 0.0
+        total_present_all += present
+        att_pcts.append(pct)
 
-        # Present = has punch in
-        present = attendance.exclude(
-            punch_in_time__isnull=True
-        ).count()
-
-        # Absent = no punch in
-        absent = attendance.filter(
-            punch_in_time__isnull=True
-        ).count()
-
-        attendance_percentage = 0
-        if total_days > 0:
-            attendance_percentage = round(
-                (present / total_days) * 100, 2
-            )
-
-        employee_data.append({
-            'employee': employee,
-            'total_days': total_days,
-            'present': present,
-            'absent': absent,
-            'attendance_percentage': attendance_percentage,
+        apr_records.append({
+            'id':                  emp.id,
+            'name':                emp.user.get_full_name() or emp.user.username,
+            'role':                emp.role,
+            'branch':              emp.branch.name if emp.branch else '—',
+            'phone':               emp.phone,
+            'profile_pic':         emp.profile_pic,
+            'present_days':        present,
+            'absent_days':         absent,
+            'leave_days':          0,
+            'late_marks':          late_marks,
+            'attendance_percentage': pct,
         })
 
-    return render(
-        request,
-        'teamleader/apr_reports.html',
-        {
-            'employee_data': employee_data
-        }
-    )
+    avg_attendance = round(sum(att_pcts) / len(att_pcts), 1) if att_pcts else 0.0
+
+    return render(request, 'teamleader/apr_reports.html', {
+        'apr_records':      apr_records,
+        'total_employees':  len(apr_records),
+        'avg_attendance':   avg_attendance,
+        'total_present':    total_present_all,
+        'total_leave':      0,
+    })
 
 @user_passes_test(tl_required, login_url='/login/')
 def employee_apr_report(request, id):
+    import json as _json
     tl = request.user.profile
 
     employee = get_object_or_404(
         UserProfile.objects.select_related('user', 'branch'),
         id=id,
         reports_to=tl,
-        role='employee'
+        role='employee',
     )
 
-    attendance = Attendance.objects.filter(
-    employee=employee.user
+    attendance_qs = Attendance.objects.filter(
+        employee=employee.user,
     ).order_by('-date')
 
-    total_days = attendance.count()
-    present = attendance.filter(status='Present').count()
-    absent = attendance.filter(status='Absent').count()
-    leave = attendance.filter(status='Leave').count()
-    late = attendance.filter(is_late=True).count()
+    daily_data = []
+    late_count = 0
 
-    attendance_percentage = 0
-    if total_days > 0:
-        attendance_percentage = round((present / total_days) * 100, 2)
+    for att in attendance_qs:
+        is_present = att.punch_in_time is not None
+        is_late    = False
+        if att.punch_in_time:
+            is_late = att.punch_in_time.time() > time_obj(9, 30)
+            if is_late:
+                late_count += 1
 
-    return render(
-        request,
-        'teamleader/employee_apr_report.html',
-        {
-            'employee': employee,
-            'attendance': attendance,
-            'total_days': total_days,
-            'present': present,
-            'absent': absent,
-            'leave': leave,
-            'late': late,
-            'attendance_percentage': attendance_percentage,
-        }
-    )
+        day_calls = list(
+            CallLog.objects.filter(
+                called_by=employee,
+                created_at__date=att.date,
+            ).select_related('lead')
+        )
+
+        day_pings = list(
+            LocationPing.objects.filter(
+                employee=employee.user,
+                timestamp__date=att.date,
+            ).order_by('timestamp')
+        )
+
+        ping_coords = _json.dumps(
+            [[float(p.latitude), float(p.longitude)] for p in day_pings]
+        )
+
+        daily_data.append({
+            'date':       att.date,
+            'punch_in':   att.punch_in_time,
+            'punch_out':  att.punch_out_time,
+            'is_present': is_present,
+            'is_late':    is_late,
+            'calls':      day_calls,
+            'call_count': len(day_calls),
+            'ping_count': len(day_pings),
+            'ping_coords': ping_coords,
+        })
+
+    total_days   = attendance_qs.count()
+    present_days = attendance_qs.filter(punch_in_time__isnull=False).count()
+    absent_days  = total_days - present_days
+    att_pct      = round((present_days / total_days * 100), 1) if total_days else 0
+
+    return render(request, 'teamleader/individual_apr_report.html', {
+        'employee':             employee,
+        'daily_data':           daily_data,
+        'total_days':           total_days,
+        'present_days':         present_days,
+        'absent_days':          absent_days,
+        'late_marks':           late_count,
+        'leave_days':           0,
+        'attendance_percentage': att_pct,
+    })
