@@ -191,6 +191,59 @@
 
 {% block script %}
 <script>
-    // Logic for checkbox handling as defined in your base template...
+    const selectAll = document.getElementById('selectAll');
+    const btnAssign = document.getElementById('btnAssign');
+    const employeeSelect = document.getElementById('employeeSelect');
+
+    function updateAssignBtn() {
+        const anyChecked = document.querySelectorAll('.lead-checkbox:checked').length > 0;
+        const empSelected = employeeSelect.value !== '';
+        btnAssign.disabled = !(anyChecked && empSelected);
+    }
+
+    selectAll.addEventListener('change', function () {
+        document.querySelectorAll('.lead-checkbox').forEach(cb => {
+            cb.checked = this.checked;
+        });
+        updateAssignBtn();
+    });
+
+    document.querySelectorAll('.lead-checkbox').forEach(cb => {
+        cb.addEventListener('change', function () {
+            const all = document.querySelectorAll('.lead-checkbox');
+            const checked = document.querySelectorAll('.lead-checkbox:checked');
+            selectAll.checked = all.length === checked.length;
+            selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+            updateAssignBtn();
+        });
+    });
+
+    employeeSelect.addEventListener('change', updateAssignBtn);
+
+    btnAssign.addEventListener('click', function () {
+        const leadIds = Array.from(
+            document.querySelectorAll('.lead-checkbox:checked')
+        ).map(cb => parseInt(cb.value));
+
+        const employeeId = parseInt(employeeSelect.value);
+
+        fetch('/assign-to-employee/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ lead_ids: leadIds, employee_id: employeeId }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert('Assignment failed: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(err => alert('Network error: ' + err));
+    });
 </script>
 {% endblock script %}

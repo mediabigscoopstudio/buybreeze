@@ -286,7 +286,7 @@ def index(request):
         'employees':employees,
     })
 
-@user_passes_test(tl_required)
+@user_passes_test(tl_required, login_url='/login/')
 def assign_to_employee(request):
     if request.method == "POST":
         try:
