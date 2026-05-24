@@ -333,6 +333,64 @@ def get_leads(request):
 
 
 # -----------------------------------------
+# ATTENDANCE HISTORY
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def attendance_history(request):
+    phone = request.query_params.get("phone")
+    month = request.query_params.get("month")
+    year = request.query_params.get("year")
+
+    if not all([phone, month, year]):
+        return Response({
+            "success": False,
+            "message": "phone, month and year required"
+        })
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+
+        records = Attendance.objects.filter(
+            employee=profile,
+            date__month=int(month),
+            date__year=int(year)
+        ).order_by("-date")
+
+        record_data = []
+        total_hours = 0
+        present_days = 0
+
+        for record in records:
+            hours = float(record.total_hours) if record.total_hours else 0
+            total_hours += hours
+            if record.punch_in:
+                present_days += 1
+
+            record_data.append({
+                "date": str(record.date),
+                "punch_in": record.punch_in.strftime("%I:%M %p") if record.punch_in else None,
+                "punch_out": record.punch_out.strftime("%I:%M %p") if record.punch_out else None,
+                "total_hours": str(round(hours, 2)) if hours else None,
+                "status": "present" if record.punch_in else "absent"
+            })
+
+        avg_hours = round(total_hours / present_days, 2) if present_days > 0 else 0
+
+        return Response({
+            "success": True,
+            "records": record_data,
+            "present_days": present_days,
+            "total_hours": str(round(total_hours, 2)),
+            "avg_hours": str(avg_hours)
+        })
+
+    except UserProfile.DoesNotExist:
+        return Response({"success": False, "message": "Employee not found"})
+
+
+# -----------------------------------------
 # GET LEAD DETAIL
 # -----------------------------------------
 @csrf_exempt
@@ -365,7 +423,11 @@ def get_lead_detail(request):
                 "call_notes": call.call_notes,
                 "created_at": call.created_at.strftime("%d %b %Y %I:%M %p"),
                 "called_by_name": call.called_by.user.get_full_name()
-                    if call.called_by else None
+                    if call.called_by else None,
+                "next_action": getattr(getattr(call, 'wrapup', None), 'next_action', None),
+                "temperature": getattr(getattr(call, 'wrapup', None), 'temperature_update', None),
+                "stage": getattr(getattr(call, 'wrapup', None), 'stage_update', None),
+                "recording_url": None,
             })
 
         return Response({

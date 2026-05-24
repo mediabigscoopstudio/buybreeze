@@ -18,6 +18,7 @@ urlpatterns = [
     # android — attendance
     path("api/attendance/punch-out/", android.punch_out, name="api_punch_out"),
     path("api/attendance/status/", android.attendance_status, name="api_attendance_status"),
+    path("api/attendance/history/", android.attendance_history, name="api_attendance_history"),
 
     # android — profile
     path("api/profile/", android.get_profile, name="api_get_profile"),
