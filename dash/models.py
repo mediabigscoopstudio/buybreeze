@@ -227,6 +227,7 @@ class CallLog(models.Model):
     called_by        = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True,
                                          related_name='call_logs')
     branch           = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    recording        = models.FileField(upload_to='recordings/', blank=True, null=True)
     status           = models.CharField(max_length=20, default='Enabled')
     created_at       = models.DateTimeField(auto_now_add=True)
     updated_at       = models.DateTimeField(auto_now=True)

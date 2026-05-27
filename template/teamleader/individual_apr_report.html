@@ -240,6 +240,7 @@
                                         <th>Lead</th>
                                         <th>Outcome</th>
                                         <th>Duration</th>
+                                        <th>Recording</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -252,6 +253,19 @@
                                             </span>
                                         </td>
                                         <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ call.duration_display }}</td>
+                                        <td>
+                                            {% if call.recording %}
+                                              <audio controls style="height:26px; width:130px; border-radius:6px; vertical-align:middle;">
+                                                <source src="{{ call.recording.url }}">
+                                              </audio>
+                                              <a href="{{ call.recording.url }}" download title="Download"
+                                                 style="color:var(--brand-accent); font-size:12px; vertical-align:middle; margin-left:4px;">
+                                                <i class="bi bi-download"></i>
+                                              </a>
+                                            {% else %}
+                                              <span style="font-size:10px; color:var(--brand-accent);"><i class="bi bi-mic-mute"></i></span>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

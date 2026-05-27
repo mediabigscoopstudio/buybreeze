@@ -186,7 +186,7 @@
                 <thead>
                     <tr>
                         <th>#</th><th>Lead</th><th>Outcome</th>
-                        <th>Duration</th><th>Time</th><th>Notes</th>
+                        <th>Duration</th><th>Time</th><th>Recording</th><th>Notes</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -200,6 +200,19 @@
                         <td><span class="outcome-badge ob-{{ call.call_outcome }}">{{ call.get_call_outcome_display }}</span></td>
                         <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ call.duration_display }}</td>
                         <td style="font-family:'Geist Mono',monospace; font-size:12px; color:var(--brand-accent);">{{ call.created_at|time:"h:i A" }}</td>
+                        <td style="min-width:190px;">
+                            {% if call.recording %}
+                              <audio controls style="height:28px; width:160px; border-radius:6px;">
+                                <source src="{{ call.recording.url }}">
+                              </audio>
+                              <a href="{{ call.recording.url }}" download title="Download"
+                                 style="margin-left:4px; color:var(--brand-accent); font-size:13px;">
+                                <i class="bi bi-download"></i>
+                              </a>
+                            {% else %}
+                              <span style="font-size:11px; color:var(--brand-accent);"><i class="bi bi-mic-mute me-1"></i>No recording</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if call.call_notes %}
                                 <button class="notes-toggle" onclick="toggleNotes({{ forloop.counter }})">View notes</button>

@@ -173,6 +173,7 @@
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Branch</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Next F/U</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Date</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Recording</th>
             <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Actions</th>
           </tr>
         </thead>
@@ -221,6 +222,24 @@
             <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
               {{ c.created_at|date:"d M Y" }}
             </td>
+            <td style="padding: 16px 12px; min-width: 200px;">
+              {% if c.recording %}
+                <audio controls style="height:32px; width:180px; border-radius:8px; outline:none;">
+                  <source src="{{ c.recording.url }}" type="audio/mpeg">
+                  <source src="{{ c.recording.url }}" type="audio/ogg">
+                  <source src="{{ c.recording.url }}" type="audio/wav">
+                </audio>
+                <a href="{{ c.recording.url }}" download
+                   class="btn btn-sm grove-btn-ghost ms-1" title="Download"
+                   style="padding:4px 8px; vertical-align:middle;">
+                  <i class="bi bi-download" style="color:var(--sage);"></i>
+                </a>
+              {% else %}
+                <span style="font-size:11px; color:var(--stone); font-weight:500;">
+                  <i class="bi bi-mic-mute me-1"></i>No recording
+                </span>
+              {% endif %}
+            </td>
             <td style="padding: 16px 24px; text-align: right;">
               <div class="d-flex gap-1 justify-content-end">
                 <a href="{% url 'edit_call' c.id %}" class="btn btn-sm grove-btn-ghost" title="Edit Call" style="padding: 6px 10px;">
@@ -236,7 +255,7 @@
           {% empty %}
           {# ── EMPTY STATE ── #}
           <tr>
-            <td colspan="10" style="padding: 64px 24px;">
+            <td colspan="11" style="padding: 64px 24px;">
               <div class="grove-empty-state text-center">
                 <i class="bi bi-telephone" style="font-size: 32px; color: var(--sage-lt);"></i>
                 <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No call logs found</div>

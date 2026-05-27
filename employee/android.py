@@ -416,6 +416,13 @@ def get_lead_detail(request):
 
         call_log_data = []
         for call in call_logs:
+            recording_url = None
+            if call.recording:
+                try:
+                    recording_url = request.build_absolute_uri(call.recording.url)
+                except Exception:
+                    recording_url = None
+
             call_log_data.append({
                 "id": call.id,
                 "call_outcome": call.call_outcome,
@@ -427,7 +434,7 @@ def get_lead_detail(request):
                 "next_action": getattr(getattr(call, 'wrapup', None), 'next_action', None),
                 "temperature": getattr(getattr(call, 'wrapup', None), 'temperature_update', None),
                 "stage": getattr(getattr(call, 'wrapup', None), 'stage_update', None),
-                "recording_url": None,
+                "recording_url": recording_url,
             })
 
         return Response({
@@ -639,6 +646,55 @@ def route_history(request):
         "success": True,
         "date": date_str,
         "pings": ping_list
+    })
+
+
+# -----------------------------------------
+# UPLOAD CALL RECORDING
+# -----------------------------------------
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def upload_recording(request):
+    phone = request.data.get("phone")
+    call_id = request.data.get("call_id")
+    recording_file = request.FILES.get("recording")
+
+    if not all([phone, call_id, recording_file]):
+        return Response(
+            {"success": False, "message": "phone, call_id, and recording file required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+        call_log = CallLog.objects.get(id=call_id, called_by=profile)
+    except CallLog.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Call log not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    call_log.recording = recording_file
+    call_log.save()
+
+    recording_url = None
+    try:
+        recording_url = request.build_absolute_uri(call_log.recording.url)
+    except Exception:
+        pass
+
+    return Response({
+        "success": True,
+        "message": "Recording uploaded successfully",
+        "recording_url": recording_url
     })
 
 
