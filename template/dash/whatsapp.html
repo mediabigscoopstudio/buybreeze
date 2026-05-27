@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}WhatsApp Dashboard — Buy Buzz CRM{% endblock %}
+{% block page_header %}WhatsApp Business{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wa-panel {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; margin-bottom: 24px;
+  }
+  .wa-panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    background: var(--cloud);
+  }
+  .wa-panel-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .wa-panel-body  { padding: 24px; }
+
+  .grove-label { font-size: 11px; font-weight: 700; color: var(--stone); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+
+  .no-keys-banner {
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px;
+  }
+  .success-banner {
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+    border-radius: 12px; padding: 16px 20px;
+    display: flex; align-items: flex-start; gap: 12px; margin-bottom: 20px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width: 860px;">
+
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size:22px; font-weight:700; color:var(--ink); margin:0;">WhatsApp Business API</h2>
+      <div style="font-size:13px; color:var(--stone); margin-top:4px;">Send template messages via WhatsApp Cloud API</div>
+    </div>
+  </div>
+
+  {% if not keys_configured %}
+  <div class="no-keys-banner fade-up">
+    <i class="bi bi-exclamation-triangle-fill" style="font-size:22px; color:#d97706; flex-shrink:0; margin-top:2px;"></i>
+    <div>
+      <div style="font-weight:700; color:var(--ink); font-size:14px; margin-bottom:4px;">WhatsApp API credentials not configured</div>
+      <div style="font-size:13px; color:var(--stone);">
+        Go to <a href="{% url 'api_settings' %}" style="color:var(--sage); font-weight:600;">API Key Settings</a>
+        and fill in WHATSAPP_API_KEY and WHATSAPP_PHONE_NUMBER_ID.
+      </div>
+    </div>
+  </div>
+  {% else %}
+
+  {% if send_result %}
+  <div class="success-banner fade-up">
+    <i class="bi bi-check-circle-fill" style="font-size:20px; color:#16a34a;"></i>
+    <div>
+      <div style="font-weight:700; color:#14532d; font-size:13px;">Message sent successfully</div>
+      <div style="font-size:11px; color:#166534; font-family:'Geist Mono',monospace; margin-top:2px;">Message ID: {{ send_result.messages.0.id|default:"—" }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if error %}
+  <div class="no-keys-banner fade-up" style="background:#fef2f2; border-color:#fecaca;">
+    <i class="bi bi-x-circle-fill" style="font-size:22px; color:#dc2626; flex-shrink:0; margin-top:2px;"></i>
+    <div>
+      <div style="font-weight:700; color:var(--ink); font-size:14px; margin-bottom:4px;">WhatsApp API Error</div>
+      <div style="font-size:12px; color:#7f1d1d; font-family:'Geist Mono',monospace;">{{ error }}</div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── SEND MESSAGE PANEL ── #}
+  <div class="wa-panel fade-up">
+    <div class="wa-panel-header">
+      <i class="bi bi-whatsapp" style="color:#25D366;"></i>
+      <span class="wa-panel-title">Send Template Message</span>
+    </div>
+    <div class="wa-panel-body">
+      <form method="POST" autocomplete="off">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-md-5">
+            <div class="grove-label">Recipient Phone</div>
+            <input type="text" name="phone" class="grove-input w-100"
+                   placeholder="919876543210 (no +)" required
+                   pattern="[0-9]{10,15}" title="International format without +">
+            <div style="font-size:11px; color:var(--stone); margin-top:4px;">Include country code, e.g. 91 for India</div>
+          </div>
+          <div class="col-md-4">
+            <div class="grove-label">Template Name</div>
+            {% if templates %}
+            <select name="template_name" class="grove-input w-100">
+              {% for t in templates %}
+              <option value="{{ t.name }}">{{ t.name }}</option>
+              {% endfor %}
+            </select>
+            {% else %}
+            <input type="text" name="template_name" class="grove-input w-100"
+                   placeholder="e.g. hello_world" required>
+            {% endif %}
+          </div>
+          <div class="col-md-3">
+            <div class="grove-label">Language Code</div>
+            <input type="text" name="language_code" class="grove-input w-100"
+                   value="en_US" placeholder="en_US">
+          </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-end">
+          <button type="submit" class="btn-primary-sage" style="padding:10px 28px; font-size:13px;">
+            <i class="bi bi-send-fill me-2"></i>Send Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {# ── ACCOUNT INFO ── #}
+  {% if templates %}
+  <div class="wa-panel fade-up" style="animation-delay:.05s;">
+    <div class="wa-panel-header">
+      <i class="bi bi-info-circle-fill" style="color:#25D366;"></i>
+      <span class="wa-panel-title">Connected Account</span>
+    </div>
+    <div class="wa-panel-body">
+      {% for t in templates %}
+      <div style="font-size:13px; color:var(--ink);">
+        <strong>Display Name:</strong> {{ t.display_phone_number|default:"—" }}<br>
+        <strong>Account Name:</strong> {{ t.name|default:"—" }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+{% endblock %}

@@ -2,6 +2,8 @@ asgiref==3.11.1
 Django==5.2.13
 django-hosts==7.0.0
 et_xmlfile==2.0.0
+facebook-business>=21.0.0
+google-ads>=24.0.0
 openpyxl==3.1.5
 pillow==12.2.0
 psycopg2-binary==2.9.11

@@ -101,6 +101,11 @@ urlpatterns = [
     path('settings', views.settings_view, name='settings'),
     path('settings/api/', views.api_settings, name='api_settings'),
 
+    # Integrations
+    path('meta-ads/',   views.meta_ads_dashboard,   name='meta_ads_dashboard'),
+    path('google-ads/', views.google_ads_dashboard,  name='google_ads_dashboard'),
+    path('whatsapp/',   views.whatsapp_dashboard,    name='whatsapp_dashboard'),
+
     path('api/meta/webhook/',meta_views.meta_webhook,name='meta_webhook'),
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

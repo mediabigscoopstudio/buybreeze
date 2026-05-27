@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Meta Ads Dashboard — Buy Buzz CRM{% endblock %}
+{% block page_header %}Meta Ads Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .int-panel {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; margin-bottom: 24px;
+  }
+  .int-panel-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    background: var(--cloud);
+  }
+  .int-panel-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .int-count {
+    margin-left: auto; font-family: 'Geist Mono', monospace;
+    font-size: 11px; font-weight: 600; color: var(--stone);
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2px 10px;
+  }
+  .int-table { width: 100%; border-collapse: collapse; }
+  .int-table th {
+    padding: 11px 20px; font-size: 10px; font-weight: 700;
+    color: var(--stone); text-transform: uppercase; letter-spacing: 1px;
+    border-bottom: 1px solid var(--border); background: var(--cloud);
+    text-align: left;
+  }
+  .int-table td {
+    padding: 14px 20px; border-bottom: 1px solid var(--cloud);
+    font-size: 13px; color: var(--ink); vertical-align: middle;
+  }
+  .int-table tr:last-child td { border-bottom: none; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 16px; padding: 20px 24px; }
+  .stat-cell { background: var(--cloud); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .stat-val { font-family: 'Geist Mono', monospace; font-size: 22px; font-weight: 700; color: var(--ink); }
+  .stat-lbl { font-size: 11px; font-weight: 600; color: var(--stone); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+  .status-badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .sb-active  { background: rgba(22,163,74,0.1); color: #16a34a; }
+  .sb-paused  { background: rgba(245,158,11,0.1); color: #d97706; }
+  .sb-other   { background: rgba(107,114,128,0.1); color: #6b7280; }
+
+  .no-keys-banner {
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width: 1200px;">
+
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size:22px; font-weight:700; color:var(--ink); margin:0;">Meta Ads Dashboard</h2>
+      <div style="font-size:13px; color:var(--stone); margin-top:4px;">Campaign performance and lead data from your Facebook Ad Account</div>
+    </div>
+    {% if keys_configured %}
+    <form method="GET" class="d-flex align-items-center gap-2">
+      <select name="date_preset" class="grove-input m-0" style="min-width:160px; min-height:38px;" onchange="this.form.submit()">
+        {% for val, label in date_preset_options %}
+        <option value="{{ val }}" {% if date_preset == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if not keys_configured %}
+  <div class="no-keys-banner fade-up">
+    <i class="bi bi-exclamation-triangle-fill" style="font-size:22px; color:#d97706; flex-shrink:0; margin-top:2px;"></i>
+    <div>
+      <div style="font-weight:700; color:var(--ink); font-size:14px; margin-bottom:4px;">Meta API credentials not configured</div>
+      <div style="font-size:13px; color:var(--stone);">
+        Go to <a href="{% url 'api_settings' %}" style="color:var(--sage); font-weight:600;">API Key Settings</a>
+        and fill in META_APP_ID, META_APP_SECRET, META_ACCESS_TOKEN, and META_AD_ACCOUNT_ID.
+      </div>
+    </div>
+  </div>
+  {% elif error %}
+  <div class="no-keys-banner fade-up" style="background:#fef2f2; border-color:#fecaca;">
+    <i class="bi bi-x-circle-fill" style="font-size:22px; color:#dc2626; flex-shrink:0; margin-top:2px;"></i>
+    <div>
+      <div style="font-weight:700; color:var(--ink); font-size:14px; margin-bottom:4px;">Meta API Error</div>
+      <div style="font-size:12px; color:#7f1d1d; font-family:'Geist Mono',monospace;">{{ error }}</div>
+    </div>
+  </div>
+  {% else %}
+
+  {# ── SUMMARY STATS ── #}
+  <div class="int-panel fade-up">
+    <div class="int-panel-header">
+      <i class="bi bi-bar-chart-fill" style="color:#1877F2;"></i>
+      <span class="int-panel-title">Campaign Summary</span>
+      <span class="int-count">{{ campaigns|length }} campaign{{ campaigns|length|pluralize }}</span>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <div class="stat-val">{{ campaigns|length }}</div>
+        <div class="stat-lbl">Total Campaigns</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val">{{ leads|length }}</div>
+        <div class="stat-lbl">Leads Fetched</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── CAMPAIGNS TABLE ── #}
+  <div class="int-panel fade-up" style="animation-delay:.05s;">
+    <div class="int-panel-header">
+      <i class="bi bi-facebook" style="color:#1877F2;"></i>
+      <span class="int-panel-title">Campaigns</span>
+    </div>
+    {% if campaigns %}
+    <div class="table-responsive">
+      <table class="int-table">
+        <thead>
+          <tr>
+            <th>#</th><th>Campaign</th><th>Objective</th>
+            <th>Status</th><th class="text-end">Daily Budget</th><th class="text-end">Lifetime Budget</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in campaigns %}
+          <tr>
+            <td style="font-family:'Geist Mono',monospace; color:var(--stone); font-size:12px;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td style="font-weight:600;">{{ c.name }}</td>
+            <td style="font-size:12px; color:var(--stone); text-transform:capitalize;">{{ c.objective|lower|replace:"_":" " }}</td>
+            <td>
+              <span class="status-badge {% if c.status == 'ACTIVE' %}sb-active{% elif c.status == 'PAUSED' %}sb-paused{% else %}sb-other{% endif %}">
+                {{ c.status }}
+              </span>
+            </td>
+            <td class="text-end" style="font-family:'Geist Mono',monospace; font-size:12px;">
+              {% if c.daily_budget %}₹{{ c.daily_budget|floatformat:0 }}{% else %}—{% endif %}
+            </td>
+            <td class="text-end" style="font-family:'Geist Mono',monospace; font-size:12px;">
+              {% if c.lifetime_budget %}₹{{ c.lifetime_budget|floatformat:0 }}{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color:var(--stone);">
+      <i class="bi bi-bar-chart d-block mb-2" style="font-size:32px; opacity:.3;"></i>
+      <div style="font-size:14px; font-weight:600; color:var(--ink);">No campaigns found for this period</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ── LEADS TABLE ── #}
+  <div class="int-panel fade-up" style="animation-delay:.1s;">
+    <div class="int-panel-header">
+      <i class="bi bi-people-fill" style="color:#1877F2;"></i>
+      <span class="int-panel-title">Recent Leads from Meta</span>
+      <span class="int-count">{{ leads|length }} lead{{ leads|length|pluralize }}</span>
+    </div>
+    {% if leads %}
+    <div class="table-responsive">
+      <table class="int-table">
+        <thead>
+          <tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Ad</th><th>Received</th></tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr>
+            <td style="font-family:'Geist Mono',monospace; color:var(--stone); font-size:12px;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td style="font-weight:600;">{{ lead.name }}</td>
+            <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ lead.phone }}</td>
+            <td style="font-size:12px; color:var(--stone);">{{ lead.email }}</td>
+            <td style="font-size:12px; color:var(--stone);">{{ lead.ad_name }}</td>
+            <td style="font-family:'Geist Mono',monospace; font-size:11px; color:var(--stone);">{{ lead.created_time }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color:var(--stone);">
+      <i class="bi bi-person-x d-block mb-2" style="font-size:32px; opacity:.3;"></i>
+      <div style="font-size:14px; font-weight:600; color:var(--ink);">No leads found</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

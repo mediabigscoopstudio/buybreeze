@@ -1741,3 +1741,125 @@ def api_settings(request):
     return render(request, 'dash/api_settings.html', {'groups': groups})
 
 
+# ── META ADS DASHBOARD ───────────────────────────────────────────────────────
+@user_passes_test(superadmin_required, login_url='/login/')
+def meta_ads_dashboard(request):
+    from .utils import get_setting
+    keys_configured = all([
+        get_setting('META_APP_ID'),
+        get_setting('META_APP_SECRET'),
+        get_setting('META_ACCESS_TOKEN'),
+        get_setting('META_AD_ACCOUNT_ID'),
+    ])
+
+    campaigns = []
+    leads     = []
+    error     = None
+
+    if keys_configured:
+        date_preset = request.GET.get('date_preset', 'last_30d')
+        try:
+            from .meta_ads import get_meta_campaigns, get_meta_leads
+            campaigns = get_meta_campaigns(date_preset=date_preset)
+            leads     = get_meta_leads(limit=100)
+        except Exception as e:
+            error = str(e)
+    else:
+        date_preset = 'last_30d'
+
+    return render(request, 'dash/meta_ads.html', {
+        'keys_configured': keys_configured,
+        'campaigns':       campaigns,
+        'leads':           leads,
+        'error':           error,
+        'date_preset':     date_preset,
+        'date_preset_options': [
+            ('today',       'Today'),
+            ('yesterday',   'Yesterday'),
+            ('last_7d',     'Last 7 Days'),
+            ('last_30d',    'Last 30 Days'),
+            ('last_90d',    'Last 90 Days'),
+            ('this_month',  'This Month'),
+            ('last_month',  'Last Month'),
+        ],
+    })
+
+
+# ── GOOGLE ADS DASHBOARD ─────────────────────────────────────────────────────
+@user_passes_test(superadmin_required, login_url='/login/')
+def google_ads_dashboard(request):
+    from .utils import get_setting
+    keys_configured = all([
+        get_setting('GOOGLE_DEVELOPER_TOKEN'),
+        get_setting('GOOGLE_CLIENT_ID'),
+        get_setting('GOOGLE_CLIENT_SECRET'),
+        get_setting('GOOGLE_REFRESH_TOKEN'),
+        get_setting('GOOGLE_CUSTOMER_ID'),
+    ])
+
+    campaigns = []
+    error     = None
+
+    if keys_configured:
+        date_range = request.GET.get('date_range', 'LAST_30_DAYS')
+        try:
+            from .google_ads import get_google_campaigns
+            campaigns = get_google_campaigns(date_range=date_range)
+        except Exception as e:
+            error = str(e)
+    else:
+        date_range = 'LAST_30_DAYS'
+
+    return render(request, 'dash/google_ads.html', {
+        'keys_configured': keys_configured,
+        'campaigns':       campaigns,
+        'error':           error,
+        'date_range':      date_range,
+        'date_range_options': [
+            ('TODAY',        'Today'),
+            ('YESTERDAY',    'Yesterday'),
+            ('LAST_7_DAYS',  'Last 7 Days'),
+            ('LAST_30_DAYS', 'Last 30 Days'),
+            ('THIS_MONTH',   'This Month'),
+            ('LAST_MONTH',   'Last Month'),
+        ],
+    })
+
+
+# ── WHATSAPP DASHBOARD ────────────────────────────────────────────────────────
+@user_passes_test(superadmin_required, login_url='/login/')
+def whatsapp_dashboard(request):
+    from .utils import get_setting
+    keys_configured = all([
+        get_setting('WHATSAPP_API_KEY'),
+        get_setting('WHATSAPP_PHONE_NUMBER_ID'),
+    ])
+
+    templates = []
+    send_result = None
+    error       = None
+
+    if keys_configured:
+        try:
+            from .whatsapp import get_whatsapp_templates
+            templates = get_whatsapp_templates()
+        except Exception as e:
+            error = str(e)
+
+    if request.method == 'POST' and keys_configured:
+        phone    = request.POST.get('phone', '').strip()
+        template = request.POST.get('template_name', '').strip()
+        language = request.POST.get('language_code', 'en_US').strip()
+        try:
+            from .whatsapp import send_whatsapp_message
+            send_result = send_whatsapp_message(phone, template, language)
+        except Exception as e:
+            error = str(e)
+
+    return render(request, 'dash/whatsapp.html', {
+        'keys_configured': keys_configured,
+        'templates':       templates,
+        'send_result':     send_result,
+        'error':           error,
+    })
+
