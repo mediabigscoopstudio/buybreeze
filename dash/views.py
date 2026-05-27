@@ -1597,7 +1597,65 @@ def individual_apr_report(request, username):
     return render(request, 'dash/individual_apr_report.html', {
         'report_data': report_data,
         'target_employee': employee
-    })    
+    })
+
+
+@staff_member_required
+def apr_day_detail(request, report_id, date_str):
+    import json as _json
+    from django.apps import apps
+    RealAttendance = apps.get_model('employee', 'Attendance')
+
+    # Lookup by User ID (dash uses User objects)
+    employee_user = get_object_or_404(User, id=report_id)
+    employee_profile = get_object_or_404(UserProfile, user=employee_user)
+
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        from django.http import Http404
+        raise Http404("Invalid date format")
+
+    attendance = RealAttendance.objects.filter(
+        employee=employee_user,
+        date=target_date
+    ).first()
+
+    total_hours = None
+    if attendance and attendance.punch_in_time and attendance.punch_out_time:
+        delta = attendance.punch_out_time - attendance.punch_in_time
+        total_hours = round(delta.total_seconds() / 3600, 2)
+
+    call_logs = CallLog.objects.filter(
+        called_by=employee_profile,
+        created_at__date=target_date
+    ).select_related('lead').order_by('created_at')
+
+    lead_ids = call_logs.values_list('lead_id', flat=True).distinct()
+    leads = Lead.objects.filter(id__in=lead_ids)
+
+    pings = LocationPing.objects.filter(
+        employee=employee_user,
+        timestamp__date=target_date
+    ).order_by('timestamp')
+
+    ping_coords = _json.dumps([
+        {'lat': float(p.latitude), 'lng': float(p.longitude), 'time': p.timestamp.strftime('%I:%M %p')}
+        for p in pings
+    ])
+
+    return render(request, 'dash/apr_day_detail.html', {
+        'employee': employee_profile,
+        'target_employee': employee_user,
+        'date': target_date,
+        'attendance': attendance,
+        'total_hours': total_hours,
+        'call_logs': call_logs,
+        'leads': leads,
+        'ping_coords': ping_coords,
+        'ping_count': pings.count(),
+        'report_id': report_id,
+    })
 
 
 from django.views.decorators.csrf import csrf_exempt

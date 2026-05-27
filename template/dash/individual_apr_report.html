@@ -126,7 +126,12 @@
           {% for row in report_data %}
           <tr style="border-bottom: 1px solid var(--cloud);">
             <td style="padding: 16px 24px;">
-              <span style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink);">{{ row.date|date:"d M Y" }}</span>
+              <a href="{% url 'apr_day_detail' target_employee.id row.date|date:'Y-m-d' %}"
+                 style="font-family:'Geist Mono', monospace; font-size:13px; font-weight:600; color:var(--ink); text-decoration:none; display:inline-flex; align-items:center; gap:6px;"
+                 title="View day performance detail">
+                {{ row.date|date:"d M Y" }}
+                <i class="bi bi-arrow-right-circle" style="color:var(--sage); font-size:13px;"></i>
+              </a>
             </td>
             <td style="padding: 16px 12px; font-weight: 600; color: var(--ink); font-size: 14px;">
               <div class="d-flex align-items-center gap-2">

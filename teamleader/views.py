@@ -598,3 +598,67 @@ def employee_apr_report(request, id):
         'leave_days':           0,
         'attendance_percentage': att_pct,
     })
+
+
+@user_passes_test(tl_required, login_url='/login/')
+def apr_day_detail(request, report_id, date_str):
+    tl = request.user.profile
+
+    employee = get_object_or_404(
+        UserProfile.objects.select_related('user', 'branch'),
+        id=report_id,
+        reports_to=tl,
+        role='employee',
+    )
+
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        from django.http import Http404
+        raise Http404("Invalid date format")
+
+    attendance = Attendance.objects.filter(
+        employee=employee.user,
+        date=target_date
+    ).first()
+
+    total_hours = None
+    if attendance and attendance.punch_in_time and attendance.punch_out_time:
+        delta = attendance.punch_out_time - attendance.punch_in_time
+        total_hours = round(delta.total_seconds() / 3600, 2)
+
+    call_logs = list(
+        CallLog.objects.filter(
+            called_by=employee,
+            created_at__date=target_date,
+        ).select_related('lead').order_by('created_at')
+    )
+
+    lead_ids = [c.lead_id for c in call_logs if c.lead_id]
+    from dash.models import Lead
+    leads = Lead.objects.filter(id__in=lead_ids)
+
+    pings = list(
+        LocationPing.objects.filter(
+            employee=employee.user,
+            timestamp__date=target_date,
+        ).order_by('timestamp')
+    )
+
+    import json as _json
+    ping_coords = _json.dumps([
+        {'lat': float(p.latitude), 'lng': float(p.longitude), 'time': p.timestamp.strftime('%I:%M %p')}
+        for p in pings
+    ])
+
+    return render(request, 'teamleader/apr_day_detail.html', {
+        'employee': employee,
+        'date': target_date,
+        'attendance': attendance,
+        'total_hours': total_hours,
+        'call_logs': call_logs,
+        'leads': leads,
+        'ping_coords': ping_coords,
+        'ping_count': len(pings),
+        'report_id': report_id,
+    })

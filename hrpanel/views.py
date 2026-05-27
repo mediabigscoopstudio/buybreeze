@@ -845,3 +845,66 @@ def employee_apr_report(request, id):
             'half_days': half_days,
         }
     )
+
+
+@user_passes_test(hr_required, login_url='/login/')
+def apr_day_detail(request, report_id, date_str):
+    from employee.models import Attendance, LocationPing
+    from dash.models import CallLog, Lead
+    from datetime import datetime
+    import json as _json
+
+    hr = request.user.profile
+
+    employee = get_object_or_404(
+        UserProfile,
+        id=report_id,
+        branch=hr.branch,
+        role='employee'
+    )
+
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        from django.http import Http404
+        raise Http404("Invalid date format")
+
+    attendance = Attendance.objects.filter(
+        employee=employee.user,
+        date=target_date
+    ).first()
+
+    total_hours = None
+    if attendance and attendance.punch_in_time and attendance.punch_out_time:
+        delta = attendance.punch_out_time - attendance.punch_in_time
+        total_hours = round(delta.total_seconds() / 3600, 2)
+
+    call_logs = CallLog.objects.filter(
+        called_by=employee,
+        created_at__date=target_date
+    ).select_related('lead').order_by('created_at')
+
+    lead_ids = call_logs.values_list('lead_id', flat=True).distinct()
+    leads = Lead.objects.filter(id__in=lead_ids)
+
+    pings = LocationPing.objects.filter(
+        employee=employee.user,
+        timestamp__date=target_date
+    ).order_by('timestamp')
+
+    ping_coords = _json.dumps([
+        {'lat': float(p.latitude), 'lng': float(p.longitude), 'time': p.timestamp.strftime('%I:%M %p')}
+        for p in pings
+    ])
+
+    return render(request, 'hrpanel/apr_day_detail.html', {
+        'employee': employee,
+        'date': target_date,
+        'attendance': attendance,
+        'total_hours': total_hours,
+        'call_logs': call_logs,
+        'leads': leads,
+        'ping_coords': ping_coords,
+        'ping_count': pings.count(),
+        'report_id': report_id,
+    })

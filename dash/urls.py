@@ -95,6 +95,7 @@ urlpatterns = [
 
     # Reports
     path('apr-report/', views.apr_report, name='dash_apr_report'),
+    path('apr-report/<int:report_id>/day/<str:date_str>/', views.apr_day_detail, name='apr_day_detail'),
     path('api/route/<str:username>/<str:date_str>/', views.get_employee_route, name='get_route'),
     # Settings
     path('settings', views.settings_view, name='settings'),

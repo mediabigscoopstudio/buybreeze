@@ -70,7 +70,14 @@
                     {% for r in records %}
                     <tr>
                         <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #7A7A72;">{{ forloop.counter|stringformat:"02d" }}</td>
-                        <td style="font-weight: 600; color: #0D0D0D;">{{ r.date|date:"d M Y" }}</td>
+                        <td>
+                            <a href="{% url 'apr_day_detail' employee.id r.date|date:'Y-m-d' %}"
+                               style="font-weight:600; color:#0D0D0D; text-decoration:none; display:inline-flex; align-items:center; gap:6px;"
+                               title="View day performance detail">
+                                {{ r.date|date:"d M Y" }}
+                                <i class="bi bi-arrow-right-circle" style="color:#1A6B55; font-size:12px;"></i>
+                            </a>
+                        </td>
                         <td style="font-family: 'Geist Mono', monospace;">{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
                         <td style="font-family: 'Geist Mono', monospace;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
                         <td style="font-family: 'Geist Mono', monospace;">{{ r.total_hours|default:"0" }}h</td>

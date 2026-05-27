@@ -419,7 +419,15 @@
                         <tbody>
                             {% for attendance in attendances %}
                             <tr>
-                                <td class="ps-4 mono text-muted">{{ attendance.date|date:"M d, Y" }}</td>
+                                <td class="ps-4">
+                                  <a href="{% url 'apr_day_detail' employee.id attendance.date|date:'Y-m-d' %}"
+                                     class="mono text-muted"
+                                     style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;"
+                                     title="View day detail">
+                                    {{ attendance.date|date:"M d, Y" }}
+                                    <i class="bi bi-arrow-right-circle" style="color:var(--brand-accent); font-size:12px;"></i>
+                                  </a>
+                                </td>
                                 <td class="mono fw-bold" style="color: var(--brand-ink);">{{ attendance.check_in|time:"h:i A"|default:"—" }}</td>
                                 <td class="mono fw-bold" style="color: var(--brand-ink);">{{ attendance.check_out|time:"h:i A"|default:"—" }}</td>
                                 <td class="mono">{{ attendance.working_hours|default:"0.0" }}h</td>

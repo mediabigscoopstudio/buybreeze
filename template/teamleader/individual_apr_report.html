@@ -187,7 +187,13 @@
 
             <div class="day-date-col">
                 <i class="bi bi-calendar2-event me-2" style="color: var(--brand-accent);"></i>
-                {{ day.date|date:"D, d M Y" }}
+                <a href="{% url 'apr_day_detail' employee.id day.date|date:'Y-m-d' %}"
+                   onclick="event.stopPropagation();"
+                   style="color:var(--brand-ink); text-decoration:none; font-weight:700; font-size:14px;"
+                   title="View day performance detail">
+                   {{ day.date|date:"D, d M Y" }}
+                   <i class="bi bi-arrow-right-circle ms-1" style="color:var(--brand-accent); font-size:12px;"></i>
+                </a>
             </div>
 
             {% if day.is_present %}

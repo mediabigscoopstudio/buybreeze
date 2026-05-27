@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ employee.user.get_full_name|default:"Employee" }} — {{ date|date:"d M Y" }} Performance — Buy Buzz CRM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .day-detail-wrapper { max-width: 1300px; margin: 0 auto; }
+
+    .day-hero-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.025);
+    }
+    .day-hero-title {
+        font-size: 22px; font-weight: 700; color: var(--ink); margin: 0 0 4px 0;
+    }
+    .day-hero-sub {
+        font-size: 13px; color: var(--stone); font-weight: 500;
+    }
+    .att-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+    }
+    .att-cell {
+        background: var(--cloud);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+    }
+    .att-cell-val {
+        font-family: 'Geist Mono', monospace;
+        font-size: 18px; font-weight: 700; color: var(--ink);
+        line-height: 1; margin-bottom: 4px;
+    }
+    .att-cell-label {
+        font-size: 11px; font-weight: 700; color: var(--stone);
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .section-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.025);
+    }
+    .section-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; gap: 10px;
+    }
+    .section-header-title {
+        font-size: 15px; font-weight: 700; color: var(--ink);
+    }
+    .section-header-count {
+        margin-left: auto;
+        font-family: 'Geist Mono', monospace;
+        font-size: 12px; font-weight: 600;
+        background: var(--cloud); border: 1px solid var(--border);
+        border-radius: 20px; padding: 2px 10px; color: var(--stone);
+    }
+
+    .status-pill {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 12px; border-radius: 20px;
+        font-size: 11px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
+    }
+    .s-present { background: rgba(16,185,129,0.1); color: #059669; }
+    .s-absent  { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .s-late    { background: rgba(245,158,11,0.1); color: #D97706; border: 1px solid rgba(245,158,11,0.25); }
+
+    /* Call table */
+    .call-tbl { width: 100%; border-collapse: collapse; }
+    .call-tbl th {
+        font-size: 10px; font-weight: 700; color: var(--stone);
+        text-transform: uppercase; letter-spacing: 1px;
+        padding: 12px 20px; border-bottom: 1px solid var(--border);
+        background: var(--cloud); text-align: left;
+    }
+    .call-tbl td {
+        padding: 14px 20px; border-bottom: 1px solid var(--cloud);
+        font-size: 13px; color: var(--ink); vertical-align: top;
+    }
+    .call-tbl tr:last-child td { border-bottom: none; }
+    .call-tbl tr:hover td { background: var(--cloud); }
+
+    .outcome-badge {
+        display: inline-block; padding: 3px 9px; border-radius: 6px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+    }
+    .ob-interested     { background: rgba(16,185,129,0.1); color: #059669; }
+    .ob-not_interested { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .ob-callback       { background: rgba(59,130,246,0.1); color: #2563EB; }
+    .ob-converted      { background: rgba(139,92,246,0.1); color: #7C3AED; }
+    .ob-site_visit     { background: rgba(245,158,11,0.1); color: #D97706; }
+    .ob-not_answered   { background: rgba(107,114,128,0.1); color: #6B7280; }
+
+    .notes-toggle {
+        font-size: 11px; color: var(--sage); font-weight: 600;
+        cursor: pointer; background: none; border: none; padding: 0;
+        text-decoration: underline;
+    }
+    .notes-body { display: none; margin-top: 6px; font-size: 12px; color: var(--stone); font-style: italic; }
+
+    /* Leads table */
+    .leads-tbl { width: 100%; border-collapse: collapse; }
+    .leads-tbl th {
+        font-size: 10px; font-weight: 700; color: var(--stone);
+        text-transform: uppercase; letter-spacing: 1px;
+        padding: 12px 20px; border-bottom: 1px solid var(--border);
+        background: var(--cloud); text-align: left;
+    }
+    .leads-tbl td {
+        padding: 14px 20px; border-bottom: 1px solid var(--cloud);
+        font-size: 13px; color: var(--ink); vertical-align: middle;
+    }
+    .leads-tbl tr:last-child td { border-bottom: none; }
+
+    .temp-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 3px 9px; border-radius: 20px;
+        font-size: 10px; font-weight: 700; text-transform: uppercase;
+    }
+    .t-hot  { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .t-warm { background: rgba(245,158,11,0.1); color: #D97706; }
+    .t-cold { background: rgba(59,130,246,0.1); color: #2563EB; }
+
+    /* Map */
+    #dayRouteMap {
+        height: 400px; width: 100%;
+    }
+    .map-placeholder {
+        height: 400px; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        background: var(--cloud); color: var(--stone);
+    }
+    .leaflet-container { font-family: 'Geist', sans-serif !important; }
+</style>
+{% endblock %}
+
+{% block page_header %}Day Performance{% endblock %}
+
+{% block content %}
+<div class="main-content day-detail-wrapper">
+
+    {# ── BACK + TITLE ── #}
+    <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+        <div>
+            <h2 class="day-hero-title">
+                {{ employee.user.get_full_name|default:employee.user.username }}
+                <span style="color: var(--sage);">— {{ date|date:"l, d M Y" }}</span>
+            </h2>
+            <div class="day-hero-sub">Daily Performance Detail &nbsp;•&nbsp; {{ employee.branch.name|default:"Global Branch" }}</div>
+        </div>
+        <button onclick="history.back()"
+                class="btn btn-sm grove-btn-outline d-flex align-items-center gap-2"
+                style="font-weight: 600; padding: 10px 16px;">
+            <i class="bi bi-arrow-left"></i> Back
+        </button>
+    </div>
+
+    {# ─────────────────────────────── SECTION 1: ATTENDANCE ── #}
+    <div class="day-hero-card fade-up" style="animation-delay: 0.05s;">
+        <div class="d-flex align-items-center gap-3 mb-2">
+            <i class="bi bi-clock" style="color: var(--sage); font-size: 18px;"></i>
+            <span style="font-size: 15px; font-weight: 700; color: var(--ink);">Attendance</span>
+            {% if attendance %}
+                {% if attendance.punch_in_time %}
+                    <span class="status-pill s-present ms-2"><i class="bi bi-check-circle-fill"></i> Present</span>
+                {% else %}
+                    <span class="status-pill s-absent ms-2"><i class="bi bi-x-circle-fill"></i> Absent</span>
+                {% endif %}
+            {% else %}
+                <span class="status-pill s-absent ms-2"><i class="bi bi-dash-circle"></i> No Record</span>
+            {% endif %}
+        </div>
+        <div class="att-grid">
+            <div class="att-cell">
+                <div class="att-cell-val">
+                    {% if attendance and attendance.punch_in_time %}{{ attendance.punch_in_time|time:"h:i A" }}{% else %}—{% endif %}
+                </div>
+                <div class="att-cell-label">Punch In</div>
+            </div>
+            <div class="att-cell">
+                <div class="att-cell-val">
+                    {% if attendance and attendance.punch_out_time %}{{ attendance.punch_out_time|time:"h:i A" }}{% else %}—{% endif %}
+                </div>
+                <div class="att-cell-label">Punch Out</div>
+            </div>
+            <div class="att-cell">
+                <div class="att-cell-val">
+                    {% if total_hours %}{{ total_hours }}h{% else %}—{% endif %}
+                </div>
+                <div class="att-cell-label">Total Hours</div>
+            </div>
+            <div class="att-cell">
+                <div class="att-cell-val">{{ call_logs|length }}</div>
+                <div class="att-cell-label">Calls Made</div>
+            </div>
+            <div class="att-cell">
+                <div class="att-cell-val">{{ leads|length }}</div>
+                <div class="att-cell-label">Leads Contacted</div>
+            </div>
+            <div class="att-cell">
+                <div class="att-cell-val">{{ ping_count }}</div>
+                <div class="att-cell-label">Location Pings</div>
+            </div>
+        </div>
+    </div>
+
+    {# ─────────────────────────────── SECTION 2: CALL PERFORMANCE ── #}
+    <div class="section-card fade-up" style="animation-delay: 0.1s;">
+        <div class="section-header">
+            <i class="bi bi-telephone-fill" style="color: var(--sage);"></i>
+            <span class="section-header-title">Call Performance</span>
+            <span class="section-header-count">{{ call_logs|length }} call{{ call_logs|length|pluralize }}</span>
+        </div>
+        {% if call_logs %}
+        <div class="table-responsive">
+            <table class="call-tbl">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Lead</th>
+                        <th>Outcome</th>
+                        <th>Duration</th>
+                        <th>Time</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for call in call_logs %}
+                    <tr>
+                        <td style="font-family:'Geist Mono',monospace; color:var(--stone); font-size:12px;">{{ forloop.counter|stringformat:"02d" }}</td>
+                        <td>
+                            <div style="font-weight: 600;">{{ call.lead.name }}</div>
+                            <div style="font-family:'Geist Mono',monospace; font-size:11px; color:var(--stone);">{{ call.lead.phone }}</div>
+                        </td>
+                        <td>
+                            <span class="outcome-badge ob-{{ call.call_outcome }}">
+                                {{ call.get_call_outcome_display }}
+                            </span>
+                        </td>
+                        <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ call.duration_display }}</td>
+                        <td style="font-family:'Geist Mono',monospace; font-size:12px; color:var(--stone);">{{ call.created_at|time:"h:i A" }}</td>
+                        <td>
+                            {% if call.call_notes %}
+                                <button class="notes-toggle" onclick="toggleNotes({{ forloop.counter }})">View notes</button>
+                                <div class="notes-body" id="notes-{{ forloop.counter }}">{{ call.call_notes }}</div>
+                            {% else %}
+                                <span style="color:var(--stone); font-size:12px;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5" style="color: var(--stone);">
+            <i class="bi bi-telephone-x d-block mb-2" style="font-size:32px; opacity:0.3;"></i>
+            <div style="font-size:14px; font-weight:600;">No calls recorded for this date</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ─────────────────────────────── SECTION 3: LEADS INTERACTED ── #}
+    <div class="section-card fade-up" style="animation-delay: 0.15s;">
+        <div class="section-header">
+            <i class="bi bi-people-fill" style="color: var(--sage);"></i>
+            <span class="section-header-title">Leads Interacted</span>
+            <span class="section-header-count">{{ leads|length }} unique lead{{ leads|length|pluralize }}</span>
+        </div>
+        {% if leads %}
+        <div class="table-responsive">
+            <table class="leads-tbl">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Stage</th>
+                        <th>Temperature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                        <td style="font-weight:600;">{{ lead.name }}</td>
+                        <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ lead.phone }}</td>
+                        <td>
+                            <span style="font-size:12px; font-weight:600; text-transform:capitalize;">
+                                {{ lead.stage|default:"—"|replace:"_":" " }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}">
+                                <i class="bi bi-thermometer-half"></i> {{ lead.temperature|title|default:"—" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5" style="color: var(--stone);">
+            <i class="bi bi-person-x d-block mb-2" style="font-size:32px; opacity:0.3;"></i>
+            <div style="font-size:14px; font-weight:600;">No leads contacted this day</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ─────────────────────────────── SECTION 4: ROUTE MAP ── #}
+    <div class="section-card fade-up" style="animation-delay: 0.2s;">
+        <div class="section-header">
+            <i class="bi bi-geo-alt-fill" style="color: var(--sage);"></i>
+            <span class="section-header-title">Route Map</span>
+            <span class="section-header-count">{{ ping_count }} ping{{ ping_count|pluralize }}</span>
+        </div>
+        {% if ping_count %}
+        <div id="dayRouteMap"></div>
+        {% else %}
+        <div class="map-placeholder">
+            <i class="bi bi-map" style="font-size:40px; opacity:0.25; margin-bottom:12px;"></i>
+            <div style="font-size:14px; font-weight:600;">No location data for this date</div>
+            <div class="small mt-1" style="opacity:0.6;">GPS pings will appear here once tracking is active.</div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    function toggleNotes(n) {
+        const el = document.getElementById('notes-' + n);
+        if (!el) return;
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    {% if ping_count %}
+    (function() {
+        const coords = {{ ping_coords|safe }};
+        if (!coords || coords.length === 0) return;
+
+        const latlngs = coords.map(c => [c.lat, c.lng]);
+        const centerLat = latlngs.reduce((s, c) => s + c[0], 0) / latlngs.length;
+        const centerLng = latlngs.reduce((s, c) => s + c[1], 0) / latlngs.length;
+
+        const map = L.map('dayRouteMap').setView([centerLat, centerLng], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19,
+        }).addTo(map);
+
+        if (latlngs.length > 1) {
+            L.polyline(latlngs, { color: '#2D6A4F', weight: 3, opacity: 0.8 }).addTo(map);
+        }
+
+        coords.forEach((c, i) => {
+            const isFirst = i === 0;
+            const isLast  = i === coords.length - 1;
+            L.circleMarker([c.lat, c.lng], {
+                radius:      isFirst || isLast ? 10 : 5,
+                fillColor:   isFirst ? '#10B981' : isLast ? '#EF4444' : '#3B82F6',
+                color:       '#fff',
+                weight:      2,
+                fillOpacity: 1,
+            }).bindTooltip(
+                isFirst ? '🟢 Start — ' + c.time : isLast ? '🔴 End — ' + c.time : c.time,
+                { permanent: false, direction: 'top' }
+            ).addTo(map);
+        });
+
+        setTimeout(() => map.invalidateSize(), 200);
+    })();
+    {% endif %}
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.fade-up').forEach((el, i) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(12px)';
+            el.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+            setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, 60 * i);
+        });
+    });
+</script>
+{% endblock %}

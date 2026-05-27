@@ -518,3 +518,67 @@ def individual_apr_report(request, id):
             'attendances': attendances,
         }
     )
+
+
+@user_passes_test(manager_required, login_url='/login/')
+def apr_day_detail(request, report_id, date_str):
+    from employee.models import Attendance, LocationPing
+    from dash.models import CallLog, Lead
+    import json as _json
+
+    manager = request.user.profile
+
+    tls = UserProfile.objects.filter(reports_to=manager, role='tl', branch=manager.branch)
+    employee_profile = get_object_or_404(
+        UserProfile,
+        id=report_id,
+        role='employee',
+        reports_to__in=tls,
+        branch=manager.branch
+    )
+
+    try:
+        target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        from django.http import Http404
+        raise Http404("Invalid date format")
+
+    attendance = Attendance.objects.filter(
+        employee=employee_profile.user,
+        date=target_date
+    ).first()
+
+    total_hours = None
+    if attendance and attendance.punch_in_time and attendance.punch_out_time:
+        delta = attendance.punch_out_time - attendance.punch_in_time
+        total_hours = round(delta.total_seconds() / 3600, 2)
+
+    call_logs = CallLog.objects.filter(
+        called_by=employee_profile,
+        created_at__date=target_date
+    ).select_related('lead').order_by('created_at')
+
+    lead_ids = call_logs.values_list('lead_id', flat=True).distinct()
+    leads = Lead.objects.filter(id__in=lead_ids)
+
+    pings = LocationPing.objects.filter(
+        employee=employee_profile.user,
+        timestamp__date=target_date
+    ).order_by('timestamp')
+
+    ping_coords = _json.dumps([
+        {'lat': float(p.latitude), 'lng': float(p.longitude), 'time': p.timestamp.strftime('%I:%M %p')}
+        for p in pings
+    ])
+
+    return render(request, 'manager/apr_day_detail.html', {
+        'employee': employee_profile,
+        'date': target_date,
+        'attendance': attendance,
+        'total_hours': total_hours,
+        'call_logs': call_logs,
+        'leads': leads,
+        'ping_coords': ping_coords,
+        'ping_count': pings.count(),
+        'report_id': report_id,
+    })
