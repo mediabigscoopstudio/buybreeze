@@ -39,4 +39,8 @@ urlpatterns = [
     # android — dashboard
     path("api/dashboard/stats/", android.dashboard_stats, name="api_dashboard_stats"),
 
+    # web — leaves
+    path("apply-leave/", views.apply_leave, name="apply_leave"),
+    path("my-leaves/",   views.my_leaves,   name="my_leaves"),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

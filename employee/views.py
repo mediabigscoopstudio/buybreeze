@@ -362,3 +362,46 @@ def save_location_ping(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+# ============================================================
+# LEAVE — APPLY & MY LEAVES
+# ============================================================
+LEAVE_TYPE_CHOICES = [
+    ('casual',    'Casual Leave'),
+    ('sick',      'Sick Leave'),
+    ('annual',    'Annual Leave'),
+    ('unpaid',    'Unpaid Leave'),
+    ('maternity', 'Maternity Leave'),
+    ('compoff',   'Comp Off'),
+]
+
+@user_passes_test(employee_required, login_url='/login/')
+def apply_leave(request):
+    from dash.models import LeaveRequest
+    profile = request.user.userprofile
+    if request.method == 'POST':
+        LeaveRequest.objects.create(
+            employee     = profile,
+            leave_type   = request.POST.get('leave_type'),
+            from_date    = request.POST.get('from_date'),
+            to_date      = request.POST.get('to_date'),
+            reason       = request.POST.get('reason'),
+            leave_status = 'pending',
+        )
+        messages.success(request, 'Leave request submitted successfully.')
+        return redirect('my_leaves')
+    return render(request, 'employee/apply_leave.html', {'leave_type_choices': LEAVE_TYPE_CHOICES})
+
+
+@user_passes_test(employee_required, login_url='/login/')
+def my_leaves(request):
+    from dash.models import LeaveRequest
+    profile = request.user.userprofile
+    records  = LeaveRequest.objects.filter(employee=profile).order_by('-created_at')
+    return render(request, 'employee/my_leaves.html', {
+        'records':          records,
+        'pending_count':    records.filter(leave_status='pending').count(),
+        'approved_count':   records.filter(leave_status='approved').count(),
+        'rejected_count':   records.filter(leave_status='rejected').count(),
+    })

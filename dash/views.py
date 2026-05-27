@@ -1295,8 +1295,9 @@ def delete_attendance(request, id):
 
 @user_passes_test(superadmin_required, login_url='/login/')
 def leaves(request):
-    branches  = Branch.objects.filter(status='Enabled')
-    records   = LeaveRequest.objects.select_related('employee__user', 'approved_by__user').order_by('-created_at')
+    branches    = Branch.objects.filter(status='Enabled')
+    all_leaves  = LeaveRequest.objects.all()
+    records     = all_leaves.select_related('employee__user', 'approved_by__user').order_by('-created_at')
     status_filter = request.GET.get('status', '')
     branch_filter = request.GET.get('branch', '')
     search        = request.GET.get('q', '')
@@ -1312,6 +1313,9 @@ def leaves(request):
     return render(request, 'dash/hr/leaves.html', {
         'records': records, 'branches': branches,
         'status_filter': status_filter, 'branch_filter': branch_filter, 'search': search,
+        'pending_leaves_count':  all_leaves.filter(leave_status='pending').count(),
+        'approved_leaves_count': all_leaves.filter(leave_status='approved').count(),
+        'rejected_leaves_count': all_leaves.filter(leave_status='rejected').count(),
     })
 
 
