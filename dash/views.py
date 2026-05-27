@@ -1180,7 +1180,7 @@ def download_lead_template(request):
 # ============================================================
 # HR PANEL
 # ============================================================
-from .models import Attendance, LeaveRequest, Payroll
+from .models import Attendance, LeaveRequest, Payroll, SystemAPISettings
 
 @user_passes_test(superadmin_required, login_url='/login/')
 def hr_panel(request):
@@ -1693,5 +1693,51 @@ def meta_webhook(request):
         return JsonResponse({
             "status": "received"
         })
-    
+
+
+# ── SETTINGS: API KEYS ──────────────────────────────────────────────────────
+@user_passes_test(superadmin_required, login_url='/login/')
+def api_settings(request):
+    from .utils import API_KEY_DEFAULTS, ensure_api_settings
+    ensure_api_settings()
+
+    if request.method == 'POST':
+        for key, _ in API_KEY_DEFAULTS:
+            val = request.POST.get(key, '').strip()
+            SystemAPISettings.objects.filter(key=key).update(value=val)
+        messages.success(request, 'API settings saved successfully.')
+        return redirect('api_settings')
+
+    settings_qs = SystemAPISettings.objects.all()
+    settings_map = {s.key: s for s in settings_qs}
+
+    groups = [
+        {
+            'label': 'Meta / Facebook Ads',
+            'icon':  'bi-facebook',
+            'keys':  ['META_APP_ID', 'META_APP_SECRET', 'META_AD_ACCOUNT_ID', 'META_ACCESS_TOKEN'],
+        },
+        {
+            'label': 'Google Ads',
+            'icon':  'bi-google',
+            'keys':  ['GOOGLE_DEVELOPER_TOKEN', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET',
+                      'GOOGLE_REFRESH_TOKEN', 'GOOGLE_CUSTOMER_ID'],
+        },
+        {
+            'label': 'WhatsApp Business API',
+            'icon':  'bi-whatsapp',
+            'keys':  ['WHATSAPP_API_KEY', 'WHATSAPP_PHONE_NUMBER_ID'],
+        },
+        {
+            'label': 'SMS (Fast2SMS)',
+            'icon':  'bi-chat-dots-fill',
+            'keys':  ['FAST2SMS_API_KEY'],
+        },
+    ]
+
+    for group in groups:
+        group['items'] = [settings_map.get(k) for k in group['keys'] if k in settings_map]
+
+    return render(request, 'dash/api_settings.html', {'groups': groups})
+
 

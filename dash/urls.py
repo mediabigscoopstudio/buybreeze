@@ -99,6 +99,7 @@ urlpatterns = [
     path('api/route/<str:username>/<str:date_str>/', views.get_employee_route, name='get_route'),
     # Settings
     path('settings', views.settings_view, name='settings'),
+    path('settings/api/', views.api_settings, name='api_settings'),
 
     path('api/meta/webhook/',meta_views.meta_webhook,name='meta_webhook'),
     

@@ -472,3 +472,17 @@ class NotificationRecipient(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.notification.title}"
+
+
+class SystemAPISettings(models.Model):
+    key         = models.CharField(max_length=100, unique=True)
+    value       = models.TextField(blank=True, default='')
+    description = models.CharField(max_length=255, blank=True, default='')
+    updated_at  = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'API Setting'
+        verbose_name_plural = 'API Settings'
+
+    def __str__(self):
+        return self.key
