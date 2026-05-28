@@ -1,7 +1,10 @@
 from math import radians, sin, cos, sqrt, atan2
 from datetime import datetime
+import os
+import pytz
 
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.views.decorators.csrf import csrf_exempt
@@ -358,6 +361,7 @@ def attendance_history(request):
             date__year=int(year)
         ).order_by("-date")
 
+        ist = pytz.timezone("Asia/Kolkata")
         record_data = []
         total_hours = 0
         present_days = 0
@@ -370,10 +374,10 @@ def attendance_history(request):
 
             record_data.append({
                 "date": str(record.date),
-                "punch_in": record.punch_in.strftime("%I:%M %p") if record.punch_in else None,
-                "punch_out": record.punch_out.strftime("%I:%M %p") if record.punch_out else None,
+                "punch_in":    record.punch_in.astimezone(ist).strftime("%I:%M %p") if record.punch_in else None,
+                "punch_out":   record.punch_out.astimezone(ist).strftime("%I:%M %p") if record.punch_out else None,
                 "total_hours": str(round(hours, 2)) if hours else None,
-                "status": "present" if record.punch_in else "absent"
+                "status":      "present" if record.punch_in else "absent"
             })
 
         avg_hours = round(total_hours / present_days, 2) if present_days > 0 else 0
@@ -414,6 +418,7 @@ def get_lead_detail(request):
             lead=lead
         ).order_by("-created_at")[:10]
 
+        ist = pytz.timezone("Asia/Kolkata")
         call_log_data = []
         for call in call_logs:
             recording_url = None
@@ -423,18 +428,27 @@ def get_lead_detail(request):
                 except Exception:
                     recording_url = None
 
+            wrapup = getattr(call, "wrapup", None)
+            followup_at_str = None
+            if wrapup and wrapup.followup_at:
+                try:
+                    followup_at_str = wrapup.followup_at.astimezone(ist).strftime("%d %b %Y %I:%M %p")
+                except Exception:
+                    followup_at_str = str(wrapup.followup_at)
+
             call_log_data.append({
-                "id": call.id,
-                "call_outcome": call.call_outcome,
-                "call_duration": call.call_duration,
-                "call_notes": call.call_notes,
-                "created_at": call.created_at.strftime("%d %b %Y %I:%M %p"),
-                "called_by_name": call.called_by.user.get_full_name()
-                    if call.called_by else None,
-                "next_action": getattr(getattr(call, 'wrapup', None), 'next_action', None),
-                "temperature": getattr(getattr(call, 'wrapup', None), 'temperature_update', None),
-                "stage": getattr(getattr(call, 'wrapup', None), 'stage_update', None),
-                "recording_url": recording_url,
+                "id":             call.id,
+                "call_outcome":   call.call_outcome,
+                "call_duration":  call.call_duration,
+                "call_notes":     call.call_notes,
+                "created_at":     call.created_at.astimezone(ist).strftime("%d %b %Y %I:%M %p"),
+                "called_by_name": call.called_by.user.get_full_name() if call.called_by else None,
+                "next_action":    wrapup.next_action if wrapup else None,
+                "followup_at":    followup_at_str,
+                "temperature":    wrapup.temperature_update if wrapup else None,
+                "stage":          wrapup.stage_update if wrapup else None,
+                "recording_url":  recording_url,
+                "detailed_notes": wrapup.detailed_notes if wrapup else None,
             })
 
         return Response({
@@ -517,7 +531,12 @@ def save_call(request):
     followup_dt = None
     if followup_at:
         try:
-            followup_dt = datetime.fromisoformat(followup_at.replace("Z", "+00:00"))
+            parsed = parse_datetime(str(followup_at).replace("Z", "+00:00"))
+            if parsed is None:
+                parsed = datetime.fromisoformat(str(followup_at).replace("Z", "+00:00"))
+            if parsed and parsed.tzinfo is None:
+                parsed = timezone.make_aware(parsed)
+            followup_dt = parsed
         except (ValueError, AttributeError):
             followup_dt = None
 
@@ -656,13 +675,14 @@ def route_history(request):
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def upload_recording(request):
-    phone = request.data.get("phone")
-    call_id = request.data.get("call_id")
+    phone          = request.data.get("phone")
+    call_id        = request.data.get("call_id")
     recording_file = request.FILES.get("recording")
+    duration       = request.data.get("duration", 0)
 
-    if not all([phone, call_id, recording_file]):
+    if not phone:
         return Response(
-            {"success": False, "message": "phone, call_id, and recording file required"},
+            {"success": False, "message": "phone required"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -675,26 +695,46 @@ def upload_recording(request):
         )
 
     try:
-        call_log = CallLog.objects.get(id=call_id, called_by=profile)
+        if call_id:
+            call_log = CallLog.objects.get(id=int(call_id), called_by=profile)
+        else:
+            call_log = CallLog.objects.filter(called_by=profile).latest("created_at")
     except CallLog.DoesNotExist:
         return Response(
             {"success": False, "message": "Call log not found"},
             status=status.HTTP_404_NOT_FOUND
         )
 
-    call_log.recording = recording_file
-    call_log.save()
+    # Update duration if provided
+    if duration:
+        call_log.call_duration = int(duration)
+        call_log.save()
 
-    recording_url = None
-    try:
-        recording_url = request.build_absolute_uri(call_log.recording.url)
-    except Exception:
-        pass
+    # Save recording file
+    if recording_file:
+        from django.core.files.storage import default_storage
+        from django.core.files.base import ContentFile
+
+        ext       = os.path.splitext(recording_file.name)[1] or ".mp3"
+        file_path = f"recordings/call_{call_log.id}_{phone}{ext}"
+        saved_path = default_storage.save(file_path, ContentFile(recording_file.read()))
+
+        # Store on the FileField so the audio player works in the dashboard
+        call_log.recording = saved_path
+        call_log.save()
+
+        recording_url = request.build_absolute_uri(f"/media/{saved_path}")
+        return Response({
+            "success": True,
+            "message": "Recording uploaded",
+            "recording_url": recording_url,
+            "call_id": call_log.id
+        })
 
     return Response({
         "success": True,
-        "message": "Recording uploaded successfully",
-        "recording_url": recording_url
+        "message": "Duration updated",
+        "call_id": call_log.id
     })
 
 
@@ -723,7 +763,7 @@ def dashboard_stats(request):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    today = timezone.now().date()
+    today = timezone.localdate()
 
     leads_count = Lead.objects.filter(
         assigned_to=profile, status="Enabled"
@@ -755,3 +795,97 @@ def dashboard_stats(request):
         "punch_status": punch_status,
         "route_points": route_points
     })
+
+
+# -----------------------------------------
+# APPLY LEAVE (Android API)
+# -----------------------------------------
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def apply_leave(request):
+    phone      = request.data.get("phone")
+    leave_type = request.data.get("leave_type")
+    from_date  = request.data.get("from_date")
+    to_date    = request.data.get("to_date")
+    reason     = request.data.get("reason")
+
+    if not all([phone, leave_type, from_date, to_date, reason]):
+        return Response(
+            {"success": False, "message": "All fields required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    try:
+        from dash.models import LeaveRequest
+        leave = LeaveRequest.objects.create(
+            employee     = profile,
+            leave_type   = leave_type,
+            from_date    = from_date,
+            to_date      = to_date,
+            reason       = reason,
+            leave_status = "pending",
+        )
+        return Response({
+            "success":  True,
+            "message":  "Leave request submitted",
+            "leave_id": leave.id
+        })
+    except Exception as e:
+        return Response(
+            {"success": False, "message": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+# -----------------------------------------
+# MY LEAVES (Android API)
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def my_leaves(request):
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response(
+            {"success": False, "message": "Phone required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    from dash.models import LeaveRequest
+    leaves = LeaveRequest.objects.filter(employee=profile).order_by("-created_at")
+
+    ist = pytz.timezone("Asia/Kolkata")
+    leave_data = [
+        {
+            "id":         leave.id,
+            "leave_type": leave.leave_type,
+            "from_date":  str(leave.from_date),
+            "to_date":    str(leave.to_date),
+            "reason":     leave.reason,
+            "status":     leave.leave_status,
+            "total_days": leave.total_days(),
+            "remarks":    leave.remarks,
+            "created_at": leave.created_at.astimezone(ist).strftime("%d %b %Y"),
+        }
+        for leave in leaves
+    ]
+
+    return Response({"success": True, "leaves": leave_data})

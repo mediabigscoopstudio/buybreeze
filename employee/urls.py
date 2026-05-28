@@ -39,6 +39,10 @@ urlpatterns = [
     # android — dashboard
     path("api/dashboard/stats/", android.dashboard_stats, name="api_dashboard_stats"),
 
+    # android — leaves
+    path("api/leave/apply/", android.apply_leave, name="api_apply_leave"),
+    path("api/leave/my/",    android.my_leaves,   name="api_my_leaves"),
+
     # web — leaves
     path("apply-leave/", views.apply_leave, name="apply_leave"),
     path("my-leaves/",   views.my_leaves,   name="my_leaves"),
