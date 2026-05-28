@@ -57,8 +57,27 @@
       top: 0; left: 0;
       display: flex;
       flex-direction: column;
-      z-index: 200;
+      z-index: 300;
       overflow: hidden;
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Mobile overlay behind sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 299;
+      backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.active { display: block; }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .topbar { left: 0 !important; }
+      .main-content { margin-left: 0 !important; }
     }
     .sidebar-nav-scroll {
       flex: 1;
@@ -151,6 +170,23 @@
       border-top: 1px solid rgba(255,255,255,.06);
       padding: 8px 0;
     }
+
+    /* Hamburger toggle — mobile only */
+    .sidebar-toggle {
+      display: none;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--cloud);
+      border: 1px solid var(--border);
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--stone);
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+    .sidebar-toggle:hover { background: var(--sage-lt); color: var(--sage); border-color: var(--sage); }
+    @media (max-width: 768px) { .sidebar-toggle { display: flex; } }
 
     /* ── TOPBAR COMPONENTS ── */
     .page-header-title {
@@ -297,8 +333,11 @@
 </head>
 <body>
 
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <!-- ─── SIDEBAR ─── -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
       <div class="brand-name">Buy Buzz</div>
       <div class="brand-sub">Admin CRM</div>
@@ -369,6 +408,9 @@
 
   <!-- ─── TOPBAR ─── -->
   <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle navigation">
+      <i class="bi bi-list"></i>
+    </button>
     <div class="page-header-title">{% block page_header %}Dashboard{% endblock %}</div>
 
     <div class="topbar-actions">
@@ -459,6 +501,35 @@
   document.addEventListener("DOMContentLoaded", () => {
     loadNotifications();
     setInterval(loadNotifications, 15000);
+
+    // ── Mobile sidebar toggle ──
+    const sidebar  = document.getElementById("sidebar");
+    const overlay  = document.getElementById("sidebarOverlay");
+    const toggle   = document.getElementById("sidebarToggle");
+
+    function openSidebar() {
+      sidebar.classList.add("open");
+      overlay.classList.add("active");
+      toggle.querySelector("i").className = "bi bi-x-lg";
+    }
+    function closeSidebar() {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("active");
+      toggle.querySelector("i").className = "bi bi-list";
+    }
+
+    toggle.addEventListener("click", () => {
+      sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+    });
+
+    overlay.addEventListener("click", closeSidebar);
+
+    // Close on nav link tap (mobile)
+    sidebar.querySelectorAll("a.nav-item-custom").forEach(link => {
+      link.addEventListener("click", () => {
+        if (window.innerWidth <= 768) closeSidebar();
+      });
+    });
   });
   </script>
 
