@@ -47,7 +47,7 @@ def employee_required(user):
     return (
         user.is_authenticated and
         hasattr(user, 'profile') and
-        user.userprofile.role == 'employee'
+        user.profile.role == 'employee'
     )
 
 
