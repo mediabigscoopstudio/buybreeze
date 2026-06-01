@@ -933,8 +933,8 @@ def employee_apr_report(request, id):
 
 @user_passes_test(hr_required, login_url='/login/')
 def apr_day_detail(request, report_id, date_str):
-    from employee.models import Attendance, LocationPing
-    from dash.models import CallLog, Lead
+    from employee.models import LocationPing
+    from dash.models import CallLog, Lead, Attendance as DashAttendance
     from datetime import datetime
     import json as _json
 
@@ -943,7 +943,6 @@ def apr_day_detail(request, report_id, date_str):
     employee = get_object_or_404(
         UserProfile,
         id=report_id,
-        branch=hr.branch,
         role='employee'
     )
 
@@ -953,14 +952,14 @@ def apr_day_detail(request, report_id, date_str):
         from django.http import Http404
         raise Http404("Invalid date format")
 
-    attendance = Attendance.objects.filter(
-        employee=employee.user,
+    attendance = DashAttendance.objects.filter(
+        employee=employee,
         date=target_date
     ).first()
 
     total_hours = None
-    if attendance and attendance.punch_in_time and attendance.punch_out_time:
-        delta = attendance.punch_out_time - attendance.punch_in_time
+    if attendance and attendance.punch_in and attendance.punch_out:
+        delta = attendance.punch_out - attendance.punch_in
         total_hours = round(delta.total_seconds() / 3600, 2)
 
     call_logs = CallLog.objects.filter(
