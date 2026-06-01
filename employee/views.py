@@ -281,7 +281,7 @@ def index(request):
 @login_required
 @require_POST
 def process_punch(request):
-    user_profile = request.user.userprofile
+    user_profile = request.user.profile
     COMPANY_LAT = user_profile.branch.gps_lat
     COMPANY_LON = user_profile.branch.gps_lng
     ALLOWED_RADIUS_METERS = user_profile.branch.gps_radius
@@ -379,7 +379,7 @@ LEAVE_TYPE_CHOICES = [
 @user_passes_test(employee_required, login_url='/login/')
 def apply_leave(request):
     from dash.models import LeaveRequest
-    profile = request.user.userprofile
+    profile = request.user.profile
     if request.method == 'POST':
         LeaveRequest.objects.create(
             employee     = profile,
@@ -397,7 +397,7 @@ def apply_leave(request):
 @user_passes_test(employee_required, login_url='/login/')
 def my_leaves(request):
     from dash.models import LeaveRequest
-    profile = request.user.userprofile
+    profile = request.user.profile
     records  = LeaveRequest.objects.filter(employee=profile).order_by('-created_at')
     return render(request, 'employee/my_leaves.html', {
         'records':          records,

@@ -53,12 +53,6 @@ urlpatterns = [
     path('approve_leave/<int:id>', views.approve_leave, name='approve_leave'),
     path('reject_leave/<int:id>', views.reject_leave, name='reject_leave'),
 
-    # Payroll
-    path('payroll', views.payroll, name='payroll'),
-    path('add_payroll', views.add_payroll, name='add_payroll'),
-    path('edit_payroll/<int:id>', views.edit_payroll, name='edit_payroll'),
-    path('delete_payroll/<int:id>', views.delete_payroll, name='delete_payroll'),
-
     # Leads
     path('leads', views.leads, name='leads'),
     path('add_lead', views.add_lead, name='add_lead'),

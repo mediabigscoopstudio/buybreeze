@@ -494,7 +494,7 @@ def add_user(request):
                 reports_to_id=reports_to_id if reports_to_id else None,
             )
             if request.FILES.get('profile_pic'):
-                profile.userprofile_pic = request.FILES['profile_pic']
+                profile.profile_pic = request.FILES['profile_pic']
             profile.save()
             messages.success(request, 'User created successfully.')
             return redirect('users')
@@ -523,7 +523,7 @@ def edit_user(request, id):
         profile.branch_id     = request.POST.get('branch') or None
         profile.reports_to_id = request.POST.get('reports_to') or None
         if request.FILES.get('profile_pic'):
-            profile.userprofile_pic = request.FILES['profile_pic']
+            profile.profile_pic = request.FILES['profile_pic']
         profile.save()
         messages.success(request, 'User updated successfully.')
         return redirect('users')
@@ -565,7 +565,7 @@ def disable_user(request, id):
 def assign_lead_view(request, lead_id):
     lead = get_object_or_404(Lead, id=lead_id)
 
-    assigned_by = request.user.userprofile
+    assigned_by = request.user.profile
     assigned_to_id = request.POST.get('assigned_to')
 
     assigned_to = get_object_or_404(UserProfile, id=assigned_to_id)
@@ -1260,37 +1260,91 @@ def download_lead_template(request):
 # ============================================================
 # HR PANEL
 # ============================================================
-from .models import Attendance, LeaveRequest, Payroll, SystemAPISettings
+from .models import Attendance, LeaveRequest, SystemAPISettings
 
 @user_passes_test(superadmin_required, login_url='/login/')
 def hr_panel(request):
-    branches  = Branch.objects.filter(status='Enabled')
-    employees = UserProfile.objects.filter(status='Enabled').select_related('user', 'branch')
+    today = timezone.localdate()
+    branches = Branch.objects.filter(status='Enabled')
+    employees = UserProfile.objects.filter(
+        status='Enabled',
+        role='employee',
+    ).select_related('user', 'branch')
     branch_filter = request.GET.get('branch', '')
-    role_filter   = request.GET.get('role', '')
-    search        = request.GET.get('q', '')
+    search = request.GET.get('q', '')
     if branch_filter:
         employees = employees.filter(branch_id=branch_filter)
-    if role_filter:
-        employees = employees.filter(role=role_filter)
     if search:
         employees = employees.filter(
             Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search)
         )
-    total_employees = employees.count()
-    present_today   = Attendance.objects.filter(date=timezone.now().date(), punch_in__isnull=False).count()
-    on_leave_today  = Attendance.objects.filter(date=timezone.now().date(), status='on_leave').count()
-    pending_leaves  = LeaveRequest.objects.filter(leave_status='pending').count()
+
+    employee_ids = list(employees.values_list('id', flat=True))
+    recent_attendance = Attendance.objects.filter(
+        employee_id__in=employee_ids
+    ).select_related('employee__user', 'branch').order_by('-date', '-created_at')[:10]
+    recent_leaves = LeaveRequest.objects.filter(
+        employee_id__in=employee_ids
+    ).select_related('employee__user', 'approved_by__user').order_by('-created_at')[:10]
+    today_attendance = {
+        record.employee_id: record
+        for record in Attendance.objects.filter(
+            employee_id__in=employee_ids,
+            date=today,
+        ).select_related('employee__user')
+    }
+
+    employee_rows = []
+    present_today = 0
+    for employee in employees:
+        attendance_record = today_attendance.get(employee.id)
+        leave_record = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_status='approved',
+            from_date__lte=today,
+            to_date__gte=today,
+        ).first()
+
+        if leave_record:
+            attendance_status = 'on_leave'
+        elif attendance_record:
+            attendance_status = attendance_record.computed_status
+        else:
+            attendance_status = 'absent'
+
+        if attendance_status == 'present':
+            present_today += 1
+
+        employee_rows.append({
+            'profile': employee,
+            'attendance_status': attendance_status,
+        })
+
+    total_employees = len(employee_rows)
+    on_leave_today = LeaveRequest.objects.filter(
+        employee_id__in=employee_ids,
+        leave_status='approved',
+        from_date__lte=today,
+        to_date__gte=today,
+    ).count()
+    absent_today = max(total_employees - present_today - on_leave_today, 0)
+    pending_leaves = LeaveRequest.objects.filter(
+        employee_id__in=employee_ids,
+        leave_status='pending',
+    ).count()
+
     return render(request, 'dash/hr/hr_panel.html', {
-        'employees': employees,
+        'employees': employee_rows,
         'branches': branches,
         'branch_filter': branch_filter,
-        'role_filter': role_filter,
         'search': search,
         'total_employees': total_employees,
         'present_today': present_today,
         'on_leave_today': on_leave_today,
+        'absent_today': absent_today,
         'pending_leaves': pending_leaves,
+        'recent_attendance': recent_attendance,
+        'recent_leaves': recent_leaves,
     })
 
 
@@ -1400,6 +1454,9 @@ def leaves(request):
     return render(request, 'dash/hr/leaves.html', {
         'records': records, 'branches': branches,
         'status_filter': status_filter, 'branch_filter': branch_filter, 'search': search,
+        'pending_leaves': all_leaves.filter(leave_status='pending'),
+        'approved_leaves': all_leaves.filter(leave_status='approved'),
+        'rejected_leaves': all_leaves.filter(leave_status='rejected'),
         'pending_leaves_count':  all_leaves.filter(leave_status='pending').count(),
         'approved_leaves_count': all_leaves.filter(leave_status='approved').count(),
         'rejected_leaves_count': all_leaves.filter(leave_status='rejected').count(),
@@ -1456,7 +1513,7 @@ def delete_leave(request, id):
 def approve_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'approved'
-    record.approved_by  = request.user.userprofile
+    record.approved_by = request.user.profile
     record.save()
     try:
         create_notification(
@@ -1475,7 +1532,7 @@ def approve_leave(request, id):
 def reject_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'rejected'
-    record.approved_by  = request.user.userprofile
+    record.approved_by = request.user.profile
     record.save()
     try:
         create_notification(
@@ -1491,87 +1548,11 @@ def reject_leave(request, id):
 
 
 @user_passes_test(superadmin_required, login_url='/login/')
-def payroll(request):
-    branches  = Branch.objects.filter(status='Enabled')
-    records   = Payroll.objects.select_related('employee__user').order_by('-year', '-created_at')
-    branch_filter = request.GET.get('branch', '')
-    month_filter  = request.GET.get('month', '')
-    search        = request.GET.get('q', '')
-    if branch_filter:
-        records = records.filter(employee__branch_id=branch_filter)
-    if month_filter:
-        records = records.filter(month=month_filter)
-    if search:
-        records = records.filter(
-            Q(employee__user__first_name__icontains=search) |
-            Q(employee__user__last_name__icontains=search)
-        )
-    return render(request, 'dash/hr/payroll.html', {
-        'records': records, 'branches': branches,
-        'branch_filter': branch_filter, 'month_filter': month_filter, 'search': search,
-    })
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def add_payroll(request):
-    employees = UserProfile.objects.filter(status='Enabled').select_related('user')
-    if request.method == 'POST':
-        base       = float(request.POST.get('base_salary', 0))
-        bonus      = float(request.POST.get('bonus', 0))
-        deductions = float(request.POST.get('deductions', 0))
-        Payroll.objects.create(
-            employee_id = request.POST.get('employee'),
-            month       = request.POST.get('month'),
-            year        = request.POST.get('year'),
-            base_salary = base,
-            bonus       = bonus,
-            deductions  = deductions,
-            net_salary  = base + bonus - deductions,
-            notes       = request.POST.get('notes', ''),
-        )
-        messages.success(request, 'Payroll record added.')
-        return redirect('payroll')
-    return render(request, 'dash/hr/add_payroll.html', {'employees': employees})
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def edit_payroll(request, id):
-    record    = get_object_or_404(Payroll, id=id)
-    employees = UserProfile.objects.filter(status='Enabled').select_related('user')
-    if request.method == 'POST':
-        base       = float(request.POST.get('base_salary', 0))
-        bonus      = float(request.POST.get('bonus', 0))
-        deductions = float(request.POST.get('deductions', 0))
-        record.employee_id = request.POST.get('employee')
-        record.month       = request.POST.get('month')
-        record.year        = request.POST.get('year')
-        record.base_salary = base
-        record.bonus       = bonus
-        record.deductions  = deductions
-        record.net_salary  = base + bonus - deductions
-        record.notes       = request.POST.get('notes', '')
-        record.save()
-        messages.success(request, 'Payroll updated.')
-        return redirect('payroll')
-    return render(request, 'dash/hr/edit_payroll.html', {
-        'data': record, 'employees': employees
-    })
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
-def delete_payroll(request, id):
-    get_object_or_404(Payroll, id=id).delete()
-    messages.success(request, 'Payroll record deleted.')
-    return redirect('payroll')
-
-
-@user_passes_test(superadmin_required, login_url='/login/')
 def employee_detail(request, id):
     employee        = get_object_or_404(UserProfile, id=id)
     branches        = Branch.objects.filter(status='Enabled')
     att_records     = Attendance.objects.filter(employee=employee).order_by('-date')
     leave_records   = LeaveRequest.objects.filter(employee=employee).order_by('-created_at')
-    payroll_records = Payroll.objects.filter(employee=employee).order_by('-year', '-created_at')
 
     if request.method == 'POST':
         record = Attendance.objects.create(
@@ -1592,7 +1573,6 @@ def employee_detail(request, id):
         'employee': employee,
         'att_records': att_records,
         'leave_records': leave_records,
-        'payroll_records': payroll_records,
         'branches': branches,
     })
 

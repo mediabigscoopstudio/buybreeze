@@ -93,9 +93,9 @@
         </div>
         <div class="col-md-12">
           <label class="form-label">Profile Photo</label>
-          {% if data.userprofile_pic %}
+          {% if data.profile_pic %}
             <div class="mb-2">
-              <img src="{{ data.userprofile_pic.url }}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border: 2px solid var(--border);">
+              <img src="{{ data.profile_pic.url }}" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border: 2px solid var(--border);">
             </div>
           {% endif %}
           <input type="file" name="profile_pic" class="grove-input" accept="image/*">

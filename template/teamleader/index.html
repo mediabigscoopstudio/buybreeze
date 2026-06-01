@@ -1,281 +1,82 @@
 {% extends "teamleader/base.html" %}
 
-{% block title %}Team Leader Dashboard — Buy Buzz CRM{% endblock %}
+{% block title %}Team Leader Dashboard{% endblock %}
 
 {% block css %}
 <style>
-    /* ── GROVE UI: TL DASHBOARD SPECIFICS ── */
-    .grove-stat-card {
-        background: var(--white);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 24px;
-        height: 100%;
-        transition: transform .2s, box-shadow .2s;
-    }
-    .grove-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
-    .top-charcoal { border-top: 4px solid #333333; }
-    .top-blue { border-top: 4px solid #2563EB; }
-    .top-sage { border-top: 4px solid var(--sage); }
-    .top-gold { border-top: 4px solid #b8860b; }
-
-    .stat-icon-box { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 16px; }
-    .stat-value { font-family: 'Geist Mono', monospace; font-size: 32px; font-weight: 700; color: var(--brand-ink); line-height: 1; margin-bottom: 4px; }
-    .stat-label { font-size: 13px; color: var(--brand-accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .table-custom th { font-size: 9px; font-weight: 700; color: var(--brand-accent); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 16px 12px; background: var(--brand-bg); }
-    .table-custom td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 14px; }
-    
-    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .s-hot { background: #F8D7DA; color: #721C24; }
-    .s-warm { background: #FFF3CD; color: #856404; }
-    .s-cold { background: var(--brand-bg); color: var(--brand-accent); }
-
-    .grove-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-
-    /* ── MISSING BUTTON & INPUT STYLES ADDED HERE ── */
-    .grove-btn-outline {
-        display: inline-block;
-        border: 1px solid var(--border);
-        background: var(--white);
-        color: var(--brand-ink);
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 8px 16px;
-        transition: all 0.2s;
-        font-size: 13px;
-        text-decoration: none !important; /* Forces link underline removal */
-    }
-    .grove-btn-outline:hover {
-        background: var(--brand-bg);
-        border-color: var(--brand-accent);
-        color: var(--brand-ink);
-    }
-
-    .btn-primary-brand {
-        background: var(--brand-ink);
-        color: var(--white);
-        border: 1px solid var(--brand-ink);
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 13px;
-        transition: all 0.2s;
-        text-decoration: none;
-    }
-    .btn-primary-brand:hover:not([disabled]) {
-        background: var(--sage);
-        border-color: var(--sage);
-        color: var(--white);
-    }
-    .btn-primary-brand[disabled] {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .grove-input {
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 13px;
-        color: var(--brand-ink);
-        background: var(--white);
-        outline: none;
-    }
-    .grove-input:focus {
-        border-color: var(--brand-accent);
-        box-shadow: 0 0 0 3px var(--accent-light);
-    }
-
-    .period-pill {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        border: 1px solid var(--border);
-        background: var(--white);
-        color: var(--brand-accent);
-        text-decoration: none;
-        transition: all 0.2s;
-        white-space: nowrap;
-    }
-    .period-pill:hover, .period-pill.active {
-        background: var(--brand-ink);
-        border-color: var(--brand-ink);
-        color: var(--white);
-    }
+  .grove-stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; height: 100%; }
+  .grove-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+  .stat-icon-box { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 16px; background: var(--accent-light); color: var(--brand-accent); }
+  .stat-value { font-family: 'Geist Mono', monospace; font-size: 30px; font-weight: 700; color: var(--brand-ink); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--brand-accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .table-custom th { font-size: 10px; font-weight: 700; color: var(--brand-accent); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 16px 12px; background: var(--brand-bg); }
+  .table-custom td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; color: var(--brand-ink); }
 </style>
 {% endblock css %}
 
 {% block body %}
 <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+  <div class="mb-4">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">Team Leader Portal</h2>
+    <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Live view of your team’s lead and attendance activity</div>
+  </div>
 
-    {# ── HEADER ── #}
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">Team Leader Portal</h2>
-            <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">
-                Managing your staff performance and lead pipeline distribution
-                &mdash; <strong style="color: var(--brand-ink);">{{ period_label }}</strong>
-            </div>
-        </div>
-        <div class="d-flex flex-wrap gap-1" style="gap: 6px !important;">
-            <a href="?"               class="period-pill {% if period == 'all' or not period %}active{% endif %}">All</a>
-            <a href="?period=today"        class="period-pill {% if period == 'today' %}active{% endif %}">Today</a>
-            <a href="?period=yesterday"    class="period-pill {% if period == 'yesterday' %}active{% endif %}">Yesterday</a>
-            <a href="?period=this_week"    class="period-pill {% if period == 'this_week' %}active{% endif %}">This Week</a>
-            <a href="?period=this_month"   class="period-pill {% if period == 'this_month' %}active{% endif %}">This Month</a>
-            <a href="?period=this_quarter" class="period-pill {% if period == 'this_quarter' %}active{% endif %}">This Quarter</a>
-        </div>
-    </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ total_team }}</div><div class="stat-label">Total Team Members</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(16,185,129,0.1); color: #059669;"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(59,130,246,0.1); color: #2563EB;"><i class="bi bi-person-lines-fill"></i></div><div class="stat-value">{{ total_leads }}</div><div class="stat-label">Total Leads</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(245,158,11,0.1); color: #D97706;"><i class="bi bi-telephone-fill"></i></div><div class="stat-value">{{ calls_today }}</div><div class="stat-label">Calls Today</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(239,68,68,0.1); color: #DC2626;"><i class="bi bi-fire"></i></div><div class="stat-value">{{ hot_leads }}</div><div class="stat-label">Hot Leads</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(16,185,129,0.1); color: #059669;"><i class="bi bi-check2-circle"></i></div><div class="stat-value">{{ converted_leads }}</div><div class="stat-label">Converted Leads</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(245,158,11,0.1); color: #D97706;"><i class="bi bi-hourglass-split"></i></div><div class="stat-value">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(239,68,68,0.1); color: #DC2626;"><i class="bi bi-person-dash-fill"></i></div><div class="stat-value">{{ absent_today }}</div><div class="stat-label">Absent Today</div></div></div>
+  </div>
 
-    {# ── KPI CARDS ── #}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-4">
-        <div class="col"><div class="grove-stat-card top-charcoal">
-            <div class="stat-icon-box" style="background:#f5f5f5; color:#333;"><i class="bi bi-briefcase"></i></div>
-            <div class="stat-value">{{ total_leads|default:"0" }}</div>
-            <div class="stat-label">Total Leads</div>
-        </div></div>
-        <div class="col"><div class="grove-stat-card top-blue">
-            <div class="stat-icon-box" style="background:#EFF6FF; color:#2563EB;"><i class="bi bi-fire"></i></div>
-            <div class="stat-value text-danger">{{ hot_leads|default:"0" }}</div>
-            <div class="stat-label">Hot Leads</div>
-        </div></div>
-        <div class="col"><div class="grove-stat-card top-sage">
-            <div class="stat-icon-box" style="background:var(--sage-lt); color:var(--sage);"><i class="bi bi-plus-circle"></i></div>
-            <div class="stat-value" style="color:var(--sage);">{{ new_leads|default:"0" }}</div>
-            <div class="stat-label">New Leads</div>
-        </div></div>
-        <div class="col"><div class="grove-stat-card top-gold">
-            <div class="stat-icon-box" style="background:var(--gold-lt); color:var(--gold);"><i class="bi bi-check2-circle"></i></div>
-            <div class="stat-value text-success">{{ closed_leads|default:"0" }}</div>
-            <div class="stat-label">Closed Leads</div>
-        </div></div>
-    </div>
-
-    {# ── LEADS TABLE ── #}
-    <div class="grove-panel p-0 mb-4" style="overflow: hidden;">
-        <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: var(--border);">
-            <h5 class="m-0 fw-bold"><i class="bi bi-list-task me-2" style="color:var(--sage);"></i> Active Leads</h5>
-            <div class="d-flex gap-2">
-                <select id="employeeSelect" class="grove-input" style="width: auto;">
-                    <option value="">Select Employee...</option>
-                    {% for emp in employees %}<option value="{{ emp.id }}">{{ emp.user.get_full_name }}</option>{% endfor %}
-                </select>
-                <button id="btnAssign" class="btn-primary-brand" disabled>Assign</button>
-            </div>
-        </div>
+  <div class="row g-4">
+    <div class="col-xl-6">
+      <div class="grove-panel p-0" style="overflow: hidden;">
+        <div class="px-4 pt-4"><h5 class="fw-bold mb-3">Recent Leads</h5></div>
         <div class="table-responsive">
-            <table class="table table-custom align-middle mb-0 text-nowrap">
-                <thead>
-                    <tr>
-                        <th class="ps-4"><input type="checkbox" id="selectAll" class="form-check-input"></th>
-                        <th>Name</th><th>Phone</th><th>Source</th><th>Temp</th><th>Assigned To</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for lead in leads %}
-                    <tr>
-                        <td class="ps-4"><input type="checkbox" class="form-check-input lead-checkbox" value="{{ lead.id }}"></td>
-                        <td class="fw-bold">{{ lead.name }}</td>
-                        <td>{{ lead.phone }}</td>
-                        <td>{{ lead.source }}</td>
-                        <td><span class="status-pill {% if lead.temperature|lower == 'hot' %}s-hot{% else %}s-cold{% endif %}">{{ lead.temperature }}</span></td>
-                        <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+          <table class="table table-custom align-middle mb-0">
+            <thead><tr><th class="ps-4">Lead</th><th>Assigned To</th><th>Temp</th><th>Date</th></tr></thead>
+            <tbody>
+              {% for lead in recent_leads %}
+              <tr>
+                <td class="ps-4">{{ lead.name }}</td>
+                <td>{{ lead.assigned_to.user.get_full_name|default:"—" }}</td>
+                <td>{{ lead.temperature|title }}</td>
+                <td>{{ lead.created_at|date:"d M Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center py-4">No leads found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
-
-    {# ── STAFF SECTION ── #}
-    <div class="mb-3"><h5 class="fw-bold"><i class="bi bi-people-fill me-2" style="color:var(--sage);"></i> My Staff</h5></div>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4">
-        {% for emp in employees %}
-        <div class="col">
-            <div class="grove-panel h-100 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="d-flex align-items-center gap-3 mb-3 border-bottom pb-3" style="border-color: var(--border) !important;">
-                        <div style="width:40px; height:40px; border-radius:50%; background:var(--brand-bg); display:flex; align-items:center; justify-content:center; font-weight:700;">
-                            {{ emp.user.get_full_name|make_list|first|upper }}
-                        </div>
-                        <div>
-                            <div class="fw-bold">{{ emp.user.get_full_name }}</div>
-                            <div class="small text-muted">Staff Member</div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="small">Total Leads</span>
-                        <strong>{{ emp.total_leads|default:"0" }}</strong>
-                    </div>
-                </div>
-                <a href="/employee_performance/{{ emp.id }}" class="grove-btn-outline w-100 mt-3 text-center">
-                    View Performance <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
+    <div class="col-xl-6">
+      <div class="grove-panel p-0" style="overflow: hidden;">
+        <div class="px-4 pt-4"><h5 class="fw-bold mb-3">Recent Calls</h5></div>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle mb-0">
+            <thead><tr><th class="ps-4">Lead</th><th>Employee</th><th>Outcome</th><th>Date</th></tr></thead>
+            <tbody>
+              {% for call in recent_calls %}
+              <tr>
+                <td class="ps-4">{{ call.lead.name }}</td>
+                <td>{{ call.called_by.user.get_full_name|default:"—" }}</td>
+                <td>{{ call.get_call_outcome_display }}</td>
+                <td>{{ call.created_at|date:"d M Y g:i A" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center py-4">No calls found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        {% endfor %}
+      </div>
     </div>
+  </div>
 </div>
 {% endblock body %}
-
-{% block script %}
-<script>
-    const selectAll = document.getElementById('selectAll');
-    const btnAssign = document.getElementById('btnAssign');
-    const employeeSelect = document.getElementById('employeeSelect');
-
-    function updateAssignBtn() {
-        const anyChecked = document.querySelectorAll('.lead-checkbox:checked').length > 0;
-        const empSelected = employeeSelect.value !== '';
-        btnAssign.disabled = !(anyChecked && empSelected);
-    }
-
-    selectAll.addEventListener('change', function () {
-        document.querySelectorAll('.lead-checkbox').forEach(cb => {
-            cb.checked = this.checked;
-        });
-        updateAssignBtn();
-    });
-
-    document.querySelectorAll('.lead-checkbox').forEach(cb => {
-        cb.addEventListener('change', function () {
-            const all = document.querySelectorAll('.lead-checkbox');
-            const checked = document.querySelectorAll('.lead-checkbox:checked');
-            selectAll.checked = all.length === checked.length;
-            selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
-            updateAssignBtn();
-        });
-    });
-
-    employeeSelect.addEventListener('change', updateAssignBtn);
-
-    btnAssign.addEventListener('click', function () {
-        const leadIds = Array.from(
-            document.querySelectorAll('.lead-checkbox:checked')
-        ).map(cb => parseInt(cb.value));
-
-        const employeeId = parseInt(employeeSelect.value);
-
-        fetch('/assign-to-employee/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken'),
-            },
-            body: JSON.stringify({ lead_ids: leadIds, employee_id: employeeId }),
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                location.reload();
-            } else {
-                alert('Assignment failed: ' + (data.message || 'Unknown error'));
-            }
-        })
-        .catch(err => alert('Network error: ' + err));
-    });
-</script>
-{% endblock script %}

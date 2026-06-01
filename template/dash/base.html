@@ -371,11 +371,8 @@
         <a href="{% url 'users' %}" class="nav-item-custom {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
           <i class="bi bi-people-fill"></i> Users
         </a>
-        <a href="{% url 'hr_panel' %}" class="nav-item-custom {% if 'hr' in request.resolver_match.url_name or 'attendance' in request.resolver_match.url_name or 'leave' in request.resolver_match.url_name or 'payroll' in request.resolver_match.url_name %}active{% endif %}">
+        <a href="{% url 'hr_panel' %}" class="nav-item-custom {% if 'hr' in request.resolver_match.url_name or 'attendance' in request.resolver_match.url_name or 'leave' in request.resolver_match.url_name %}active{% endif %}">
           <i class="bi bi-person-badge-fill"></i> HR Panel
-        </a>
-        <a href="{% url 'dash_apr_report' %}" class="nav-item-custom {% if request.resolver_match.url_name == 'dash_apr_report' or request.resolver_match.url_name == 'apr_day_detail' %}active{% endif %}">
-          <i class="bi bi-bar-chart-line-fill"></i> APR Report
         </a>
 
         <div class="sidebar-section">Integrations</div>

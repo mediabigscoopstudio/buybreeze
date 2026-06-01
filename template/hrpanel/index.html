@@ -5,298 +5,155 @@
 
 {% block extra_css %}
 <style>
-  /* ── HR DASHBOARD LOCAL STYLES ── */
-  .grove-stat-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    height: 100%;
-    transition: transform .2s, box-shadow .2s;
-  }
+  .grove-stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; height: 100%; transition: transform .2s, box-shadow .2s; }
   .grove-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
-  
-  /* Top Accent Borders */
   .top-charcoal { border-top: 4px solid var(--charcoal); }
-  .top-sage     { border-top: 4px solid var(--sage); }
-  .top-gold     { border-top: 4px solid var(--gold); }
-  .top-lost     { border-top: 4px solid #FCA5A5; } 
-  
-  /* Icon Boxes */
-  .stat-icon-box {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; margin-bottom: 20px;
-  }
+  .top-sage { border-top: 4px solid var(--sage); }
+  .top-gold { border-top: 4px solid var(--gold); }
+  .top-lost { border-top: 4px solid #FCA5A5; }
+  .stat-icon-box { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 20px; }
   .stat-icon-box.charcoal { background: #F5F5F3; color: var(--charcoal); }
-  .stat-icon-box.sage     { background: var(--sage-lt); color: var(--sage); }
-  .stat-icon-box.gold     { background: var(--gold-lt); color: #B48E32; }
-  .stat-icon-box.lost     { background: #FCE8E8; color: #DC2626; }
-
-  /* Typography for Stats */
-  .stat-value { font-family: 'Geist', sans-serif; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 6px; letter-spacing: -1px; }
-  .stat-label { font-size: 12px; color: var(--stone); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;}
-
-  /* ── NAVIGATION CARDS ── */
-  .grove-nav-card {
-    display: flex; align-items: center; gap: 16px;
-    text-decoration: none;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-    transition: all 0.2s;
-  }
-  .grove-nav-card:hover { border-color: var(--sage); transform: translateY(-2px); }
-  
-  .nav-icon {
-    width: 40px; height: 40px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
-  }
-  .nav-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
-  .nav-sub   { font-size: 11px; color: var(--stone); font-weight: 500; }
-
-  /* ── TABLE & DIRECTORY ── */
-  .leads-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    padding: 24px;
-  }
-  
-  .table-header-title {
-    font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 24px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  
-  .grove-input {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    color: var(--ink);
-    outline: none;
-    background: var(--white);
-  }
-  
-  .filter-btn {
-    background: var(--cloud);
-    border: 1px solid var(--ink);
-    color: var(--ink);
-    border-radius: 8px;
-    font-weight: 600;
-    padding: 8px 24px;
-    font-size: 13px;
-    transition: background 0.2s;
-  }
-  .filter-btn:hover { background: var(--border); }
-
+  .stat-icon-box.sage { background: var(--sage-lt); color: var(--sage); }
+  .stat-icon-box.gold { background: var(--gold-lt); color: #B48E32; }
+  .stat-icon-box.lost { background: #FCE8E8; color: #DC2626; }
+  .stat-value { font-family: 'Geist', sans-serif; font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 12px; color: var(--stone); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .leads-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; padding: 24px; }
+  .table-header-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
+  .grove-input { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--ink); outline: none; background: var(--white); }
+  .filter-btn { background: var(--cloud); border: 1px solid var(--ink); color: var(--ink); border-radius: 8px; font-weight: 600; padding: 8px 24px; font-size: 13px; }
   .leads-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-  .leads-table th { 
-    padding: 12px 16px; font-size: 10px; font-weight: 700; 
-    color: var(--stone); letter-spacing: 1px; text-transform: uppercase; 
-    border-bottom: 1px solid var(--border); border-top: 1px solid var(--border);
-  }
+  .leads-table th { padding: 12px 16px; font-size: 10px; font-weight: 700; color: var(--stone); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
   .leads-table td { padding: 16px; border-bottom: 1px solid var(--cloud); vertical-align: middle; }
-  
-  /* Status Pills */
   .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-  .s-tl { background: var(--gold-lt); color: #8B6914; }
-  .s-emp { background: var(--cloud); color: var(--stone); }
-
-  /* Action Icons */
+  .s-present { background: #E6F2EE; color: #1A6B55; }
+  .s-active { background: #FBF4E0; color: #B48E32; }
+  .s-absent { background: #FCE8E8; color: #DC2626; }
+  .s-leave { background: #EFF6FF; color: #2563EB; }
   .action-icon { color: var(--stone); font-size: 14px; text-decoration: none; margin-left: 8px; }
-  .action-icon:hover { color: var(--ink); }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="main-content">
-{# ── PAGE HEADER ── #}
-<div class="mb-4 fade-up" style="animation-delay: 0s;">
-  <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Operational Workspace</h2>
-  <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Employee lifecycle management and branch synchronization logs</div>
-</div>
+  <div class="mb-4 fade-up">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Operational Workspace</h2>
+    <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Employee lifecycle management and branch synchronization logs</div>
+  </div>
 
-{# ── STAT CARDS ── #}
-<div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
-  <div class="col fade-up" style="animation-delay: 0.05s;">
-    <div class="grove-stat-card top-charcoal">
-      <div class="stat-icon-box charcoal"><i class="bi bi-people-fill"></i></div>
-      <div class="stat-value">{{ total_employees|default:"196" }}</div>
-      <div class="stat-label">Total Employees</div>
-    </div>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-5 g-4 mb-4">
+    <div class="col fade-up"><div class="grove-stat-card top-charcoal"><div class="stat-icon-box charcoal"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ total_employees }}</div><div class="stat-label">Total Employees</div></div></div>
+    <div class="col fade-up" style="animation-delay:.05s;"><div class="grove-stat-card top-sage"><div class="stat-icon-box sage"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div></div>
+    <div class="col fade-up" style="animation-delay:.1s;"><div class="grove-stat-card top-gold"><div class="stat-icon-box gold"><i class="bi bi-calendar-x-fill"></i></div><div class="stat-value">{{ on_leave_today }}</div><div class="stat-label">On Leave</div></div></div>
+    <div class="col fade-up" style="animation-delay:.15s;"><div class="grove-stat-card top-lost"><div class="stat-icon-box lost"><i class="bi bi-person-dash-fill"></i></div><div class="stat-value" style="color:#DC2626;">{{ absent_today }}</div><div class="stat-label">Absent Today</div></div></div>
+    <div class="col fade-up" style="animation-delay:.2s;"><div class="grove-stat-card top-lost"><div class="stat-icon-box lost"><i class="bi bi-hourglass-split"></i></div><div class="stat-value" style="color:#DC2626;">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div></div>
   </div>
-  
-  <div class="col fade-up" style="animation-delay: 0.1s;">
-    <div class="grove-stat-card top-sage">
-      <div class="stat-icon-box sage"><i class="bi bi-check-circle-fill"></i></div>
-      <div class="stat-value">{{ present_today|default:"0" }}</div>
-      <div class="stat-label">Present Today</div>
-    </div>
-  </div>
-  
-  <div class="col fade-up" style="animation-delay: 0.15s;">
-    <div class="grove-stat-card top-gold">
-      <div class="stat-icon-box gold"><i class="bi bi-calendar-x-fill"></i></div>
-      <div class="stat-value">{{ on_leave_today|default:"0" }}</div>
-      <div class="stat-label">On Leave Today</div>
-    </div>
-  </div>
-  
-  <div class="col fade-up" style="animation-delay: 0.2s;">
-    <div class="grove-stat-card top-lost">
-      <div class="stat-icon-box lost"><i class="bi bi-hourglass-split"></i></div>
-      <div class="stat-value" style="color: #DC2626;">{{ pending_leaves|default:"0" }}</div>
-      <div class="stat-label">Pending Leaves</div>
-    </div>
-  </div>
-</div>
 
-{# ── NAVIGATION SECTIONS ── #}
-<div class="row g-4 mb-4 fade-up" style="animation-delay: 0.25s;">
-  <div class="col-md-4">
-    <a href="{% url 'attendance' %}" class="grove-nav-card">
-      <div class="nav-icon" style="background: var(--sage-lt); color: var(--sage);"><i class="bi bi-clock"></i></div>
-      <div>
-        <div class="nav-title">Attendance Dashboard</div>
-        <div class="nav-sub">View & audit localized punch timelines</div>
+  <div class="row g-4 mb-4">
+    <div class="col-xl-6 fade-up">
+      <div class="leads-card">
+        <div class="table-header-title"><i class="bi bi-clock-history" style="color: var(--sage);"></i> Recent Attendance</div>
+        <div class="table-responsive">
+          <table class="leads-table">
+            <thead><tr><th>Employee</th><th>Date</th><th>Punch In</th><th>Punch Out</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for row in recent_attendance %}
+              <tr>
+                <td style="font-weight:700;">{{ row.employee.user.get_full_name }}</td>
+                <td>{{ row.date|date:"d M Y" }}</td>
+                <td>{{ row.punch_in|date:"g:i A"|default:"—" }}</td>
+                <td>{{ row.punch_out|date:"g:i A"|default:"—" }}</td>
+                <td>
+                  {% if row.computed_status == 'present' %}<span class="status-pill s-present">Present</span>
+                  {% elif row.computed_status == 'active' %}<span class="status-pill s-active">Active</span>
+                  {% else %}<span class="status-pill s-absent">Absent</span>{% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" style="text-align:center; padding:40px 24px;">No attendance records found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </a>
-  </div>
-  
-  <div class="col-md-4">
-    <a href="{% url 'leaves' %}" class="grove-nav-card">
-      <div class="nav-icon" style="background: var(--gold-lt); color: #B48E32;"><i class="bi bi-calendar-check"></i></div>
-      <div>
-        <div class="nav-title">Leave Management</div>
-        <div class="nav-sub">Authorize or adjust leave rows requests</div>
-      </div>
-    </a>
-  </div>
-  
-  <div class="col-md-4">
-    <a href="{% url 'apr_reports' %}" class="grove-nav-card">
-      <div class="nav-icon" style="background: var(--cloud); color: var(--charcoal);"><i class="bi bi-bar-chart-line"></i></div>
-      <div>
-        <div class="nav-title">APR Reports</div>
-        <div class="nav-sub">Employee performance and attendance tracking</div>
-      </div>
-    </a>
-  </div>
-</div>
-
-{# ── EMPLOYEE DIRECTORY ── #}
-<div class="leads-card fade-up" style="animation-delay: 0.3s;">
-  
-  <div class="table-header-title">
-    <i class="bi bi-people" style="color: var(--sage);"></i> Employee Directory
-  </div>
-
-  <form method="GET" class="d-flex align-items-center gap-3 flex-wrap mb-2">
-    <div style="position: relative; flex: 1; min-width: 200px; max-width: 280px;">
-      <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--stone);"></i>
-      <input type="text" name="q" class="grove-input w-100" style="padding-left: 36px;" placeholder="Search employee..." value="{{ search|default:'' }}">
     </div>
-    
-    <select name="role" class="grove-input" style="min-width: 180px;">
-      <option value="">All Account Roles</option>
-      <option value="tl">Team Leader</option>
-      <option value="member">Employee</option>
-    </select>
-    
-    <select name="branch" class="grove-input" style="min-width: 180px;">
-      <option value="">All Active Branches</option>
-      {% for b in branches %}
-        <option value="{{ b.id }}">{{ b.name }}</option>
-      {% endfor %}
-    </select>
-    
-    <button type="submit" class="filter-btn">Filter</button>
-    <a href="" style="font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; margin-left: 8px;">Clear</a>
-  </form>
 
-  <div class="table-responsive">
-    <table class="leads-table">
-      <thead>
-        <tr>
-          <th style="width: 50px;">#</th>
-          <th>Employee</th>
-          <th class="text-center">Role</th>
-          <th>Branch</th>
-          <th>Phone</th>
-          <th class="text-end">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for e in employees %}
-        <tr>
-          <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: var(--stone);">
-            {{ forloop.counter|stringformat:"02d" }}
-          </td>
-          <td style="font-weight: 700; color: var(--ink);">
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
-                {{ e.user.get_full_name|default:e.user.username|make_list|first|upper }}
-              </div>
-              {{ e.user.get_full_name }}
-            </div>
-          </td>
-          <td class="text-center">
-            {% if e.role == 'tl' %}
-              <span class="status-pill s-tl"><i class="bi bi-people-fill"></i> Team Leader</span>
-            {% else %}
-              <span class="status-pill s-emp">Employee</span>
-            {% endif %}
-          </td>
-          <td style="color: var(--stone); font-size: 13px;">{{ e.branch.name|default:"Delhi Central" }}</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">{{ e.phone|default:"-" }}</td>
-          <td class="text-end">
-            <a href="{% url 'employee_detail' e.id %}" class="action-icon"><i class="bi bi-person-vcard"></i></a>
-            <a href="{% url 'leaves' %}?q={{ e.user.get_full_name }}" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: var(--stone);">01</td>
-          <td style="font-weight: 700; color: var(--ink);">
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">A</div>
-              Amit Verma
-            </div>
-          </td>
-          <td class="text-center"><span class="status-pill s-tl"><i class="bi bi-people-fill"></i> Team Leader</span></td>
-          <td style="color: var(--stone); font-size: 13px;">Delhi Central</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">9396157298</td>
-          <td class="text-end">
-            <a href="#" class="action-icon"><i class="bi bi-person-vcard"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-cash"></i></a>
-          </td>
-        </tr>
-        <tr>
-          <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: var(--stone);">02</td>
-          <td style="font-weight: 700; color: var(--ink);">
-            <div class="d-flex align-items-center gap-3">
-              <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--sage-lt); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">S</div>
-              Sandeep Singh
-            </div>
-          </td>
-          <td class="text-center"><span class="status-pill s-emp">Employee</span></td>
-          <td style="color: var(--stone); font-size: 13px;">Delhi Central</td>
-          <td style="font-family: 'Geist', sans-serif; font-weight: 700; color: var(--ink);">9700364323</td>
-          <td class="text-end">
-            <a href="#" class="action-icon"><i class="bi bi-person-vcard"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-calendar-check"></i></a>
-            <a href="#" class="action-icon"><i class="bi bi-cash"></i></a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="col-xl-6 fade-up" style="animation-delay:.05s;">
+      <div class="leads-card">
+        <div class="table-header-title"><i class="bi bi-calendar-check" style="color: var(--gold);"></i> Recent Leave Requests</div>
+        <div class="table-responsive">
+          <table class="leads-table">
+            <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for row in recent_leaves %}
+              <tr>
+                <td style="font-weight:700;">{{ row.employee.user.get_full_name }}</td>
+                <td>{{ row.get_leave_type_display }}</td>
+                <td>{{ row.from_date|date:"d M Y" }}</td>
+                <td>{{ row.to_date|date:"d M Y" }}</td>
+                <td>
+                  {% if row.leave_status == 'approved' %}<span class="status-pill s-present">Approved</span>
+                  {% elif row.leave_status == 'rejected' %}<span class="status-pill s-absent">Rejected</span>
+                  {% else %}<span class="status-pill s-active">Pending</span>{% endif %}
+                </td>
+                <td style="white-space:nowrap;">
+                  {% if row.leave_status == 'pending' %}
+                  <a href="{% url 'approve_leave' row.id %}" class="action-icon" title="Approve"><i class="bi bi-check-circle-fill" style="color:#1A6B55;"></i></a>
+                  <a href="{% url 'reject_leave' row.id %}" class="action-icon" title="Reject"><i class="bi bi-x-circle-fill" style="color:#DC2626;"></i></a>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" style="text-align:center; padding:40px 24px;">No leave requests found</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <div class="leads-card fade-up" style="animation-delay:.1s;">
+    <div class="table-header-title"><i class="bi bi-people" style="color: var(--sage);"></i> Employee List</div>
+    <form method="GET" class="d-flex align-items-center gap-3 flex-wrap mb-2">
+      <div style="position: relative; flex: 1; min-width: 200px; max-width: 280px;">
+        <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--stone);"></i>
+        <input type="text" name="q" class="grove-input w-100" style="padding-left: 36px;" placeholder="Search employee..." value="{{ search|default:'' }}">
+      </div>
+      <select name="branch" class="grove-input" style="min-width: 180px;">
+        <option value="">All Active Branches</option>
+        {% for b in branches %}<option value="{{ b.id }}" {% if branch_filter == b.id|stringformat:"s" %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="filter-btn">Filter</button>
+      <a href="{% url 'index' %}" style="font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: none; margin-left: 8px;">Clear</a>
+    </form>
+    <div class="table-responsive">
+      <table class="leads-table">
+        <thead><tr><th>#</th><th>Employee</th><th>Branch</th><th>Phone</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+        <tbody>
+          {% for e in employees %}
+          <tr>
+            <td style="font-family:'Geist Mono',monospace; color: var(--stone);">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td style="font-weight:700;">{{ e.profile.user.get_full_name }}</td>
+            <td>{{ e.profile.branch.name|default:"—" }}</td>
+            <td>{{ e.profile.phone|default:"—" }}</td>
+            <td>
+              {% if e.attendance_status == 'present' %}<span class="status-pill s-present">Present</span>
+              {% elif e.attendance_status == 'active' %}<span class="status-pill s-active">Active</span>
+              {% elif e.attendance_status == 'on_leave' %}<span class="status-pill s-leave">On Leave</span>
+              {% else %}<span class="status-pill s-absent">Absent</span>{% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'employee_detail' e.profile.id %}" class="action-icon"><i class="bi bi-person-vcard"></i></a>
+              <a href="{% url 'leaves' %}?q={{ e.profile.user.get_full_name }}" class="action-icon"><i class="bi bi-calendar-check"></i></a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" style="text-align:center; padding:40px 24px;">No employees found</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 {% endblock %}

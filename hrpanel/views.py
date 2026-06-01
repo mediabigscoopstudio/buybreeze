@@ -146,41 +146,86 @@ def logout_view(request):
 # ============================================================
 @user_passes_test(hr_required, login_url='/login')
 def index(request):
-    branches  = Branch.objects.filter(status='Enabled')
-    employees = UserProfile.objects.filter(status='Enabled').select_related('user', 'branch')
+    today = timezone.localdate()
+    branches = Branch.objects.filter(status='Enabled')
+    employees = UserProfile.objects.filter(
+        status='Enabled',
+        role='employee',
+    ).select_related('user', 'branch')
 
     branch_filter = request.GET.get('branch', '')
-    role_filter   = request.GET.get('role', '')
-    search        = request.GET.get('q', '')
+    search = request.GET.get('q', '')
 
     if branch_filter:
         employees = employees.filter(branch_id=branch_filter)
-    if role_filter:
-        employees = employees.filter(role=role_filter)
     if search:
         employees = employees.filter(
             Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search)
         )
 
-    total_employees  = employees.count()
-    present_today    = Attendance.objects.filter(
-        date=timezone.now().date(), punch_in__isnull=False
+    employee_ids = list(employees.values_list('id', flat=True))
+    recent_attendance = Attendance.objects.filter(
+        employee_id__in=employee_ids
+    ).select_related('employee__user', 'branch').order_by('-date', '-created_at')[:10]
+    recent_leaves = LeaveRequest.objects.filter(
+        employee_id__in=employee_ids
+    ).select_related('employee__user', 'approved_by__user').order_by('-created_at')[:10]
+    today_attendance = {
+        record.employee_id: record
+        for record in Attendance.objects.filter(employee_id__in=employee_ids, date=today)
+    }
+
+    employee_rows = []
+    present_today = 0
+    for employee in employees:
+        leave_record = LeaveRequest.objects.filter(
+            employee=employee,
+            leave_status='approved',
+            from_date__lte=today,
+            to_date__gte=today,
+        ).first()
+        attendance_record = today_attendance.get(employee.id)
+
+        if leave_record:
+            attendance_status = 'on_leave'
+        elif attendance_record:
+            attendance_status = attendance_record.computed_status
+        else:
+            attendance_status = 'absent'
+
+        if attendance_status == 'present':
+            present_today += 1
+
+        employee_rows.append({
+            'profile': employee,
+            'attendance_status': attendance_status,
+        })
+
+    total_employees = len(employee_rows)
+    on_leave_today = LeaveRequest.objects.filter(
+        employee_id__in=employee_ids,
+        leave_status='approved',
+        from_date__lte=today,
+        to_date__gte=today,
     ).count()
-    on_leave_today   = Attendance.objects.filter(
-        date=timezone.now().date(), status='on_leave'
+    absent_today = max(total_employees - present_today - on_leave_today, 0)
+    pending_leaves = LeaveRequest.objects.filter(
+        employee_id__in=employee_ids,
+        leave_status='pending',
     ).count()
-    pending_leaves   = LeaveRequest.objects.filter(leave_status='pending').count()
 
     return render(request, 'hrpanel/index.html', {
-        'employees': employees,
+        'employees': employee_rows,
         'branches': branches,
         'branch_filter': branch_filter,
-        'role_filter': role_filter,
         'search': search,
         'total_employees': total_employees,
         'present_today': present_today,
         'on_leave_today': on_leave_today,
+        'absent_today': absent_today,
         'pending_leaves': pending_leaves,
+        'recent_attendance': recent_attendance,
+        'recent_leaves': recent_leaves,
     })
 
 
@@ -303,7 +348,7 @@ def add_user(request):
                 reports_to_id=reports_to_id if reports_to_id else None,
             )
             if request.FILES.get('profile_pic'):
-                profile.userprofile_pic = request.FILES['profile_pic']
+                profile.profile_pic = request.FILES['profile_pic']
             profile.save()
             messages.success(request, 'User created successfully.')
             return redirect('users')
@@ -328,7 +373,7 @@ def edit_user(request, id):
         profile.branch_id  = request.POST.get('branch') or None
         profile.reports_to_id = request.POST.get('reports_to') or None
         if request.FILES.get('profile_pic'):
-            profile.userprofile_pic = request.FILES['profile_pic']
+            profile.profile_pic = request.FILES['profile_pic']
         profile.save()
         messages.success(request, 'User updated successfully.')
         return redirect('users')
@@ -523,7 +568,8 @@ def delete_attendance(request, id):
 @user_passes_test(hr_required, login_url='/login')
 def leaves(request):
     branches  = Branch.objects.filter(status='Enabled')
-    records   = LeaveRequest.objects.select_related('employee__user', 'approved_by__user').order_by('-created_at')
+    all_leaves = LeaveRequest.objects.all()
+    records = all_leaves.select_related('employee__user', 'approved_by__user').order_by('-created_at')
 
     status_filter = request.GET.get('status', '')
     branch_filter = request.GET.get('branch', '')
@@ -543,6 +589,12 @@ def leaves(request):
         'status_filter': status_filter,
         'branch_filter': branch_filter,
         'search': search,
+        'pending_leaves': all_leaves.filter(leave_status='pending'),
+        'approved_leaves': all_leaves.filter(leave_status='approved'),
+        'rejected_leaves': all_leaves.filter(leave_status='rejected'),
+        'pending_leaves_count': all_leaves.filter(leave_status='pending').count(),
+        'approved_leaves_count': all_leaves.filter(leave_status='approved').count(),
+        'rejected_leaves_count': all_leaves.filter(leave_status='rejected').count(),
     })
 
 
@@ -596,7 +648,7 @@ def delete_leave(request, id):
 def approve_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'approved'
-    record.approved_by  = request.user.userprofile
+    record.approved_by = request.user.profile
     record.save()
     try:
         create_notification(
@@ -621,7 +673,7 @@ def approve_leave(request, id):
 def reject_leave(request, id):
     record = get_object_or_404(LeaveRequest, id=id)
     record.leave_status = 'rejected'
-    record.approved_by  = request.user.userprofile
+    record.approved_by = request.user.profile
     record.save()
     try:
         create_notification(
