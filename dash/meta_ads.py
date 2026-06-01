@@ -2,29 +2,38 @@
 Meta / Facebook Ads helpers.
 Requires: pip install facebook-business
 """
+import hmac
+import hashlib
 from .utils import get_setting
 
 
 def _get_api():
     from facebook_business.api import FacebookAdsApi
-    from facebook_business.exceptions import FacebookRequestError
 
-    app_id      = get_setting('META_APP_ID')
-    app_secret  = get_setting('META_APP_SECRET')
+    app_id       = get_setting('META_APP_ID')
+    app_secret   = get_setting('META_APP_SECRET')
     access_token = get_setting('META_ACCESS_TOKEN')
 
     if not all([app_id, app_secret, access_token]):
         raise ValueError('Meta API credentials are not fully configured.')
 
     FacebookAdsApi.init(app_id, app_secret, access_token)
-    return access_token
+
+    # Required when "Require App Secret" is enabled on the Meta app
+    appsecret_proof = hmac.new(
+        app_secret.encode('utf-8'),
+        access_token.encode('utf-8'),
+        hashlib.sha256,
+    ).hexdigest()
+
+    return appsecret_proof
 
 
 def get_meta_campaigns(date_preset='last_30d', account_id=None):
     from facebook_business.adobjects.adaccount import AdAccount
     from facebook_business.adobjects.campaign import Campaign
 
-    _get_api()
+    appsecret_proof = _get_api()
     if not account_id:
         account_id = get_setting('META_AD_ACCOUNT_ID')
     if not account_id:
@@ -39,7 +48,11 @@ def get_meta_campaigns(date_preset='last_30d', account_id=None):
             Campaign.Field.daily_budget,
             Campaign.Field.lifetime_budget,
         ],
-        params={'date_preset': date_preset, 'limit': 100},
+        params={
+            'date_preset':     date_preset,
+            'limit':           100,
+            'appsecret_proof': appsecret_proof,
+        },
     )
 
     results = []
@@ -57,9 +70,8 @@ def get_meta_campaigns(date_preset='last_30d', account_id=None):
 
 def get_meta_leads(limit=50, account_id=None):
     from facebook_business.adobjects.adaccount import AdAccount
-    from facebook_business.adobjects.lead import Lead
 
-    _get_api()
+    appsecret_proof = _get_api()
     if not account_id:
         account_id = get_setting('META_AD_ACCOUNT_ID')
     if not account_id:
@@ -68,7 +80,10 @@ def get_meta_leads(limit=50, account_id=None):
     account = AdAccount(account_id)
     lead_forms = account.get_ad_leads(
         fields=['created_time', 'field_data', 'ad_name', 'form_id'],
-        params={'limit': limit},
+        params={
+            'limit':           limit,
+            'appsecret_proof': appsecret_proof,
+        },
     )
 
     results = []
