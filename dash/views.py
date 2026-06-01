@@ -1662,31 +1662,49 @@ def get_employee_route(request, username, date_str):
     
 @staff_member_required
 def individual_apr_report(request, username):
-    # Get the specific employee
-    employee = get_object_or_404(User, username=username)
-    
-    # Grab the attendance model securely
-    from django.apps import apps 
-    RealAttendanceModel = apps.get_model('employee', 'Attendance')
-    
-    # Fetch records ONLY for this employee!
-    attendances = RealAttendanceModel.objects.filter(employee=employee).order_by('-date')
-    
+    employee_user = get_object_or_404(User, username=username)
+    profile = get_object_or_404(UserProfile, user=employee_user)
+
+    attendances = Attendance.objects.filter(
+        employee=profile
+    ).order_by('-date')
+
     report_data = []
     for att in attendances:
+        day_calls = CallLog.objects.filter(
+            called_by=profile,
+            created_at__date=att.date,
+        )
+        call_count = day_calls.count()
+        closed = day_calls.filter(call_outcome__in=['converted', 'site_visit']).count()
+
+        total_secs = sum(c.call_duration for c in day_calls)
+        if call_count:
+            avg_secs = total_secs // call_count
+            avg_call_time = f"{avg_secs // 60}m {avg_secs % 60}s"
+        else:
+            avg_call_time = "—"
+
+        total_hours = None
+        if att.punch_in and att.punch_out:
+            delta = att.punch_out - att.punch_in
+            total_hours = round(delta.total_seconds() / 3600, 2)
+
         report_data.append({
-            'employee_name': att.employee.username,
+            'employee_name': employee_user.get_full_name() or employee_user.username,
             'date': att.date,
-            'punch_in': att.punch_in_time,
-            'punch_out': att.punch_out_time,
-            'new_leads': 12,
-            'closed_contacts': 3,
-            'avg_call_time': "4m 30s",
+            'punch_in': att.punch_in,
+            'punch_out': att.punch_out,
+            'total_hours': total_hours,
+            'new_leads': call_count,
+            'closed_contacts': closed,
+            'avg_call_time': avg_call_time,
         })
-        
+
     return render(request, 'dash/individual_apr_report.html', {
         'report_data': report_data,
-        'target_employee': employee
+        'target_employee': employee_user,
+        'profile': profile,
     })
 
 
