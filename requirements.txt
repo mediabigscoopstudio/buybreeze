@@ -1,4 +1,5 @@
 asgiref==3.11.1
+firebase-admin
 Django==5.2.13
 django-hosts==7.0.0
 et_xmlfile==2.0.0

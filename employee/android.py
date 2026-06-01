@@ -850,6 +850,37 @@ def apply_leave(request):
 # MY LEAVES (Android API)
 # -----------------------------------------
 @csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def save_device_token(request):
+    phone = request.data.get("phone")
+    token = request.data.get("token")
+
+    if not phone or not token:
+        return Response({
+            "success": False,
+            "message": "phone and token required"
+        })
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+        from dash.models import UserDeviceToken
+        UserDeviceToken.objects.update_or_create(
+            user=profile.user,
+            defaults={'token': token}
+        )
+        return Response({
+            "success": True,
+            "message": "Device token saved"
+        })
+    except UserProfile.DoesNotExist:
+        return Response({
+            "success": False,
+            "message": "Employee not found"
+        })
+
+
+@csrf_exempt
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def my_leaves(request):

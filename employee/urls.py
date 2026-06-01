@@ -39,6 +39,9 @@ urlpatterns = [
     # android — dashboard
     path("api/dashboard/stats/", android.dashboard_stats, name="api_dashboard_stats"),
 
+    # android — device token (FCM)
+    path("api/device-token/", android.save_device_token, name="api_save_device_token"),
+
     # android — leaves
     path("api/leave/apply/", android.apply_leave, name="api_apply_leave"),
     path("api/leave/my/",    android.my_leaves,   name="api_my_leaves"),

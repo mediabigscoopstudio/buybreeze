@@ -117,6 +117,12 @@ WRAPUP_EDIT_WINDOW_MINUTES = 10
 FAST2SMS_API_KEY = config('FAST2SMS_API_KEY')
 OTP_TEST_MODE = config('OTP_TEST_MODE', default= True, cast=bool)
 
+# ============================================================
+# FIREBASE / FCM
+# ============================================================
+FIREBASE_CREDENTIALS_PATH = '/var/www/buybuzz/buybreeze-crm-firebase-adminsdk.json'
+FCM_SENDER_ID = '911697440597'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
