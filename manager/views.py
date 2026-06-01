@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.db.models import Q
-from dash.models import Attendance, Branch, LeaveRequest, UserProfile, Lead
+from dash.models import Attendance, Branch, LeaveRequest, UserProfile, Lead, FollowUp
 from datetime import timedelta, datetime
 from dash.otp_utils import generate_otp, send_otp
 from django.utils import timezone
@@ -502,8 +502,10 @@ def view_lead(request, id):
 @user_passes_test(manager_required, login_url='/login/')
 def apr_reports(request):
     manager_profile = request.user.profile
-    current_month = timezone.now().month
-    current_year = timezone.now().year
+    from zoneinfo import ZoneInfo
+    now_ist = timezone.now().astimezone(ZoneInfo('Asia/Kolkata'))
+    current_month = now_ist.month
+    current_year = now_ist.year
 
     team_leaders = UserProfile.objects.filter(
         reports_to=manager_profile,
@@ -547,7 +549,7 @@ def apr_reports(request):
         'manager/apr_reports.html',
         {
             'employee_data': employee_data,
-            'month': timezone.now().strftime('%B %Y'),
+            'month': now_ist.strftime('%B %Y'),
             'total_team_members': len(employee_data),
             'total_present_this_month': total_present_this_month,
             'total_calls_this_month': total_calls_this_month,
@@ -683,6 +685,139 @@ def apr_day_detail(request, report_id, date_str):
         'ping_count': pings.count(),
         'report_id': report_id,
     })
+
+# ============================================================
+# APR REPORT DETAIL (alias with profile_id param)
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def apr_report_detail(request, profile_id):
+    return individual_apr_report(request, id=profile_id)
+
+
+# ============================================================
+# LEAD LIST (all leads in manager scope)
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def lead_list(request):
+    manager = request.user.profile
+    team_leaders = UserProfile.objects.filter(reports_to=manager, role='tl')
+    employees = UserProfile.objects.filter(
+        reports_to__in=list(team_leaders) + [manager],
+        role='employee',
+        status='Enabled',
+    )
+    leads = Lead.objects.filter(
+        Q(assigned_to__in=employees) | Q(assigned_to=manager)
+    ).select_related('assigned_to__user', 'branch').order_by('-created_at')
+    return render(request, 'manager/lead_list.html', {'leads': leads})
+
+
+# ============================================================
+# LEAD DETAIL
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def lead_detail(request, lead_id):
+    manager = request.user.profile
+    team_leaders = UserProfile.objects.filter(reports_to=manager, role='tl')
+    employees = UserProfile.objects.filter(
+        reports_to__in=list(team_leaders) + [manager],
+        role='employee',
+        status='Enabled',
+    )
+    allowed_ids = list(employees.values_list('id', flat=True)) + [manager.id]
+    lead = get_object_or_404(Lead, id=lead_id, assigned_to_id__in=allowed_ids)
+    call_logs = CallLog.objects.filter(lead=lead).select_related('called_by__user').order_by('-created_at')
+    call_log_data = []
+    for call in call_logs:
+        wrapup = getattr(call, 'wrapup', None)
+        recording_url = call.recording.url if call.recording else None
+        call_log_data.append({
+            'call': call,
+            'wrapup': wrapup,
+            'recording_url': recording_url,
+        })
+    follow_ups = FollowUp.objects.filter(lead=lead).order_by('followup_at')
+    return render(request, 'manager/lead_detail.html', {
+        'lead': lead,
+        'call_log_data': call_log_data,
+        'follow_ups': follow_ups,
+    })
+
+
+# ============================================================
+# ASSIGN LEAD (POST assigns lead to TL)
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def assign_lead(request, lead_id):
+    if request.method == 'POST':
+        manager = request.user.profile
+        lead = get_object_or_404(Lead, id=lead_id)
+        tl_id = request.POST.get('tl_id')
+        tl = get_object_or_404(UserProfile, id=tl_id, role='tl', reports_to=manager)
+        lead.assigned_to = tl
+        lead.save()
+        messages.success(request, f'Lead assigned to {tl.user.get_full_name()}.')
+    return redirect('index')
+
+
+# ============================================================
+# TEAM DETAIL (employees under specific TL)
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def team_detail(request, tl_id):
+    manager = request.user.profile
+    tl = get_object_or_404(UserProfile, id=tl_id, role='tl', reports_to=manager)
+    employees = UserProfile.objects.filter(
+        reports_to=tl,
+        role='employee',
+        status='Enabled',
+    ).select_related('user', 'branch')
+    today = timezone.localdate()
+    employee_data = []
+    for emp in employees:
+        lead_count = Lead.objects.filter(assigned_to=emp).count()
+        calls_today = CallLog.objects.filter(called_by=emp, created_at__date=today).count()
+        hot_leads = Lead.objects.filter(assigned_to=emp, temperature='hot').count()
+        employee_data.append({
+            'profile': emp,
+            'lead_count': lead_count,
+            'calls_today': calls_today,
+            'hot_leads': hot_leads,
+        })
+    return render(request, 'manager/team_detail.html', {
+        'tl': tl,
+        'employee_data': employee_data,
+    })
+
+
+# ============================================================
+# EMPLOYEE LEADS
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def employee_leads(request, employee_id):
+    manager = request.user.profile
+    team_leaders = UserProfile.objects.filter(reports_to=manager, role='tl')
+    employee = get_object_or_404(
+        UserProfile,
+        id=employee_id,
+        role='employee',
+        reports_to__in=list(team_leaders) + [manager],
+    )
+    leads = Lead.objects.filter(assigned_to=employee).select_related('branch').order_by('-created_at')
+    lead_data = []
+    for lead in leads:
+        last_call = CallLog.objects.filter(lead=lead).order_by('-created_at').first()
+        followup = FollowUp.objects.filter(lead=lead, followup_status='pending').order_by('followup_at').first()
+        lead_data.append({
+            'lead': lead,
+            'last_call': last_call,
+            'followup': followup,
+        })
+    return render(request, 'manager/employee_leads.html', {
+        'employee': employee,
+        'lead_data': lead_data,
+    })
+
 
 # ============================================================
 # NOTIFICATIONS PAGE (Manager)

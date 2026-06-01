@@ -1,0 +1,112 @@
+{% extends "teamleader/base.html" %}
+
+{% block title %}{{ employee.user.get_full_name }} — Leads — Team Leader Portal{% endblock %}
+
+{% block css %}
+<style>
+  .brand-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 24px; }
+  .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .panel-title { font-size: 15px; font-weight: 700; color: var(--brand-ink); display: flex; align-items: center; gap: 8px; margin: 0; }
+  .panel-title i { color: var(--brand-accent); }
+  .table-custom th { font-size: 10px; font-weight: 700; color: var(--brand-accent); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 14px 12px; background: var(--brand-bg); }
+  .table-custom td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; color: var(--brand-ink); }
+  .temp-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .t-hot { background: rgba(239,68,68,0.1); color: #DC2626; }
+  .t-warm { background: rgba(245,158,11,0.1); color: #D97706; }
+  .t-cold { background: rgba(59,130,246,0.1); color: #2563EB; }
+  .emp-info { padding: 24px; }
+  .data-label { font-size: 11px; color: var(--brand-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .data-value { font-size: 14px; color: var(--brand-ink); font-weight: 600; }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 700; color: var(--brand-ink); margin: 0;">{{ employee.user.get_full_name }}</h2>
+      <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Employee Leads</div>
+    </div>
+    <a href="javascript:history.back()" style="background: var(--white); color: var(--brand-ink); border: 1px solid var(--border); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+
+  {# Employee Header Card #}
+  <div class="brand-panel">
+    <div class="emp-info d-flex align-items-center gap-4 flex-wrap">
+      <div style="width: 56px; height: 56px; border-radius: 14px; background: var(--brand-ink); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700;">
+        {{ employee.user.get_full_name|make_list|first|upper|default:"E" }}
+      </div>
+      <div class="flex-grow-1">
+        <div style="font-size: 18px; font-weight: 700; color: var(--brand-ink);">{{ employee.user.get_full_name }}</div>
+        <div style="font-size: 13px; color: var(--brand-accent); margin-top: 2px;">
+          <i class="bi bi-telephone me-1"></i>{{ employee.phone|default:"—" }}
+          &nbsp;•&nbsp;
+          <i class="bi bi-building me-1"></i>{{ employee.branch.name|default:"—" }}
+        </div>
+      </div>
+      <div>
+        <div class="data-label">Total Leads</div>
+        <div class="data-value" style="font-family:'Geist Mono',monospace; font-size: 22px;">{{ lead_data|length }}</div>
+      </div>
+    </div>
+  </div>
+
+  {# Leads Table #}
+  <div class="brand-panel p-0" style="overflow: hidden;">
+    <div class="panel-header">
+      <div class="panel-title"><i class="bi bi-person-lines-fill"></i> Leads ({{ lead_data|length }})</div>
+    </div>
+    {% if lead_data %}
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4">#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Stage</th>
+            <th>Temperature</th>
+            <th>Last Call</th>
+            <th>Follow Up</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in lead_data %}
+          <tr>
+            <td class="ps-4" style="font-family:'Geist Mono',monospace; color: var(--brand-accent); font-size: 12px;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td>
+              <a href="{% url 'tl_lead_detail' item.lead.id %}" style="color: var(--brand-ink); text-decoration: none; font-weight: 700;">
+                {{ item.lead.name }}
+              </a>
+            </td>
+            <td style="font-family:'Geist Mono',monospace; font-size: 12px;">{{ item.lead.phone }}</td>
+            <td style="text-transform: capitalize; font-size: 12px; font-weight: 600;">{{ item.lead.stage|default:"—" }}</td>
+            <td><span class="temp-badge t-{{ item.lead.temperature|lower|default:'cold' }}"><i class="bi bi-thermometer-half"></i> {{ item.lead.temperature|title }}</span></td>
+            <td style="font-size: 12px; color: var(--brand-accent);">
+              {% if item.last_call %}{{ item.last_call.created_at|date:"d M Y" }}{% else %}—{% endif %}
+            </td>
+            <td style="font-size: 12px; color: var(--brand-accent);">
+              {% if item.followup %}{{ item.followup.followup_at|date:"d M Y" }}{% else %}—{% endif %}
+            </td>
+            <td>
+              <a href="{% url 'tl_lead_detail' item.lead.id %}" class="btn btn-sm" style="border: 1px solid var(--border); background: var(--white); color: var(--brand-ink); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 6px;">View</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color: var(--brand-accent);">
+      <i class="bi bi-person-x d-block mb-2" style="font-size: 32px; opacity: 0.3;"></i>
+      <div style="font-size: 14px; font-weight: 600; color: var(--brand-ink);">No leads assigned to this employee</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock body %}

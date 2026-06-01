@@ -16,5 +16,9 @@ urlpatterns = [
     path('apr-reports/', views.apr_reports, name='apr_reports'),
     path('apr-report/<int:id>/', views.employee_apr_report, name='employee_apr_report'),
     path('apr-report/<int:report_id>/day/<str:date_str>/', views.apr_day_detail, name='apr_day_detail'),
-
+    path('apr-report/<int:profile_id>/detail/', views.apr_report_detail, name='tl_apr_report_detail'),
+    path('lead-list/', views.lead_list, name='tl_lead_list'),
+    path('lead/<int:lead_id>/', views.lead_detail, name='tl_lead_detail'),
+    path('lead/<int:lead_id>/assign/', views.assign_lead, name='tl_assign_lead'),
+    path('employee/<int:employee_id>/leads/', views.employee_leads, name='tl_employee_leads'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

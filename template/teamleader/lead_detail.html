@@ -1,0 +1,159 @@
+{% extends "teamleader/base.html" %}
+
+{% block title %}Lead: {{ lead.name }} — Team Leader Portal{% endblock %}
+
+{% block css %}
+<style>
+  .brand-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .panel-title { font-size: 15px; font-weight: 700; color: var(--brand-ink); display: flex; align-items: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
+  .panel-title i { color: var(--brand-accent); }
+  .data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px 16px; }
+  .data-item { display: flex; flex-direction: column; gap: 4px; }
+  .data-label { font-size: 11px; color: var(--brand-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .data-value { font-size: 14px; color: var(--brand-ink); font-weight: 600; }
+  .table-custom th { font-size: 10px; font-weight: 700; color: var(--brand-accent); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 14px 12px; background: var(--brand-bg); }
+  .table-custom td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; color: var(--brand-ink); }
+  .temp-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .t-hot { background: rgba(239,68,68,0.1); color: #DC2626; }
+  .t-warm { background: rgba(245,158,11,0.1); color: #D97706; }
+  .t-cold { background: rgba(59,130,246,0.1); color: #2563EB; }
+  .outcome-badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .ob-interested { background: rgba(16,185,129,0.1); color: #059669; }
+  .ob-not_interested { background: rgba(239,68,68,0.1); color: #DC2626; }
+  .ob-callback { background: rgba(59,130,246,0.1); color: #2563EB; }
+  .ob-converted { background: rgba(139,92,246,0.1); color: #7C3AED; }
+  .ob-site_visit { background: rgba(245,158,11,0.1); color: #D97706; }
+  .ob-not_answered { background: rgba(107,114,128,0.1); color: #6B7280; }
+  .status-pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .s-pending { background: rgba(245,158,11,0.1); color: #D97706; }
+  .s-completed { background: rgba(16,185,129,0.1); color: #059669; }
+  .s-missed { background: rgba(239,68,68,0.1); color: #DC2626; }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 style="font-size: 22px; font-weight: 700; color: var(--brand-ink); margin: 0;">{{ lead.name }}</h2>
+      <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Lead Detail View</div>
+    </div>
+    <a href="javascript:history.back()" style="background: var(--white); color: var(--brand-ink); border: 1px solid var(--border); font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+
+  {# Lead Info Card #}
+  <div class="brand-panel">
+    <div class="panel-title"><i class="bi bi-person-lines-fill"></i> Lead Information</div>
+    <div class="data-grid">
+      <div class="data-item"><span class="data-label">Name</span><span class="data-value">{{ lead.name }}</span></div>
+      <div class="data-item"><span class="data-label">Phone</span><span class="data-value" style="font-family:'Geist Mono',monospace;">{{ lead.phone }}</span></div>
+      <div class="data-item"><span class="data-label">Email</span><span class="data-value">{{ lead.email|default:"—" }}</span></div>
+      <div class="data-item">
+        <span class="data-label">Temperature</span>
+        <div><span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}"><i class="bi bi-thermometer-half"></i> {{ lead.temperature|title }}</span></div>
+      </div>
+      <div class="data-item"><span class="data-label">Stage</span><span class="data-value" style="text-transform: capitalize;">{{ lead.stage|default:"—" }}</span></div>
+      <div class="data-item"><span class="data-label">Location</span><span class="data-value">{{ lead.location|default:"—" }}</span></div>
+      <div class="data-item"><span class="data-label">Budget</span><span class="data-value" style="font-family:'Geist Mono',monospace;">{% if lead.budget_min and lead.budget_max %}₹{{ lead.budget_min|floatformat:0 }} – ₹{{ lead.budget_max|floatformat:0 }}{% else %}—{% endif %}</span></div>
+      <div class="data-item"><span class="data-label">Property Type</span><span class="data-value" style="text-transform: capitalize;">{{ lead.property_type|default:"—" }}</span></div>
+      <div class="data-item"><span class="data-label">Source</span><span class="data-value" style="text-transform: capitalize;">{{ lead.source|default:"—" }}</span></div>
+      <div class="data-item"><span class="data-label">Purpose</span><span class="data-value" style="text-transform: capitalize;">{{ lead.purpose|default:"—" }}</span></div>
+      <div class="data-item"><span class="data-label">Assigned To</span><span class="data-value">{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</span></div>
+      <div class="data-item"><span class="data-label">Branch</span><span class="data-value">{{ lead.branch.name|default:"—" }}</span></div>
+    </div>
+  </div>
+
+  {# Call History Card #}
+  <div class="brand-panel p-0" style="overflow: hidden;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+      <div class="panel-title mb-0 pb-0 border-0"><i class="bi bi-telephone-fill"></i> Call History</div>
+    </div>
+    {% if call_log_data %}
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4">#</th>
+            <th>Date</th>
+            <th>Called By</th>
+            <th>Outcome</th>
+            <th>Duration</th>
+            <th>Notes</th>
+            <th>Recording</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in call_log_data %}
+          <tr>
+            <td class="ps-4" style="font-family:'Geist Mono',monospace; color: var(--brand-accent); font-size: 12px;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td style="font-family:'Geist Mono',monospace; font-size: 12px;">{{ item.call.created_at|date:"d M Y, h:i A" }}</td>
+            <td>{{ item.call.called_by.user.get_full_name|default:"—" }}</td>
+            <td><span class="outcome-badge ob-{{ item.call.call_outcome }}">{{ item.call.get_call_outcome_display }}</span></td>
+            <td style="font-family:'Geist Mono',monospace; font-size: 12px;">{{ item.call.duration_display }}</td>
+            <td style="font-size: 12px; color: var(--brand-accent); max-width: 200px;">{{ item.call.call_notes|default:"—" }}</td>
+            <td style="min-width: 180px;">
+              {% if item.recording_url %}
+                <audio controls style="height: 28px; width: 150px; border-radius: 6px;">
+                  <source src="{{ item.recording_url }}">
+                </audio>
+                <a href="{{ item.recording_url }}" download style="margin-left: 4px; color: var(--brand-accent); font-size: 13px;"><i class="bi bi-download"></i></a>
+              {% else %}
+                <span style="font-size: 11px; color: var(--brand-accent);"><i class="bi bi-mic-mute me-1"></i>No recording</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color: var(--brand-accent);">
+      <i class="bi bi-telephone-x d-block mb-2" style="font-size: 32px; opacity: 0.3;"></i>
+      <div style="font-size: 14px; font-weight: 600; color: var(--brand-ink);">No calls recorded yet</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# Follow Ups Card #}
+  <div class="brand-panel p-0" style="overflow: hidden;">
+    <div style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
+      <div class="panel-title mb-0 pb-0 border-0"><i class="bi bi-calendar-check-fill"></i> Follow Ups</div>
+    </div>
+    {% if follow_ups %}
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4">Scheduled Date</th>
+            <th>Type</th>
+            <th>Notes</th>
+            <th>Assigned To</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fu in follow_ups %}
+          <tr>
+            <td class="ps-4" style="font-family:'Geist Mono',monospace; font-size: 12px;">{{ fu.followup_at|date:"d M Y, h:i A" }}</td>
+            <td style="text-transform: capitalize;">{{ fu.followup_type|default:"—" }}</td>
+            <td style="font-size: 12px; color: var(--brand-accent); max-width: 220px;">{{ fu.notes|default:"—" }}</td>
+            <td>{{ fu.assigned_to.user.get_full_name|default:"—" }}</td>
+            <td><span class="status-pill s-{{ fu.followup_status }}">{{ fu.followup_status|title }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color: var(--brand-accent);">
+      <i class="bi bi-calendar-x d-block mb-2" style="font-size: 32px; opacity: 0.3;"></i>
+      <div style="font-size: 14px; font-weight: 600; color: var(--brand-ink);">No follow-ups scheduled</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock body %}

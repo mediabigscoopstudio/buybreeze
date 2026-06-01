@@ -1628,6 +1628,7 @@ def apr_report(request):
             
             directory_data.append({
                 'username': emp.username,
+                'profile_id': emp.profile.id if hasattr(emp, 'profile') else None,
                 'branch': branch_name,
                 'team_leader': tl_name,
             })

@@ -1,0 +1,65 @@
+{% extends "manager/base.html" %}
+
+{% block title %}All Leads — Manager Portal{% endblock %}
+
+{% block css %}
+<style>
+  .brand-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 24px; overflow: hidden; }
+  .table-custom th { font-size: 10px; font-weight: 700; color: var(--brand-accent); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 14px 12px; background: var(--brand-bg); }
+  .table-custom td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; color: var(--brand-ink); }
+  .temp-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .t-hot { background: rgba(239,68,68,0.1); color: #DC2626; }
+  .t-warm { background: rgba(245,158,11,0.1); color: #D97706; }
+  .t-cold { background: rgba(59,130,246,0.1); color: #2563EB; }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+
+  <div class="mb-4">
+    <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">All Leads</h2>
+    <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">All leads across your reporting team</div>
+  </div>
+
+  <div class="brand-panel">
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4">#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Stage</th>
+            <th>Temperature</th>
+            <th>Assigned To</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr>
+            <td class="ps-4" style="font-family:'Geist Mono',monospace; color: var(--brand-accent); font-size: 12px;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td>
+              <a href="{% url 'manager_lead_detail' lead.id %}" style="color: var(--brand-ink); text-decoration: none; font-weight: 700;">{{ lead.name }}</a>
+            </td>
+            <td style="font-family:'Geist Mono',monospace; font-size: 12px;">{{ lead.phone }}</td>
+            <td style="text-transform: capitalize; font-size: 12px; font-weight: 600;">{{ lead.stage|default:"—" }}</td>
+            <td><span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}"><i class="bi bi-thermometer-half"></i> {{ lead.temperature|title }}</span></td>
+            <td>{{ lead.assigned_to.user.get_full_name|default:"Unassigned" }}</td>
+            <td style="font-size: 12px; color: var(--brand-accent);">{{ lead.created_at|date:"d M Y" }}</td>
+            <td>
+              <a href="{% url 'manager_lead_detail' lead.id %}" class="btn btn-sm" style="border: 1px solid var(--border); background: var(--white); color: var(--brand-ink); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 6px;">View</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="text-center py-5">No leads found</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock body %}

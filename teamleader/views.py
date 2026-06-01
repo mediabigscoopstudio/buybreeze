@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
+from django.db.models import Q
 from dash.models import Attendance, Branch, LeaveRequest, UserProfile, Lead, CallLog
 from dash.notifications import (
     create_notification, get_admins,
@@ -490,8 +491,10 @@ def view_lead(request, id):
 @user_passes_test(tl_required, login_url='/login/')
 def apr_reports(request):
     tl_profile = request.user.profile
-    current_month = timezone.now().month
-    current_year = timezone.now().year
+    from zoneinfo import ZoneInfo
+    now_ist = timezone.now().astimezone(ZoneInfo('Asia/Kolkata'))
+    current_month = now_ist.month
+    current_year = now_ist.year
 
     employees = UserProfile.objects.filter(
         reports_to=tl_profile,
@@ -527,7 +530,7 @@ def apr_reports(request):
 
     return render(request, 'teamleader/apr_reports.html', {
         'employee_data': employee_data,
-        'month': timezone.now().strftime('%B %Y'),
+        'month': now_ist.strftime('%B %Y'),
         'total_team_members': len(employee_data),
         'total_present_this_month': total_present_this_month,
         'total_calls_this_month': total_calls_this_month,
@@ -671,6 +674,96 @@ def apr_day_detail(request, report_id, date_str):
         'ping_count': len(pings),
         'report_id': report_id,
     })
+
+# ============================================================
+# APR REPORT DETAIL (alias with profile_id param)
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def apr_report_detail(request, profile_id):
+    return employee_apr_report(request, id=profile_id)
+
+
+# ============================================================
+# LEAD LIST
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def lead_list(request):
+    tl = request.user.profile
+    employees = UserProfile.objects.filter(reports_to=tl, role='employee', status='Enabled')
+    leads = Lead.objects.filter(
+        Q(assigned_to__in=employees) | Q(assigned_to=tl)
+    ).select_related('assigned_to__user', 'branch').order_by('-created_at')
+    return render(request, 'teamleader/lead_list.html', {'leads': leads})
+
+
+# ============================================================
+# LEAD DETAIL
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def lead_detail(request, lead_id):
+    from dash.models import FollowUp, CallWrapUp
+    tl = request.user.profile
+    employees = UserProfile.objects.filter(reports_to=tl, role='employee', status='Enabled')
+    allowed_ids = list(employees.values_list('id', flat=True)) + [tl.id]
+    lead = get_object_or_404(Lead, id=lead_id, assigned_to_id__in=allowed_ids)
+    call_logs = CallLog.objects.filter(lead=lead).select_related('called_by__user').order_by('-created_at')
+    call_log_data = []
+    for call in call_logs:
+        wrapup = getattr(call, 'wrapup', None)
+        recording_url = call.recording.url if call.recording else None
+        call_log_data.append({
+            'call': call,
+            'wrapup': wrapup,
+            'recording_url': recording_url,
+        })
+    follow_ups = FollowUp.objects.filter(lead=lead).order_by('followup_at')
+    return render(request, 'teamleader/lead_detail.html', {
+        'lead': lead,
+        'call_log_data': call_log_data,
+        'follow_ups': follow_ups,
+    })
+
+
+# ============================================================
+# ASSIGN LEAD (POST assigns lead to employee)
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def assign_lead(request, lead_id):
+    from dash.models import FollowUp
+    if request.method == 'POST':
+        tl = request.user.profile
+        lead = get_object_or_404(Lead, id=lead_id, assigned_to=tl)
+        employee_id = request.POST.get('employee_id')
+        employee = get_object_or_404(UserProfile, id=employee_id, role='employee', reports_to=tl)
+        lead.assigned_to = employee
+        lead.save()
+        messages.success(request, f'Lead assigned to {employee.user.get_full_name()}.')
+    return redirect('index')
+
+
+# ============================================================
+# EMPLOYEE LEADS
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def employee_leads(request, employee_id):
+    from dash.models import FollowUp
+    tl = request.user.profile
+    employee = get_object_or_404(UserProfile, id=employee_id, role='employee', reports_to=tl)
+    leads = Lead.objects.filter(assigned_to=employee).select_related('branch').order_by('-created_at')
+    lead_data = []
+    for lead in leads:
+        last_call = CallLog.objects.filter(lead=lead).order_by('-created_at').first()
+        followup = FollowUp.objects.filter(lead=lead, followup_status='pending').order_by('followup_at').first()
+        lead_data.append({
+            'lead': lead,
+            'last_call': last_call,
+            'followup': followup,
+        })
+    return render(request, 'teamleader/employee_leads.html', {
+        'employee': employee,
+        'lead_data': lead_data,
+    })
+
 
 # ============================================================
 # NOTIFICATIONS PAGE (Team Leader)
