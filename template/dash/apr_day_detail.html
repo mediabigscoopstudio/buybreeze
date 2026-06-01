@@ -175,7 +175,7 @@
             <i class="bi bi-clock" style="color: var(--sage); font-size: 18px;"></i>
             <span style="font-size: 15px; font-weight: 700; color: var(--ink);">Attendance</span>
             {% if attendance %}
-                {% if attendance.punch_in_time %}
+                {% if attendance.punch_in %}
                     <span class="status-pill s-present ms-2"><i class="bi bi-check-circle-fill"></i> Present</span>
                 {% else %}
                     <span class="status-pill s-absent ms-2"><i class="bi bi-x-circle-fill"></i> Absent</span>
@@ -187,13 +187,13 @@
         <div class="att-grid">
             <div class="att-cell">
                 <div class="att-cell-val">
-                    {% if attendance and attendance.punch_in_time %}{{ attendance.punch_in_time|time:"h:i A" }}{% else %}—{% endif %}
+                    {% if attendance and attendance.punch_in %}{{ attendance.punch_in|time:"h:i A" }}{% else %}—{% endif %}
                 </div>
                 <div class="att-cell-label">Punch In</div>
             </div>
             <div class="att-cell">
                 <div class="att-cell-val">
-                    {% if attendance and attendance.punch_out_time %}{{ attendance.punch_out_time|time:"h:i A" }}{% else %}—{% endif %}
+                    {% if attendance and attendance.punch_out %}{{ attendance.punch_out|time:"h:i A" }}{% else %}—{% endif %}
                 </div>
                 <div class="att-cell-label">Punch Out</div>
             </div>
@@ -313,7 +313,7 @@
                         <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ lead.phone }}</td>
                         <td>
                             <span style="font-size:12px; font-weight:600; text-transform:capitalize;">
-                                {{ lead.stage|default:"—"|replace:"_":" " }}
+                                {{ lead.stage|default:"—"|cut:"_" }}
                             </span>
                         </td>
                         <td>
