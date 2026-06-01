@@ -1863,10 +1863,14 @@ def meta_ads_dashboard(request):
             from .meta_ads import get_meta_campaigns, get_meta_leads
             campaigns = get_meta_campaigns(date_preset=date_preset)
             leads     = get_meta_leads(limit=100)
-        except ModuleNotFoundError as e:
-            error = "Missing dependency: facebook-business is not installed on the server. Run: pip install facebook-business"
+        except ModuleNotFoundError:
+            error = "missing_package"
         except Exception as e:
-            error = str(e)
+            err_str = str(e)
+            if 'OAuthException' in err_str or 'Session has expired' in err_str or 'access token' in err_str.lower():
+                error = "token_expired"
+            else:
+                error = err_str
     else:
         date_preset = 'last_30d'
 
