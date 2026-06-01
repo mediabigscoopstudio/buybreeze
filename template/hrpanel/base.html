@@ -82,15 +82,14 @@
     <button class="mobile-toggle" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
     <h1 class="page-header-title">{% block page_header %}HR Panel{% endblock %}</h1>
     <div class="d-flex align-items-center gap-3">
-        <div class="dropdown">
-            <button class="notification-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-bell-fill"></i>
-                <span id="notification-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none; font-size: 8px;">0</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" id="notification-list" style="width: 280px; border-radius: 12px;">
-                <li class="dropdown-header fw-bold">Notifications</li>
-            </ul>
-        </div>
+        <a href="/notifications/" class="notification-btn position-relative text-decoration-none" title="Notifications">
+            <i class="bi bi-bell-fill"></i>
+            {% if unread_notifications_count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 8px;">
+                {{ unread_notifications_count }}
+            </span>
+            {% endif %}
+        </a>
       <div class="admin-profile">
         <div style="width: 8px; height: 8px; background: var(--sage); border-radius: 50%;"></div>
         {{ request.user.get_full_name|default:"Minaketan Mishra" }}

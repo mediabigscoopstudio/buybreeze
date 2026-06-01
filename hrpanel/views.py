@@ -15,6 +15,11 @@ from dash.models import (
     Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting
 )
 from dash.otp_utils import generate_otp, send_otp
+from dash.notifications import (
+    create_notification, get_admins,
+    get_user_notifications, get_unread_count,
+    mark_all_read, mark_read,
+)
 
 
 
@@ -585,6 +590,21 @@ def approve_leave(request, id):
     record.leave_status = 'approved'
     record.approved_by  = request.user.userprofile
     record.save()
+    try:
+        create_notification(
+            from_user=request.user,
+            to_users=[record.employee.user],
+            title="✅ Leave Approved",
+            description=f"Your {record.leave_type} leave from {record.from_date} to {record.to_date} has been approved by HR.",
+        )
+        create_notification(
+            from_user=request.user,
+            to_users=get_admins(),
+            title="✅ Leave Approved by HR",
+            description=f"{record.employee.user.get_full_name()}'s {record.leave_type} leave approved by {request.user.get_full_name()}.",
+        )
+    except Exception:
+        pass
     messages.success(request, 'Leave approved.')
     return redirect('leaves')
 
@@ -595,6 +615,15 @@ def reject_leave(request, id):
     record.leave_status = 'rejected'
     record.approved_by  = request.user.userprofile
     record.save()
+    try:
+        create_notification(
+            from_user=request.user,
+            to_users=[record.employee.user],
+            title="❌ Leave Rejected",
+            description=f"Your {record.leave_type} leave has been rejected by HR. Remarks: {record.remarks or 'No remarks'}",
+        )
+    except Exception:
+        pass
     messages.success(request, 'Leave rejected.')
     return redirect('leaves')
 
@@ -907,4 +936,24 @@ def apr_day_detail(request, report_id, date_str):
         'ping_coords': ping_coords,
         'ping_count': pings.count(),
         'report_id': report_id,
+    })
+
+# ============================================================
+# NOTIFICATIONS PAGE (HR Panel)
+# ============================================================
+@user_passes_test(hr_required, login_url='/login')
+def notifications_list(request):
+    if request.method == 'POST':
+        action   = request.POST.get('action')
+        notif_id = request.POST.get('notification_id')
+        if action == 'mark_all_read':
+            mark_all_read(request.user)
+        elif action == 'mark_read' and notif_id:
+            mark_read(request.user, notif_id)
+        return redirect('notifications_list')
+    notifications = get_user_notifications(request.user, limit=50)
+    unread_count  = get_unread_count(request.user)
+    return render(request, 'hrpanel/notifications.html', {
+        'notifications': notifications,
+        'unread_count':  unread_count,
     })

@@ -13,6 +13,7 @@ urlpatterns = [
     path('tl_performance/<int:id>/', views.tl_performance, name='tl_performance'),
     path('profile_settings', views.profile_settings, name='profile_settings'),
     path('view_lead/<int:id>/', views.view_lead, name='view_lead'),
+    path('notifications/', views.notifications_list, name='notifications_list'),
     path('apr-reports/', views.apr_reports, name='apr_reports'),
     path('apr-report/<int:id>/', views.individual_apr_report, name='individual_apr_report'),
     path('apr-report/<int:report_id>/day/<str:date_str>/', views.apr_day_detail, name='apr_day_detail'),

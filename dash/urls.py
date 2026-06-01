@@ -8,9 +8,11 @@ from dash import meta_views
 urlpatterns = [
     # Admin 
     path('django-admin/', admin.site.urls),
-    #notifications
+    # notifications (JSON API for bell dropdown)
     path('notifications/', views.get_notifications, name='get_notifications'),
     path('notifications/read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),
+    # notifications page
+    path('my-notifications/', views.notifications_list, name='notifications_list'),
     # Auth
     path('', views.index, name='index'),
     path('login/', views.login_view, name='login_view'),

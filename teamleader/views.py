@@ -4,6 +4,11 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.db.models import Count, Q
 from dash.models import Branch, UserProfile, Lead, CallLog
+from dash.notifications import (
+    create_notification, get_admins,
+    get_user_notifications, get_unread_count,
+    mark_all_read, mark_read,
+)
 from django.http import JsonResponse
 import json
 from dash.otp_utils import generate_otp, send_otp
@@ -337,6 +342,16 @@ def assign_to_employee(request):
                 lead.assigned_to = employee
                 lead.save()
 
+            try:
+                create_notification(
+                    from_user=request.user,
+                    to_users=[employee.user],
+                    title="📋 New Lead(s) Assigned",
+                    description=f"Team Leader {request.user.get_full_name()} assigned {len(lead_ids)} lead(s) to you.",
+                )
+            except Exception:
+                pass
+
             return JsonResponse({'status': 'success'})
 
         except Exception as e:
@@ -661,4 +676,24 @@ def apr_day_detail(request, report_id, date_str):
         'ping_coords': ping_coords,
         'ping_count': len(pings),
         'report_id': report_id,
+    })
+
+# ============================================================
+# NOTIFICATIONS PAGE (Team Leader)
+# ============================================================
+@user_passes_test(tl_required, login_url='/login/')
+def notifications_list(request):
+    if request.method == 'POST':
+        action   = request.POST.get('action')
+        notif_id = request.POST.get('notification_id')
+        if action == 'mark_all_read':
+            mark_all_read(request.user)
+        elif action == 'mark_read' and notif_id:
+            mark_read(request.user, notif_id)
+        return redirect('notifications_list')
+    notifications = get_user_notifications(request.user, limit=50)
+    unread_count  = get_unread_count(request.user)
+    return render(request, 'teamleader/notifications.html', {
+        'notifications': notifications,
+        'unread_count':  unread_count,
     })

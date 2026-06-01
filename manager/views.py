@@ -8,6 +8,13 @@ from datetime import timedelta, datetime
 from dash.otp_utils import generate_otp, send_otp
 from django.utils import timezone
 from django.contrib.auth.models import User
+from dash.notifications import (
+    create_notification, get_admins,
+    get_user_notifications, get_unread_count,
+    mark_all_read, mark_read,
+)
+import json
+from django.http import JsonResponse
 
 
 
@@ -277,8 +284,6 @@ def index(request):
 # ============================================================
 # ASSIGN LEAD TO TL (Manager)
 # ============================================================
-from django.http import JsonResponse
-import json
 
 @user_passes_test(manager_required)
 def assign_to_tl(request):
@@ -297,8 +302,18 @@ def assign_to_tl(request):
             leads = Lead.objects.filter(id__in=lead_ids)
 
             for lead in leads:
-                lead.assigned_to = tl   # 🔥 THIS IS THE KEY LINE
+                lead.assigned_to = tl
                 lead.save()
+
+            try:
+                create_notification(
+                    from_user=request.user,
+                    to_users=[tl.user],
+                    title="📋 New Lead(s) Assigned",
+                    description=f"{request.user.get_full_name()} assigned {len(lead_ids)} lead(s) to you.",
+                )
+            except Exception:
+                pass
 
             return JsonResponse({'status': 'success'})
 
@@ -581,4 +596,24 @@ def apr_day_detail(request, report_id, date_str):
         'ping_coords': ping_coords,
         'ping_count': pings.count(),
         'report_id': report_id,
+    })
+
+# ============================================================
+# NOTIFICATIONS PAGE (Manager)
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def notifications_list(request):
+    if request.method == 'POST':
+        action   = request.POST.get('action')
+        notif_id = request.POST.get('notification_id')
+        if action == 'mark_all_read':
+            mark_all_read(request.user)
+        elif action == 'mark_read' and notif_id:
+            mark_read(request.user, notif_id)
+        return redirect('notifications_list')
+    notifications = get_user_notifications(request.user, limit=50)
+    unread_count  = get_unread_count(request.user)
+    return render(request, 'manager/notifications.html', {
+        'notifications': notifications,
+        'unread_count':  unread_count,
     })

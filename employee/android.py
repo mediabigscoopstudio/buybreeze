@@ -18,6 +18,11 @@ from dash.models import (
     UserProfile, Attendance, Lead,
     CallLog, CallWrapUp, FollowUp, Branch
 )
+from dash.notifications import (
+    create_notification, get_admins,
+    get_hr_users, get_manager_for_employee,
+    get_team_leaders_for_employee,
+)
 from employee.models import LocationPing, Attendance as EmployeeAttendance
 
 
@@ -133,6 +138,29 @@ def verify_otp(request):
         attendance.punch_in_lng = lng
         attendance.is_out_of_zone = False
         attendance.save()
+        try:
+            ist = pytz.timezone('Asia/Kolkata')
+            punch_time = attendance.punch_in.astimezone(ist)
+            notify_users = list(set(
+                get_hr_users(branch=profile.branch) +
+                get_manager_for_employee(profile)
+            ))
+            if punch_time.hour >= 10:
+                create_notification(
+                    from_user=profile.user,
+                    to_users=notify_users,
+                    title="⚠️ Late Punch In",
+                    description=f"{profile.user.get_full_name()} punched in late at {punch_time.strftime('%I:%M %p')}",
+                )
+            else:
+                create_notification(
+                    from_user=profile.user,
+                    to_users=notify_users,
+                    title="✅ Employee Checked In",
+                    description=f"{profile.user.get_full_name()} punched in at {punch_time.strftime('%I:%M %p')}",
+                )
+        except Exception:
+            pass
 
     return Response({
         "success": True,
@@ -182,6 +210,21 @@ def punch_out(request):
     attendance.punch_out_lng = lng
     attendance.calculate_hours()
     attendance.save()
+    try:
+        ist = pytz.timezone('Asia/Kolkata')
+        punch_time = attendance.punch_out.astimezone(ist)
+        notify_users = list(set(
+            get_hr_users(branch=profile.branch) +
+            get_manager_for_employee(profile)
+        ))
+        create_notification(
+            from_user=profile.user,
+            to_users=notify_users,
+            title="👋 Employee Checked Out",
+            description=f"{profile.user.get_full_name()} punched out at {punch_time.strftime('%I:%M %p')} ({attendance.total_hours or 0}h worked)",
+        )
+    except Exception:
+        pass
 
     return Response({
         "success": True,
@@ -559,6 +602,29 @@ def save_call(request):
     lead.stage = stage
     lead.save()
 
+    # Notification: call logged
+    try:
+        outcome_emoji = {"converted": "🎯", "interested": "✅", "not_interested": "❌"}.get(call_outcome, "📞")
+        notify_users = list(set(
+            get_manager_for_employee(profile) +
+            get_team_leaders_for_employee(profile)
+        ))
+        create_notification(
+            from_user=profile.user,
+            to_users=notify_users,
+            title=f"{outcome_emoji} Call Logged",
+            description=f"{profile.user.get_full_name()} called {lead.name} — Outcome: {call_outcome.replace('_', ' ').title()}",
+        )
+        if call_outcome in ('converted', 'closed'):
+            create_notification(
+                from_user=profile.user,
+                to_users=get_admins(),
+                title="🎯 Lead Converted!",
+                description=f"{lead.name} has been converted by {profile.user.get_full_name()}",
+            )
+    except Exception:
+        pass
+
     # Create FollowUp if followup_at provided
     if followup_dt:
         FollowUp.objects.create(
@@ -834,6 +900,20 @@ def apply_leave(request):
             reason       = reason,
             leave_status = "pending",
         )
+        try:
+            notify_users = list(set(
+                get_hr_users(branch=profile.branch) +
+                get_admins() +
+                get_manager_for_employee(profile)
+            ))
+            create_notification(
+                from_user=profile.user,
+                to_users=notify_users,
+                title="🏖️ Leave Request",
+                description=f"{profile.user.get_full_name()} applied for {leave_type} leave from {from_date} to {to_date}",
+            )
+        except Exception:
+            pass
         return Response({
             "success":  True,
             "message":  "Leave request submitted",

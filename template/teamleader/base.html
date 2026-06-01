@@ -160,8 +160,20 @@
                 
                 <li class="nav-item">
                     <a href="{% url 'apr_reports' %}" class="btn-outline-brand">
-                        <i class="bi bi-bar-chart-fill" style="color: var(--brand-accent);"></i> 
+                        <i class="bi bi-bar-chart-fill" style="color: var(--brand-accent);"></i>
                         <span class="d-none d-md-inline">APR Reports</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'notifications_list' %}" class="btn-outline-brand position-relative" title="Notifications">
+                        <i class="bi bi-bell-fill" style="color: var(--brand-accent);"></i>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 9px;">
+                            {{ unread_notifications_count }}
+                        </span>
+                        {% endif %}
+                        <span class="d-none d-md-inline">Notifications</span>
                     </a>
                 </li>
 

@@ -6,6 +6,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# ──────────────────────────────────────────────
+# FIREBASE
+# ──────────────────────────────────────────────
+
 def initialize_firebase():
     try:
         import firebase_admin
@@ -26,7 +30,6 @@ def initialize_firebase():
 def send_push_notification(user, title, body):
     try:
         initialize_firebase()
-        import firebase_admin
         from firebase_admin import messaging
         from dash.models import UserDeviceToken
 
@@ -36,15 +39,10 @@ def send_push_notification(user, title, body):
             return False
 
         message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=body
-            ),
+            notification=messaging.Notification(title=title, body=body),
             android=messaging.AndroidConfig(
                 priority='high',
-                notification=messaging.AndroidNotification(
-                    sound='default'
-                )
+                notification=messaging.AndroidNotification(sound='default')
             ),
             token=token_obj.token
         )
@@ -54,6 +52,10 @@ def send_push_notification(user, title, body):
         logger.error(f"Push notification error: {e}")
         return False
 
+
+# ──────────────────────────────────────────────
+# CORE NOTIFICATION FUNCTIONS
+# ──────────────────────────────────────────────
 
 def create_notification(from_user, to_users, title, description):
     if not to_users:
@@ -107,22 +109,54 @@ def mark_read(user, notification_id):
     ).update(is_read=True, read_at=timezone.now())
 
 
-def get_managers_for_employee(profile):
+# ──────────────────────────────────────────────
+# RECIPIENT RESOLVER HELPERS
+# ──────────────────────────────────────────────
+
+def get_admins():
+    return list(User.objects.filter(is_staff=True))
+
+
+def get_hr_users(branch=None):
     from dash.models import UserProfile
+    qs = UserProfile.objects.filter(role='hr', status='Enabled')
+    if branch:
+        qs = qs.filter(branch=branch)
+    return [p.user for p in qs]
+
+
+def get_managers_for_branch(branch=None):
+    from dash.models import UserProfile
+    qs = UserProfile.objects.filter(role='manager', status='Enabled')
+    if branch:
+        qs = qs.filter(branch=branch)
+    return [p.user for p in qs]
+
+
+def get_team_leaders_for_employee(profile):
     users = []
     if profile.reports_to:
         users.append(profile.reports_to.user)
-        if profile.reports_to.reports_to:
-            users.append(profile.reports_to.reports_to.user)
+    return users
+
+
+def get_manager_for_employee(profile):
+    users = []
+    if profile.reports_to:
+        tl = profile.reports_to
+        users.append(tl.user)
+        if tl.reports_to:
+            users.append(tl.reports_to.user)
+    return users
+
+
+def get_managers_for_employee(profile):
+    """Legacy alias — returns TL + manager + HR for an employee profile."""
+    from dash.models import UserProfile
+    users = list(get_manager_for_employee(profile))
     hr_profiles = UserProfile.objects.filter(
-        role='hr',
-        branch=profile.branch,
-        status='Enabled'
+        role='hr', branch=profile.branch, status='Enabled'
     )
     for hr in hr_profiles:
         users.append(hr.user)
     return list(set(users))
-
-
-def get_admins():
-    return list(User.objects.filter(is_staff=True))

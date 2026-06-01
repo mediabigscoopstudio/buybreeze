@@ -22,8 +22,13 @@ from datetime import datetime
 from django.shortcuts import get_object_or_404
 from .otp_utils import generate_otp, send_otp
 from django.contrib.auth.decorators import login_required
-from .notification_utils import create_notification
 from dash.models import NotificationRecipient
+from dash.notifications import (
+    create_notification, get_admins,
+    get_hr_users, get_manager_for_employee,
+    get_user_notifications, get_unread_count,
+    mark_all_read, mark_read,
+)
 
 # ============================================================
 # AUTH GUARD
@@ -666,7 +671,7 @@ def add_lead(request):
     branches = Branch.objects.filter(status='Enabled')
     members  = UserProfile.objects.filter(role='member', status='Enabled').select_related('user')
     if request.method == 'POST':
-        Lead.objects.create(
+        new_lead = Lead.objects.create(
             name              = request.POST.get('name'),
             phone             = request.POST.get('phone'),
             email             = request.POST.get('email') or None,
@@ -690,6 +695,15 @@ def add_lead(request):
             branch_id         = request.POST.get('branch') or None,
             notes             = request.POST.get('notes'),
         )
+        try:
+            create_notification(
+                from_user=request.user,
+                to_users=get_admins(),
+                title="🆕 New Lead Added",
+                description=f"{request.user.get_full_name()} added new lead: {new_lead.name} ({new_lead.phone})",
+            )
+        except Exception:
+            pass
         messages.success(request, 'Lead added successfully.')
         return redirect('leads')
     return render(request, 'dash/leads/add_lead.html', {'branches': branches, 'members': members})
@@ -719,11 +733,22 @@ def edit_lead(request, id):
         item.timeline          = request.POST.get('timeline') or None
         item.readiness         = request.POST.get('readiness') or None
         item.temperature       = request.POST.get('temperature', 'cold')
-        item.stage             = request.POST.get('stage', 'new')
+        new_stage              = request.POST.get('stage', 'new')
+        item.stage             = new_stage
         item.assigned_to_id    = request.POST.get('assigned_to') or None
         item.branch_id         = request.POST.get('branch') or None
         item.notes             = request.POST.get('notes')
         item.save()
+        if new_stage in ('converted', 'closed'):
+            try:
+                create_notification(
+                    from_user=request.user,
+                    to_users=get_admins(),
+                    title=f"🎯 Lead {new_stage.title()}",
+                    description=f"{item.name} has been marked as {new_stage} by {request.user.get_full_name()}",
+                )
+            except Exception:
+                pass
         messages.success(request, 'Lead updated successfully.')
         return redirect('leads')
     return render(request, 'dash/leads/edit_lead.html', {
@@ -781,6 +806,15 @@ def assign_lead_to_manager(request, lead_id):
             lead.assigned_to_tl = None
             lead.assigned_to    = None
             lead.save()
+            try:
+                create_notification(
+                    from_user=request.user,
+                    to_users=[manager.user],
+                    title="📋 New Lead Assigned",
+                    description=f"You have been assigned a new lead: {lead.name} ({lead.phone})",
+                )
+            except Exception:
+                pass
             messages.success(request, f'Lead "{lead.name}" assigned to Manager {manager.user.get_full_name()}.')
         else:
             messages.error(request, 'Please select a Manager.')
@@ -1141,6 +1175,15 @@ def bulk_upload_leads(request):
 
         if created_count:
             messages.success(request, f'{created_count} leads imported successfully.')
+            try:
+                create_notification(
+                    from_user=request.user,
+                    to_users=get_admins(),
+                    title="📊 Bulk Leads Uploaded",
+                    description=f"{request.user.get_full_name()} uploaded {created_count} leads via bulk upload.",
+                )
+            except Exception:
+                pass
         if errors:
             for err in errors[:10]:
                 messages.warning(request, err)
@@ -1371,6 +1414,15 @@ def approve_leave(request, id):
     record.leave_status = 'approved'
     record.approved_by  = request.user.userprofile
     record.save()
+    try:
+        create_notification(
+            from_user=request.user,
+            to_users=[record.employee.user],
+            title="✅ Leave Approved",
+            description=f"Your {record.leave_type} leave from {record.from_date} to {record.to_date} has been approved.",
+        )
+    except Exception:
+        pass
     messages.success(request, 'Leave approved.')
     return redirect('leaves')
 
@@ -1381,6 +1433,15 @@ def reject_leave(request, id):
     record.leave_status = 'rejected'
     record.approved_by  = request.user.userprofile
     record.save()
+    try:
+        create_notification(
+            from_user=request.user,
+            to_users=[record.employee.user],
+            title="❌ Leave Rejected",
+            description=f"Your {record.leave_type} leave has been rejected. Remarks: {record.remarks or 'No remarks'}",
+        )
+    except Exception:
+        pass
     messages.success(request, 'Leave rejected.')
     return redirect('leaves')
 
@@ -1863,3 +1924,24 @@ def whatsapp_dashboard(request):
         'error':           error,
     })
 
+
+
+# ============================================================
+# NOTIFICATIONS PAGE (Dash)
+# ============================================================
+@user_passes_test(superadmin_required, login_url='/login/')
+def notifications_list(request):
+    if request.method == 'POST':
+        action   = request.POST.get('action')
+        notif_id = request.POST.get('notification_id')
+        if action == 'mark_all_read':
+            mark_all_read(request.user)
+        elif action == 'mark_read' and notif_id:
+            mark_read(request.user, notif_id)
+        return redirect('notifications_list')
+    notifications = get_user_notifications(request.user, limit=50)
+    unread_count  = get_unread_count(request.user)
+    return render(request, 'dash/notifications.html', {
+        'notifications': notifications,
+        'unread_count':  unread_count,
+    })
