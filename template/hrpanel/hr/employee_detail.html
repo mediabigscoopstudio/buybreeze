@@ -82,7 +82,13 @@
                 <td>{{ r.punch_in|date:"g:i A"|default:"—" }}</td>
                 <td>{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
                 <td>
-                  <span class="status-pill {% if r.status == 'present' %}s-sage{% else %}s-lost{% endif %}">{{ r.get_status_display }}</span>
+                  {% if r.computed_status == 'present' %}
+                    <span class="status-pill s-sage">Present</span>
+                  {% elif r.computed_status == 'active' %}
+                    <span class="status-pill s-gold">Active</span>
+                  {% else %}
+                    <span class="status-pill s-lost">Absent</span>
+                  {% endif %}
                 </td>
                 <td>
                   <a href="{% url 'edit_attendance' r.id %}" class="action-icon"><i class="bi bi-pencil-square"></i></a>

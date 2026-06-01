@@ -354,6 +354,7 @@ class Attendance(models.Model):
     punch_out_lat  = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True)
     punch_out_lng  = models.DecimalField(max_digits=10, decimal_places=7, blank=True, null=True)
     status         = models.CharField(max_length=20, choices=ATTENDANCE_STATUS_CHOICES, default='present')
+    is_absent      = models.BooleanField(default=False)
     is_out_of_zone = models.BooleanField(default=False)
     total_hours    = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     notes          = models.TextField(blank=True, null=True)
@@ -368,6 +369,18 @@ class Attendance(models.Model):
             delta = self.punch_out - self.punch_in
             self.total_hours = round(delta.total_seconds() / 3600, 2)
             self.save()
+
+    @property
+    def computed_status(self):
+        if self.punch_in and self.punch_out:
+            return 'present'
+        if self.punch_in and not self.punch_out:
+            return 'active'
+        return 'absent'
+
+    @property
+    def computed_status_label(self):
+        return self.computed_status.title()
 
 
 LEAVE_TYPE_CHOICES = [

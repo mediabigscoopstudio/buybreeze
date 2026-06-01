@@ -1,121 +1,77 @@
 {% extends 'hrpanel/base.html' %}
 {% load static %}
 
-{% block title %}APR Reports — Buy Buzz CRM{% endblock %}
+{% block title %}APR Reports - {{ current_month }}{% endblock %}
 {% block page_header %}APR Reports{% endblock %}
 
 {% block content %}
 <style>
-    /* ── GROVE UI: APR REPORTS ── */
-    .stat-card {
-        background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; 
-        padding: 24px; display: flex; align-items: center; gap: 16px;
-    }
-    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-    .stat-val { font-family: 'Geist Mono', monospace; font-size: 28px; font-weight: 700; color: #0D0D0D; line-height: 1; }
-    .stat-label { font-size: 11px; color: #7A7A72; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .grove-panel { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; overflow: hidden; }
-    .grove-table { width: 100%; border-collapse: collapse; }
-    .grove-table th { padding: 16px 24px; font-size: 10px; font-weight: 700; color: #7A7A72; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E4E4E0; }
-    .grove-table td { padding: 16px 24px; border-bottom: 1px solid #F5F5F3; vertical-align: middle; }
-    
-    .btn-view-apr { 
-        background: #E6F2EE; color: #1A6B55; border: none; border-radius: 8px; 
-        font-weight: 600; padding: 6px 16px; font-size: 12px; transition: all 0.2s; text-decoration: none; 
-    }
-    .btn-view-apr:hover { background: #1A6B55; color: #FFFFFF; }
+  .grove-panel { background: #FFFFFF; border: 1px solid #E4E4E0; border-radius: 16px; overflow: hidden; }
+  .grove-table { width: 100%; border-collapse: collapse; }
+  .grove-table th { padding: 16px 24px; font-size: 10px; font-weight: 700; color: #7A7A72; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #E4E4E0; }
+  .grove-table td { padding: 16px 24px; border-bottom: 1px solid #F5F5F3; vertical-align: middle; }
+  .grove-input { border: 1px solid #E4E4E0; border-radius: 8px; padding: 9px 12px; font-size: 13px; color: #0D0D0D; outline: none; background: #FFFFFF; }
+  .grove-input:focus { border-color: #1A6B55; box-shadow: 0 0 0 3px #E6F2EE; }
+  .btn-primary-sage { background: #1A6B55; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; padding: 9px 20px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+  .employee-link { color: #0D0D0D; text-decoration: none; font-weight: 700; }
+  .employee-link:hover { color: #1A6B55; text-decoration: underline; }
 </style>
 
 <div class="main-content">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+    <div>
+      <h2 style="font-size: 24px; font-weight: 700; color: #0D0D0D; margin: 0;">APR Reports - {{ current_month }}</h2>
+      <div style="font-size: 13px; color: #7A7A72; margin-top: 4px;">Employee attendance presence summary for the current month</div>
+    </div>
+  </div>
 
-    {# ── HEADER ── #}
-    <div class="mb-4 fade-up">
-        <h2 style="font-size: 24px; font-weight: 700; color: #0D0D0D; margin: 0;">APR Reports</h2>
-        <div style="font-size: 13px; color: #7A7A72; margin-top: 4px;">Track attendance performance of all employees</div>
+  <div class="grove-panel fade-up">
+    <div style="padding: 20px 24px; border-bottom: 1px solid #E4E4E0;">
+      <form method="GET" class="d-flex align-items-center gap-3 flex-wrap">
+        <div style="position: relative; flex: 1; min-width: 220px; max-width: 360px;">
+          <i class="bi bi-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #7A7A72;"></i>
+          <input type="text" name="q" class="grove-input w-100" style="padding-left: 38px;" placeholder="Search name or branch..." value="{{ search }}">
+        </div>
+        <button type="submit" class="btn-primary-sage"><i class="bi bi-funnel"></i> Filter</button>
+        <a href="{% url 'apr_reports' %}" style="font-size: 13px; font-weight: 600; color: #0D0D0D; text-decoration: none;">Clear</a>
+      </form>
     </div>
 
-    {# ── CALCULATED SUMMARY CARDS ── #}
-    <div class="row g-4 mb-4">
-        <div class="col-6 col-md-4 fade-up" style="animation-delay: 0.05s;">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:#EFF6FF; color:#2563EB;"><i class="bi bi-people-fill"></i></div>
-                <div><div class="stat-val">{{ employees|length }}</div><div class="stat-label">Total Employees</div></div>
-            </div>
-        </div>
-        <div class="col-6 col-md-4 fade-up" style="animation-delay: 0.1s;">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:#E6F2EE; color:#1A6B55;"><i class="bi bi-check-circle-fill"></i></div>
-                <div><div class="stat-val" id="total_present">0</div><div class="stat-label">Total Present</div></div>
-            </div>
-        </div>
-        <div class="col-6 col-md-4 fade-up" style="animation-delay: 0.15s;">
-            <div class="stat-card">
-                <div class="stat-icon" style="background:#FCE8E8; color:#DC2626;"><i class="bi bi-x-circle-fill"></i></div>
-                <div><div class="stat-val" id="total_absent">0</div><div class="stat-label">Total Absent</div></div>
-            </div>
-        </div>
+    <div class="table-responsive">
+      <table class="grove-table">
+        <thead style="background: #F5F5F3;">
+          <tr>
+            <th>#</th>
+            <th>Employee Name</th>
+            <th>Branch</th>
+            <th>Phone</th>
+            <th>Present Days</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in employee_data %}
+          <tr>
+            <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #7A7A72;">{{ forloop.counter|stringformat:"02d" }}</td>
+            <td>
+              <a href="{% url 'employee_apr_report' item.profile.id %}" class="employee-link">
+                {{ item.name|default:item.profile.user.username }}
+              </a>
+            </td>
+            <td style="color: #7A7A72;">{{ item.branch }}</td>
+            <td style="font-family: 'Geist Mono', monospace;">{{ item.phone|default:"—" }}</td>
+            <td style="font-weight: 700; color: #1A6B55;">{{ item.present_days }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="padding: 64px 24px; text-align: center;">
+              <i class="bi bi-bar-chart" style="font-size: 32px; color: #E4E4E0; margin-bottom: 12px; display: block;"></i>
+              <div style="font-size: 14px; font-weight: 600; color: #0D0D0D;">No APR reports found</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    {# ── MAIN TABLE ── #}
-    <div class="grove-panel fade-up" style="animation-delay: 0.2s;">
-        <div class="table-responsive">
-            <table class="grove-table">
-                <thead style="background: #F5F5F3;">
-                    <tr>
-                        <th>#</th>
-                        <th>Employee Name</th>
-                        <th>Email</th>
-                        <th>Branch</th>
-                        <th>Total Days</th>
-                        <th>Present</th>
-                        <th>Absent</th>
-                        <th class="text-end">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for emp in employees %}
-                    <tr>
-                        <td style="font-family: 'Geist Mono', monospace; font-weight: 600; color: #7A7A72;">{{ forloop.counter|stringformat:"02d" }}</td>
-                        <td style="font-weight: 700; color: #0D0D0D;">
-                            <a href="{% url 'employee_apr_report' emp.employee.id %}" style="text-decoration: none; color: inherit;">
-                                {{ emp.employee.user.get_full_name }}
-                            </a>
-                        </td>
-                        <td style="color: #7A7A72;">{{ emp.employee.user.email|default:"—" }}</td>
-                        <td style="color: #7A7A72;">{{ emp.employee.branch.name|default:"—" }}</td>
-                        <td style="font-weight: 600;">{{ emp.total_days }}</td>
-                        <td style="font-weight: 600; color: #1A6B55;">{{ emp.present_days }}</td>
-                        <td style="font-weight: 600; color: #DC2626;">{{ emp.absent_days }}</td>
-                        <td class="text-end">
-                            <a href="{% url 'employee_apr_report' emp.employee.id %}" class="btn-view-apr">View APR</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" style="padding: 64px 24px; text-align: center;">
-                            <i class="bi bi-bar-chart" style="font-size: 32px; color: #E4E4E0; margin-bottom: 12px; display: block;"></i>
-                            <div style="font-size: 14px; font-weight: 600; color: #0D0D0D;">No reports available</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+  </div>
 </div>
-
-<script>
-    // Simple logic to calculate totals for cards
-    document.addEventListener("DOMContentLoaded", function() {
-        let totalPresent = 0;
-        let totalAbsent = 0;
-        {% for emp in employees %}
-            totalPresent += {{ emp.present_days }};
-            totalAbsent += {{ emp.absent_days }};
-        {% endfor %}
-        document.getElementById("total_present").innerText = totalPresent;
-        document.getElementById("total_absent").innerText = totalAbsent;
-    });
-</script>
 {% endblock %}

@@ -124,6 +124,7 @@
         <select name="status" class="grove-input m-0" style="width: auto; min-width: 160px; min-height: 38px;">
           <option value="">All Statuses</option>
           <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
+          <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
           <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
           <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Late</option>
           <option value="half_day" {% if status_filter == 'half_day' %}selected{% endif %}>Half Day</option>
@@ -188,16 +189,14 @@
               {{ r.total_hours|default:"—" }}h
             </td>
             <td style="padding: 16px 12px;">
-              {% if r.status == 'present' %}
+              {% if r.computed_status == 'present' %}
                 <span class="status-pill s-qual">✓ Present</span>
-              {% elif r.status == 'absent' %}
+              {% elif r.computed_status == 'active' %}
+                <span class="status-pill s-prog">● Active</span>
+              {% elif r.computed_status == 'absent' %}
                 <span class="status-pill s-lost">✕ Absent</span>
-              {% elif r.status == 'late' %}
-                <span class="status-pill s-prog">● Late</span>
-              {% elif r.status == 'on_leave' %}
-                <span class="status-pill s-new">● On Leave</span>
               {% else %}
-                <span class="status-pill s-cold">{{ r.get_status_display }}</span>
+                <span class="status-pill s-cold">{{ r.computed_status_label }}</span>
               {% endif %}
             </td>
             <td style="padding: 16px 12px;">

@@ -844,10 +844,12 @@ def dashboard_stats(request):
         employee=profile, date=today
     ).first()
 
-    if attendance and attendance.punch_in and not attendance.punch_out:
-        punch_status = "in"
+    if attendance and attendance.punch_in and attendance.punch_out:
+        punch_status = "present"
+    elif attendance and attendance.punch_in and not attendance.punch_out:
+        punch_status = "active"
     else:
-        punch_status = "out"
+        punch_status = "absent"
 
     route_points = LocationPing.objects.filter(
         employee=profile.user,

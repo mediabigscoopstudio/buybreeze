@@ -78,38 +78,6 @@
     </div>
   </div>
 
-  {# ── KPI STAT CARDS ── #}
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
-    <div class="col fade-up">
-      <div class="grove-stat-card top-sage">
-        <div class="stat-icon-box sage"><i class="bi bi-clipboard-check"></i></div>
-        <div class="stat-value">{{ total_wrapups|default:"0" }}</div>
-        <div class="stat-label">Total Summaries</div>
-      </div>
-    </div>
-    <div class="col fade-up" style="animation-delay: 0.1s;">
-      <div class="grove-stat-card top-gold">
-        <div class="stat-icon-box gold"><i class="bi bi-lock"></i></div>
-        <div class="stat-value">{{ locked_wrapups_count|default:"0" }}</div>
-        <div class="stat-label">Locked Records</div>
-      </div>
-    </div>
-    <div class="col fade-up" style="animation-delay: 0.15s;">
-      <div class="grove-stat-card top-charcoal">
-        <div class="stat-icon-box charcoal"><i class="bi bi-unlock"></i></div>
-        <div class="stat-value">{{ active_wrapups_count|default:"0" }}</div>
-        <div class="stat-label">Open / Modifiable</div>
-      </div>
-    </div>
-    <div class="col fade-up" style="animation-delay: 0.2s;">
-      <div class="grove-stat-card top-stone">
-        <div class="stat-icon-box stone"><i class="bi bi-arrow-right-circle"></i></div>
-        <div class="stat-value">{{ ongoing_actions_count|default:"0" }}</div>
-        <div class="stat-label">Next Action Outlines</div>
-      </div>
-    </div>
-  </div>
-
   {# ── DATA PANEL & TABLES ── #}
   <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.25s;">
     
@@ -153,7 +121,6 @@
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Temperature</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Stage</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Next Action</th>
-            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Follow-up At</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Submitted By</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Lock Status</th>
             <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Date</th>
@@ -194,9 +161,6 @@
             <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);">
               {{ w.get_next_action_display }}
             </td>
-            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink);">
-              {{ w.followup_at|date:"d M g:i A"|default:"—" }}
-            </td>
             <td style="padding: 16px 12px;">
               <div class="d-flex align-items-center gap-2">
                 <div class="user-avatar" style="width: 24px; height: 24px; border-radius: 50%; background: var(--cloud); color: var(--stone); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
@@ -220,7 +184,7 @@
           {% empty %}
           {# ── EMPTY STATE ── #}
           <tr>
-            <td colspan="10" style="padding: 64px 24px;">
+            <td colspan="9" style="padding: 64px 24px;">
               <div class="grove-empty-state text-center">
                 <i class="bi bi-clipboard-check" style="font-size: 32px; color: var(--sage-lt);"></i>
                 <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No wrap-ups submitted yet</div>

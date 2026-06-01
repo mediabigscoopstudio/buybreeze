@@ -86,32 +86,32 @@
     <div class="col fade-up">
       <div class="grove-stat-card top-sage">
         <div class="stat-icon-box sage"><i class="bi bi-telephone-outbound"></i></div>
-        <div class="stat-value">{{ total_calls|default:"0" }}</div>
-        <div class="stat-label">Total Calls</div>
+        <div class="stat-value">{{ calls_today|default:"0" }}</div>
+        <div class="stat-label">Total Calls Today</div>
       </div>
     </div>
     
     <div class="col fade-up" style="animation-delay: 0.1s;">
       <div class="grove-stat-card top-gold">
         <div class="stat-icon-box gold"><i class="bi bi-fire"></i></div>
-        <div class="stat-value">{{ interested_calls|default:"0" }}</div>
-        <div class="stat-label">Interested Outcomes</div>
+        <div class="stat-value">{{ calls_this_week|default:"0" }}</div>
+        <div class="stat-label">Total Calls This Week</div>
       </div>
     </div>
     
     <div class="col fade-up" style="animation-delay: 0.15s;">
       <div class="grove-stat-card top-charcoal">
         <div class="stat-icon-box charcoal"><i class="bi bi-building-check"></i></div>
-        <div class="stat-value">{{ site_visits|default:"0" }}</div>
-        <div class="stat-label">Site Visits Scheduled</div>
+        <div class="stat-value">{{ calls_this_month|default:"0" }}</div>
+        <div class="stat-label">Total Calls This Month</div>
       </div>
     </div>
     
     <div class="col fade-up" style="animation-delay: 0.2s;">
       <div class="grove-stat-card top-stone">
         <div class="stat-icon-box stone"><i class="bi bi-clock-history"></i></div>
-        <div class="stat-value">{{ pending_callbacks|default:"0" }}</div>
-        <div class="stat-label">Pending Callbacks</div>
+        <div class="stat-value">{{ avg_call_duration_month|default:"0" }}s</div>
+        <div class="stat-label">Avg Duration This Month</div>
       </div>
     </div>
     

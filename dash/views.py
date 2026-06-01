@@ -312,33 +312,61 @@ def mark_notification_read(request, notification_id):
 # ============================================================
 @user_passes_test(superadmin_required, login_url='/login/')
 def index(request):
-    total_leads       = Lead.objects.count()
-    hot_leads         = Lead.objects.filter(temperature='hot').count()
-    total_calls       = CallLog.objects.count()
-    total_branches    = Branch.objects.filter(status='Enabled').count()
-    total_users       = UserProfile.objects.filter(status='Enabled').count()
-    pending_followups = FollowUp.objects.filter(followup_status='pending').count()
-
-    stage_data   = Lead.objects.values('stage').annotate(count=Count('id'))
-    branch_leads = Branch.objects.annotate(lead_count=Count('lead')).filter(status='Enabled')
-    recent_leads = Lead.objects.order_by('-created_at')[:8]
-
-    upcoming_followups = FollowUp.objects.filter(
+    today = timezone.localdate()
+    now = timezone.now()
+    total_leads = Lead.objects.count()
+    total_employees = UserProfile.objects.filter(
+        role='employee',
+        status='Enabled',
+    ).count()
+    total_calls_today = CallLog.objects.filter(created_at__date=today).count()
+    followups_due_today = FollowUp.objects.filter(
         followup_status='pending',
-        followup_at__gte=timezone.now(),
-        followup_at__lte=timezone.now() + timedelta(hours=24)
+        followup_at__date=today,
+    ).count()
+    pending_leaves = LeaveRequest.objects.filter(leave_status='pending').count()
+
+    stage_data = Lead.objects.values('stage').annotate(count=Count('id'))
+    branch_leads = Branch.objects.filter(status='Enabled').annotate(
+        lead_count=Count('lead')
+    ).order_by('name')
+    recent_leads = Lead.objects.select_related(
+        'assigned_to__user',
+        'branch',
+    ).order_by('-created_at')[:10]
+    recent_calls = CallLog.objects.select_related(
+        'lead',
+        'called_by__user',
+    ).order_by('-created_at')[:10]
+
+    today_attendance = Attendance.objects.filter(date=today)
+    present_count = today_attendance.filter(punch_in__isnull=False).count()
+    active_count = today_attendance.filter(
+        punch_in__isnull=False,
+        punch_out__isnull=True,
+    ).count()
+    absent_count = today_attendance.filter(punch_in__isnull=True).count()
+
+    upcoming_followups = FollowUp.objects.select_related('lead').filter(
+        followup_status='pending',
+        followup_at__gte=now,
+        followup_at__lte=now + timedelta(hours=24)
     ).order_by('followup_at')[:5]
 
     context = {
         'total_leads': total_leads,
-        'hot_leads': hot_leads,
-        'total_calls': total_calls,
-        'total_branches': total_branches,
-        'total_users': total_users,
-        'pending_followups': pending_followups,
+        'total_employees': total_employees,
+        'total_calls_today': total_calls_today,
+        'followups_due_today': followups_due_today,
+        'pending_followups': followups_due_today,
+        'pending_leaves': pending_leaves,
         'stage_data': stage_data,
         'branch_leads': branch_leads,
         'recent_leads': recent_leads,
+        'recent_calls': recent_calls,
+        'present_count': present_count,
+        'absent_count': absent_count,
+        'active_count': active_count,
         'upcoming_followups': upcoming_followups,
     }
     return render(request, 'dash/index.html', context)
@@ -783,8 +811,8 @@ def disable_lead(request, id):
 @user_passes_test(superadmin_required, login_url='/login/')
 def view_lead(request, id):
     item      = get_object_or_404(Lead, id=id)
-    calls     = item.calls.order_by('-created_at')
-    followups = item.followups.order_by('followup_at')
+    calls     = item.calls.select_related('called_by__user').order_by('-created_at')
+    followups = FollowUp.objects.filter(lead=item).select_related('assigned_to__user').order_by('followup_at')
     wrapups   = item.wrapups.order_by('-created_at')
     return render(request, 'dash/leads/view_lead.html', {
         'lead': item, 'calls': calls, 'followups': followups, 'wrapups': wrapups
@@ -838,6 +866,9 @@ def unassign_lead_from_manager(request, lead_id):
 # ============================================================
 @user_passes_test(superadmin_required, login_url='/login/')
 def calls(request):
+    today = timezone.localdate()
+    week_start = today - timedelta(days=today.weekday())
+    month_start = today.replace(day=1)
     all_calls      = CallLog.objects.select_related('lead', 'called_by__user', 'branch').order_by('-created_at')
     branches       = Branch.objects.filter(status='Enabled')
     branch_filter  = request.GET.get('branch', '')
@@ -849,9 +880,15 @@ def calls(request):
         all_calls = all_calls.filter(call_outcome=outcome_filter)
     if search:
         all_calls = all_calls.filter(lead__name__icontains=search)
+    month_calls = CallLog.objects.filter(created_at__date__gte=month_start)
+    avg_duration = month_calls.aggregate(avg=Avg('call_duration'))['avg'] or 0
     return render(request, 'dash/calls/calls.html', {
         'calls': all_calls, 'branches': branches,
         'branch_filter': branch_filter, 'outcome_filter': outcome_filter, 'search': search,
+        'calls_today': CallLog.objects.filter(created_at__date=today).count(),
+        'calls_this_week': CallLog.objects.filter(created_at__date__gte=week_start).count(),
+        'calls_this_month': month_calls.count(),
+        'avg_call_duration_month': round(avg_duration),
     })
 
 
@@ -1241,7 +1278,7 @@ def hr_panel(request):
             Q(user__first_name__icontains=search) | Q(user__last_name__icontains=search)
         )
     total_employees = employees.count()
-    present_today   = Attendance.objects.filter(date=timezone.now().date(), status='present').count()
+    present_today   = Attendance.objects.filter(date=timezone.now().date(), punch_in__isnull=False).count()
     on_leave_today  = Attendance.objects.filter(date=timezone.now().date(), status='on_leave').count()
     pending_leaves  = LeaveRequest.objects.filter(leave_status='pending').count()
     return render(request, 'dash/hr/hr_panel.html', {
@@ -1270,7 +1307,14 @@ def attendance(request):
     if date_filter:
         records = records.filter(date=date_filter)
     if status_filter:
-        records = records.filter(status=status_filter)
+        if status_filter == 'active':
+            records = records.filter(punch_in__isnull=False, punch_out__isnull=True)
+        elif status_filter == 'absent':
+            records = records.filter(punch_in__isnull=True)
+        elif status_filter == 'present':
+            records = records.filter(punch_in__isnull=False, punch_out__isnull=False)
+        else:
+            records = records.filter(status=status_filter)
     if search:
         records = records.filter(
             Q(employee__user__first_name__icontains=search) |

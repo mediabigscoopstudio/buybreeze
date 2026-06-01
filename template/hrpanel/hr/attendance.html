@@ -59,6 +59,7 @@
       <select name="status" class="grove-input" style="min-width: 140px;">
         <option value="">All Status</option>
         <option value="present" {% if status_filter == 'present' %}selected{% endif %}>Present</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
         <option value="absent" {% if status_filter == 'absent' %}selected{% endif %}>Absent</option>
         <option value="late" {% if status_filter == 'late' %}selected{% endif %}>Late</option>
         <option value="half_day" {% if status_filter == 'half_day' %}selected{% endif %}>Half Day</option>
@@ -111,18 +112,14 @@
             <td style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #0D0D0D;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
             <td style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #7A7A72;">{{ r.total_hours|default:"—" }}h</td>
             <td class="text-center">
-              {% if r.status == 'present' %}
+              {% if r.computed_status == 'present' %}
                 <span class="status-pill s-sage"><i class="bi bi-check-circle-fill"></i> Present</span>
-              {% elif r.status == 'absent' %}
+              {% elif r.computed_status == 'active' %}
+                <span class="status-pill s-gold"><i class="bi bi-clock-history"></i> Active</span>
+              {% elif r.computed_status == 'absent' %}
                 <span class="status-pill s-lost"><i class="bi bi-x-circle-fill"></i> Absent</span>
-              {% elif r.status == 'late' %}
-                <span class="status-pill s-gold"><i class="bi bi-clock-history"></i> Late</span>
-              {% elif r.status == 'on_leave' %}
-                <span class="status-pill s-blue"><i class="bi bi-calendar-check"></i> On Leave</span>
-              {% elif r.status == 'half_day' %}
-                <span class="status-pill s-charcoal"><i class="bi bi-brightness-alt-high"></i> Half Day</span>
               {% else %}
-                <span class="status-pill s-charcoal">{{ r.get_status_display }}</span>
+                <span class="status-pill s-charcoal">{{ r.computed_status_label }}</span>
               {% endif %}
             </td>
             <td class="text-center">

@@ -80,43 +80,6 @@
     </a>
   </div>
 
-  {# ── KPI STAT CARDS ── #}
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
-    
-    <div class="col fade-up">
-      <div class="grove-stat-card top-sage">
-        <div class="stat-icon-box sage"><i class="bi bi-calendar-check"></i></div>
-        <div class="stat-value">{{ total_followups_count|default:followups.count }}</div>
-        <div class="stat-label">Total Follow-Ups</div>
-      </div>
-    </div>
-    
-    <div class="col fade-up" style="animation-delay: 0.1s;">
-      <div class="grove-stat-card top-gold">
-        <div class="stat-icon-box gold"><i class="bi bi-hourglass-split"></i></div>
-        <div class="stat-value">{{ pending_count|default:"0" }}</div>
-        <div class="stat-label">Pending Follow-Ups</div>
-      </div>
-    </div>
-    
-    <div class="col fade-up" style="animation-delay: 0.15s;">
-      <div class="grove-stat-card top-charcoal">
-        <div class="stat-icon-box charcoal"><i class="bi bi-calendar-x"></i></div>
-        <div class="stat-value">{{ missed_count|default:"0" }}</div>
-        <div class="stat-label">Missed Deadlines</div>
-      </div>
-    </div>
-    
-    <div class="col fade-up" style="animation-delay: 0.2s;">
-      <div class="grove-stat-card top-stone">
-        <div class="stat-icon-box stone"><i class="bi bi-check2-all"></i></div>
-        <div class="stat-value">{{ completed_count|default:"0" }}</div>
-        <div class="stat-label">Completed Action Rows</div>
-      </div>
-    </div>
-    
-  </div>
-
   {# ── MAIN DATA PANEL & FILTERS ── #}
   <div class="leads-card fade-up" style="background: var(--white); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; animation-delay: 0.25s;">
     

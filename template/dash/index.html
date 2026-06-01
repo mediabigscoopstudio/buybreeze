@@ -134,7 +134,7 @@
         Good morning, {{ request.user.first_name|default:request.user.username }} 👋
       </h2>
       <div style="font-size:13px; color:var(--stone); margin-top:4px;">
-        {% now "l, d F Y" %} &nbsp;·&nbsp; {{ total_leads }} total leads &nbsp;·&nbsp; {{ pending_followups }} follow-up{{ pending_followups|pluralize }} due
+        {% now "l, d F Y" %} &nbsp;·&nbsp; {{ total_leads }} total leads &nbsp;·&nbsp; {{ followups_due_today }} follow-up{{ followups_due_today|pluralize }} due today
       </div>
     </div>
     <a href="{% url 'add_lead' %}" class="btn-primary-sage" style="padding:10px 20px;">
@@ -156,30 +156,30 @@
     <div class="col-sm-6 col-xl-3 fade-up" style="animation-delay:.05s;">
       <div class="stat-card accent-gold">
         <div class="stat-icon si-gold"><i class="bi bi-fire"></i></div>
-        <div class="stat-val">{{ hot_leads }}</div>
-        <div class="stat-lbl">Hot Leads</div>
+        <div class="stat-val">{{ total_employees }}</div>
+        <div class="stat-lbl">Total Employees</div>
       </div>
     </div>
 
     <div class="col-sm-6 col-xl-3 fade-up" style="animation-delay:.1s;">
       <div class="stat-card accent-blue">
         <div class="stat-icon si-blue"><i class="bi bi-telephone-fill"></i></div>
-        <div class="stat-val">{{ total_calls }}</div>
-        <div class="stat-lbl">Total Calls Logged</div>
+        <div class="stat-val">{{ total_calls_today }}</div>
+        <div class="stat-lbl">Total Calls Today</div>
       </div>
     </div>
 
     <div class="col-sm-6 col-xl-3 fade-up" style="animation-delay:.15s;">
       <div class="stat-card accent-dark">
         <div class="stat-icon si-dark"><i class="bi bi-calendar-check-fill"></i></div>
-        <div class="stat-val">{{ pending_followups }}</div>
-        <div class="stat-lbl">Pending Follow-Ups</div>
+        <div class="stat-val">{{ followups_due_today }}</div>
+        <div class="stat-lbl">Follow-Ups Due Today</div>
       </div>
     </div>
 
   </div>
 
-  {# ── MIDDLE ROW: PIPELINE + FOLLOWUPS + QUICK ACTIONS ── #}
+  {# ── MIDDLE ROW: PIPELINE + FOLLOWUPS + ATTENDANCE ── #}
   <div class="row g-4 mb-4">
 
     {# ── PIPELINE BY STAGE ── #}
@@ -251,45 +251,45 @@
       </div>
     </div>
 
-    {# ── QUICK ACTIONS ── #}
+    {# ── ATTENDANCE SUMMARY ── #}
     <div class="col-lg-4 fade-up" style="animation-delay:.2s;">
       <div class="g-panel h-100">
         <div class="g-panel-head">
           <div>
-            <div class="g-panel-title"><i class="bi bi-lightning-fill me-2" style="color:#8B5CF6;"></i>Quick Actions</div>
-            <div class="g-panel-sub">Common shortcuts</div>
+            <div class="g-panel-title"><i class="bi bi-fingerprint me-2" style="color:#8B5CF6;"></i>Today's Attendance</div>
+            <div class="g-panel-sub">Present, absent, and active punch-ins</div>
           </div>
         </div>
         <div class="g-panel-body d-flex flex-column gap-3">
-          <a href="{% url 'add_lead' %}" class="qa-card text-decoration-none">
-            <div class="qa-icon" style="background:var(--sage-lt); color:var(--sage);"><i class="bi bi-person-plus-fill"></i></div>
+          <a href="{% url 'attendance' %}?status=present" class="qa-card text-decoration-none">
+            <div class="qa-icon" style="background:var(--sage-lt); color:var(--sage);"><i class="bi bi-check-circle-fill"></i></div>
             <div>
-              <div class="qa-label">Add New Lead</div>
-              <div class="qa-desc">Register a fresh prospect</div>
+              <div class="qa-label">{{ present_count }} Present</div>
+              <div class="qa-desc">Employees with completed punch records</div>
             </div>
             <i class="bi bi-chevron-right ms-auto" style="color:var(--stone); font-size:12px;"></i>
           </a>
-          <a href="{% url 'add_call' %}" class="qa-card text-decoration-none">
-            <div class="qa-icon" style="background:#EFF6FF; color:#2563EB;"><i class="bi bi-telephone-plus-fill"></i></div>
+          <a href="{% url 'attendance' %}?status=active" class="qa-card text-decoration-none">
+            <div class="qa-icon" style="background:#FBF4E0; color:#8B6914;"><i class="bi bi-hourglass-split"></i></div>
             <div>
-              <div class="qa-label">Log a Call</div>
-              <div class="qa-desc">Record call outcome & notes</div>
+              <div class="qa-label">{{ active_count }} Not Punched Out</div>
+              <div class="qa-desc">Employees currently active today</div>
             </div>
             <i class="bi bi-chevron-right ms-auto" style="color:var(--stone); font-size:12px;"></i>
           </a>
-          <a href="{% url 'add_followup' %}" class="qa-card text-decoration-none">
-            <div class="qa-icon" style="background:#FBF4E0; color:#8B6914;"><i class="bi bi-calendar-plus-fill"></i></div>
+          <a href="{% url 'attendance' %}?status=absent" class="qa-card text-decoration-none">
+            <div class="qa-icon" style="background:#FCE8E8; color:#DC2626;"><i class="bi bi-x-circle-fill"></i></div>
             <div>
-              <div class="qa-label">Schedule Follow-Up</div>
-              <div class="qa-desc">Set a reminder for a lead</div>
+              <div class="qa-label">{{ absent_count }} Absent</div>
+              <div class="qa-desc">Employees without punch-in records</div>
             </div>
             <i class="bi bi-chevron-right ms-auto" style="color:var(--stone); font-size:12px;"></i>
           </a>
-          <a href="{% url 'dash_apr_report' %}" class="qa-card text-decoration-none">
-            <div class="qa-icon" style="background:#F5F3FF; color:#7C3AED;"><i class="bi bi-bar-chart-line-fill"></i></div>
+          <a href="{% url 'leaves' %}?status=pending" class="qa-card text-decoration-none">
+            <div class="qa-icon" style="background:#EFF6FF; color:#2563EB;"><i class="bi bi-calendar-check-fill"></i></div>
             <div>
-              <div class="qa-label">APR Report</div>
-              <div class="qa-desc">Team performance overview</div>
+              <div class="qa-label">{{ pending_leaves }} Pending Leaves</div>
+              <div class="qa-desc">Leave requests waiting for action</div>
             </div>
             <i class="bi bi-chevron-right ms-auto" style="color:var(--stone); font-size:12px;"></i>
           </a>
@@ -324,8 +324,8 @@
             <th>Phone</th>
             <th>Stage</th>
             <th>Temperature</th>
-            <th>Source</th>
             <th>Assigned To</th>
+            <th>Created</th>
             <th style="padding-right:22px;"></th>
           </tr>
         </thead>
@@ -355,10 +355,10 @@
                 <i class="bi bi-thermometer-half"></i> {{ lead.temperature|title|default:"Cold" }}
               </span>
             </td>
-            <td style="font-size:12px; color:var(--stone);">{{ lead.source|default:"—" }}</td>
             <td style="font-size:12px; color:var(--stone);">
               {% if lead.assigned_to %}{{ lead.assigned_to.user.get_full_name|default:"—" }}{% else %}—{% endif %}
             </td>
+            <td style="font-family:'Geist Mono',monospace; font-size:12px; color:var(--stone);">{{ lead.created_at|date:"d M Y" }}</td>
             <td style="padding-right:22px; text-align:right;">
               <a href="{% url 'view_lead' lead.id %}" class="grove-btn-outline" style="font-size:11px; padding:4px 12px;">
                 View
@@ -379,6 +379,69 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <div class="row g-4 mt-4">
+    <div class="col-xl-7">
+      <div class="g-panel fade-up">
+        <div class="g-panel-head">
+          <div>
+            <div class="g-panel-title"><i class="bi bi-telephone-fill me-2" style="color:#2563EB;"></i>Recent Call Logs</div>
+            <div class="g-panel-sub">Latest {{ recent_calls|length }} call records</div>
+          </div>
+          <a href="{% url 'calls' %}" class="grove-btn-outline" style="font-size:12px; padding:6px 14px;">View All</a>
+        </div>
+        <div class="table-responsive">
+          <table class="leads-tbl">
+            <thead>
+              <tr>
+                <th style="padding-left:22px;">Lead</th>
+                <th>Employee</th>
+                <th>Outcome</th>
+                <th>Duration</th>
+                <th style="padding-right:22px;">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for call in recent_calls %}
+              <tr>
+                <td style="padding-left:22px; font-weight:600;">{{ call.lead.name|default:"—" }}</td>
+                <td>{{ call.called_by.user.get_full_name|default:"—" }}</td>
+                <td><span class="stage-badge">{{ call.get_call_outcome_display }}</span></td>
+                <td style="font-family:'Geist Mono',monospace;">{{ call.duration_display }}</td>
+                <td style="padding-right:22px; font-family:'Geist Mono',monospace; color:var(--stone);">{{ call.created_at|date:"d M Y g:i A" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" style="padding:40px 24px; text-align:center; color:var(--stone);">No call logs yet</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-5">
+      <div class="g-panel fade-up">
+        <div class="g-panel-head">
+          <div>
+            <div class="g-panel-title"><i class="bi bi-buildings-fill me-2" style="color:var(--sage);"></i>Branch-Wise Leads</div>
+            <div class="g-panel-sub">Lead distribution by branch</div>
+          </div>
+        </div>
+        <div class="g-panel-body">
+          {% for branch in branch_leads %}
+          <div class="pipe-row">
+            <span class="pipe-label">{{ branch.name|truncatechars:12 }}</span>
+            <div class="pipe-track">
+              <div class="pipe-fill" style="width:{% widthratio branch.lead_count total_leads 100 %}%; background:var(--sage);"></div>
+            </div>
+            <span class="pipe-count">{{ branch.lead_count }}</span>
+          </div>
+          {% empty %}
+          <div class="text-center py-4" style="color:var(--stone);">No branch lead data yet</div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
 

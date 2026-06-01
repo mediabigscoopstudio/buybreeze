@@ -82,8 +82,10 @@
                         <td style="font-family: 'Geist Mono', monospace;">{{ r.punch_out|date:"g:i A"|default:"—" }}</td>
                         <td style="font-family: 'Geist Mono', monospace;">{{ r.total_hours|default:"0" }}h</td>
                         <td>
-                            {% if r.punch_in %}
+                            {% if r.computed_status == 'present' %}
                                 <span class="status-pill s-sage"><i class="bi bi-check-circle-fill"></i> Present</span>
+                            {% elif r.computed_status == 'active' %}
+                                <span class="status-pill s-gold"><i class="bi bi-clock-history"></i> Active</span>
                             {% else %}
                                 <span class="status-pill s-lost"><i class="bi bi-x-circle-fill"></i> Absent</span>
                             {% endif %}

@@ -12,7 +12,8 @@ import openpyxl
 from django.http import HttpResponse
 
 from dash.models import (
-    Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting
+    Attendance, Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp,
+    LeaveRequest, Payroll, SystemSetting
 )
 from dash.otp_utils import generate_otp, send_otp
 from dash.notifications import (
@@ -163,7 +164,7 @@ def index(request):
 
     total_employees  = employees.count()
     present_today    = Attendance.objects.filter(
-        date=timezone.now().date(), status='present'
+        date=timezone.now().date(), punch_in__isnull=False
     ).count()
     on_leave_today   = Attendance.objects.filter(
         date=timezone.now().date(), status='on_leave'
@@ -405,7 +406,7 @@ def hr_panel(request):
 
     total_employees  = employees.count()
     present_today    = Attendance.objects.filter(
-        date=timezone.now().date(), status='present'
+        date=timezone.now().date(), punch_in__isnull=False
     ).count()
     on_leave_today   = Attendance.objects.filter(
         date=timezone.now().date(), status='on_leave'
@@ -441,7 +442,14 @@ def attendance(request):
     if date_filter:
         records = records.filter(date=date_filter)
     if status_filter:
-        records = records.filter(status=status_filter)
+        if status_filter == 'active':
+            records = records.filter(punch_in__isnull=False, punch_out__isnull=True)
+        elif status_filter == 'absent':
+            records = records.filter(punch_in__isnull=True)
+        elif status_filter == 'present':
+            records = records.filter(punch_in__isnull=False, punch_out__isnull=False)
+        else:
+            records = records.filter(status=status_filter)
     if search:
         records = records.filter(
             Q(employee__user__first_name__icontains=search) |
@@ -780,50 +788,45 @@ def profile(request):
 # ==========================================
 @user_passes_test(hr_required, login_url='/login/')
 def apr_reports(request):
-    hr = request.user.profile
-
     employees = UserProfile.objects.filter(
-        branch=hr.branch,
-        role='employee'
+        role='employee',
+        status='Enabled',
     ).select_related('user', 'branch')
 
-    apr_data = []
+    search = request.GET.get('q', '')
+    if search:
+        employees = employees.filter(
+            Q(user__first_name__icontains=search) |
+            Q(user__last_name__icontains=search) |
+            Q(branch__name__icontains=search)
+        )
 
+    employee_data = []
+    current_month = timezone.now().month
+    current_year = timezone.now().year
     for emp in employees:
-        records = Attendance.objects.filter(employee=emp)
-
-        total_days = records.count()
-
-        present_days = records.filter(
-            punch_in__isnull=False
+        attendance_count = Attendance.objects.filter(
+            employee=emp,
+            date__month=current_month,
+            date__year=current_year,
+            punch_in__isnull=False,
         ).count()
 
-        absent_days = records.filter(
-            status='absent'
-        ).count()
-
-        late_days = records.filter(
-            status='late'
-        ).count()
-
-        half_days = records.filter(
-            status='half_day'
-        ).count()
-
-        apr_data.append({
-            'employee': emp,
-            'total_days': total_days,
-            'present_days': present_days,
-            'absent_days': absent_days,
-            'late_days': late_days,
-            'half_days': half_days,
+        employee_data.append({
+            'profile': emp,
+            'present_days': attendance_count,
+            'name': emp.user.get_full_name(),
+            'branch': emp.branch.name if emp.branch else 'N/A',
+            'phone': emp.phone,
         })
 
     return render(
         request,
         'hrpanel/apr_reports.html',
         {
-            'employees': apr_data
+            'employee_data': employee_data,
+            'current_month': timezone.now().strftime('%B %Y'),
+            'search': search,
         }
     )# ==========================================
 # INDIVIDUAL APR REPORT

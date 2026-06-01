@@ -255,23 +255,21 @@
       <table class="leads-table" style="width: 100%; border-collapse: collapse;">
         <thead style="background: var(--cloud);">
           <tr>
-            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
-            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Type</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Date/Time</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Called By</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Outcome</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Duration</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Notes</th>
-            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Next Follow-up</th>
-            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Date</th>
           </tr>
         </thead>
         <tbody>
           {% for c in calls %}
           <tr style="border-bottom: 1px solid var(--cloud);">
             <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
-              {{ forloop.counter|stringformat:"02d" }}
+              {{ c.created_at|date:"d M Y g:i A" }}
             </td>
             <td style="padding: 16px 12px; font-size: 13px; font-weight: 500; color: var(--ink);">
-              {{ c.get_call_type_display }}
+              {{ c.called_by.user.get_full_name|default:"—" }}
             </td>
             <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);">
               {{ c.get_call_outcome_display }}
@@ -282,16 +280,10 @@
             <td style="padding: 16px 12px; font-size: 13px; color: var(--stone); max-width: 250px;">
               {{ c.call_notes|default:"—"|truncatechars:60 }}
             </td>
-            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink);">
-              {{ c.next_followup_at|date:"d M Y g:i A"|default:"—" }}
-            </td>
-            <td style="padding: 16px 24px; text-align: right; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
-              {{ c.created_at|date:"d M Y" }}
-            </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="7" style="padding: 48px 24px;">
+            <td colspan="5" style="padding: 48px 24px;">
               <div class="grove-empty-state text-center">
                 <i class="bi bi-telephone-x" style="font-size: 32px; color: var(--sage-lt);"></i>
                 <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No Call Logs</div>
@@ -318,24 +310,27 @@
       <table class="leads-table" style="width: 100%; border-collapse: collapse;">
         <thead style="background: var(--cloud);">
           <tr>
-            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); width: 60px;">#</th>
+            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Scheduled Date</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Assigned To</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Type</th>
-            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Scheduled</th>
+            <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Notes</th>
             <th style="padding: 12px 12px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border);">Status</th>
-            <th style="padding: 12px 24px; font-size: 9px; font-weight: 600; color: var(--stone); letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid var(--border); text-align: right;">Notes</th>
           </tr>
         </thead>
         <tbody>
           {% for f in followups %}
           <tr style="border-bottom: 1px solid var(--cloud);">
-            <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--stone);">
-              {{ forloop.counter|stringformat:"02d" }}
+            <td style="padding: 16px 24px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink);">
+              {{ f.followup_at|date:"d M Y g:i A" }}
+            </td>
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone);">
+              {{ f.assigned_to.user.get_full_name|default:"—" }}
             </td>
             <td style="padding: 16px 12px; font-size: 13px; font-weight: 500; color: var(--ink);">
               {{ f.get_followup_type_display }}
             </td>
-            <td style="padding: 16px 12px; font-family: 'Geist Mono', monospace; font-size: 12px; color: var(--ink);">
-              {{ f.followup_at|date:"d M Y g:i A" }}
+            <td style="padding: 16px 12px; font-size: 13px; color: var(--stone); max-width: 250px;">
+              {{ f.notes|default:"—"|truncatechars:60 }}
             </td>
             <td style="padding: 16px 12px;">
               {% if f.followup_status == 'pending' %}
@@ -348,17 +343,13 @@
                 <span class="status-pill s-cold">{{ f.get_followup_status_display }}</span>
               {% endif %}
             </td>
-            <td style="padding: 16px 24px; text-align: right; font-size: 13px; color: var(--stone); max-width: 250px;">
-              {{ f.notes|default:"—"|truncatechars:60 }}
-            </td>
           </tr>
           {% empty %}
           <tr>
             <td colspan="5" style="padding: 48px 24px;">
               <div class="grove-empty-state text-center">
                 <i class="bi bi-calendar-x" style="font-size: 32px; color: var(--sage-lt);"></i>
-                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No Follow-Ups</div>
-                <div style="font-size: 12px; color: var(--stone); margin-top: 4px;">No future tasks or follow-ups are scheduled.</div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 12px;">No follow-ups scheduled</div>
               </div>
             </td>
           </tr>
