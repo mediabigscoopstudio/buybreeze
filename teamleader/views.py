@@ -539,7 +539,7 @@ def apr_reports(request):
 @user_passes_test(tl_required, login_url='/login/')
 def employee_apr_report(request, id):
     import json as _json
-    from employee.models import Attendance as EmployeeAttendance
+    from dash.models import Attendance as DashAttendance
     tl = request.user.profile
 
     employee = get_object_or_404(
@@ -549,18 +549,18 @@ def employee_apr_report(request, id):
         role='employee',
     )
 
-    attendance_qs = EmployeeAttendance.objects.filter(
-        employee=employee.user,
+    attendance_qs = DashAttendance.objects.filter(
+        employee=employee,
     ).order_by('-date')
 
     daily_data = []
     late_count = 0
 
     for att in attendance_qs:
-        is_present = att.punch_in_time is not None
-        is_late    = False
-        if att.punch_in_time:
-            is_late = att.punch_in_time.time() > time_obj(9, 30)
+        is_present = att.punch_in is not None
+        is_late = False
+        if att.punch_in:
+            is_late = att.punch_in.time() > time_obj(9, 30)
             if is_late:
                 late_count += 1
 
@@ -584,8 +584,8 @@ def employee_apr_report(request, id):
 
         daily_data.append({
             'date':       att.date,
-            'punch_in':   att.punch_in_time,
-            'punch_out':  att.punch_out_time,
+            'punch_in':   att.punch_in,
+            'punch_out':  att.punch_out,
             'is_present': is_present,
             'is_late':    is_late,
             'calls':      day_calls,
@@ -595,25 +595,25 @@ def employee_apr_report(request, id):
         })
 
     total_days   = attendance_qs.count()
-    present_days = attendance_qs.filter(punch_in_time__isnull=False).count()
+    present_days = attendance_qs.filter(punch_in__isnull=False).count()
     absent_days  = total_days - present_days
     att_pct      = round((present_days / total_days * 100), 1) if total_days else 0
 
     return render(request, 'teamleader/individual_apr_report.html', {
-        'employee':             employee,
-        'daily_data':           daily_data,
-        'total_days':           total_days,
-        'present_days':         present_days,
-        'absent_days':          absent_days,
-        'late_marks':           late_count,
-        'leave_days':           0,
+        'employee':              employee,
+        'daily_data':            daily_data,
+        'total_days':            total_days,
+        'present_days':          present_days,
+        'absent_days':           absent_days,
+        'late_marks':            late_count,
+        'leave_days':            0,
         'attendance_percentage': att_pct,
     })
 
 
 @user_passes_test(tl_required, login_url='/login/')
 def apr_day_detail(request, report_id, date_str):
-    from employee.models import Attendance as EmployeeAttendance
+    from dash.models import Attendance as DashAttendance
     tl = request.user.profile
 
     employee = get_object_or_404(
@@ -629,14 +629,14 @@ def apr_day_detail(request, report_id, date_str):
         from django.http import Http404
         raise Http404("Invalid date format")
 
-    attendance = EmployeeAttendance.objects.filter(
-        employee=employee.user,
+    attendance = DashAttendance.objects.filter(
+        employee=employee,
         date=target_date
     ).first()
 
     total_hours = None
-    if attendance and attendance.punch_in_time and attendance.punch_out_time:
-        delta = attendance.punch_out_time - attendance.punch_in_time
+    if attendance and attendance.punch_in and attendance.punch_out:
+        delta = attendance.punch_out - attendance.punch_in
         total_hours = round(delta.total_seconds() / 3600, 2)
 
     call_logs = list(

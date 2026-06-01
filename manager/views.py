@@ -628,8 +628,8 @@ def individual_apr_report(request, id):
 
 @user_passes_test(manager_required, login_url='/login/')
 def apr_day_detail(request, report_id, date_str):
-    from employee.models import Attendance as EmployeeAttendance, LocationPing
-    from dash.models import Lead
+    from employee.models import LocationPing
+    from dash.models import Lead, Attendance as DashAttendance
     import json as _json
 
     manager = request.user.profile
@@ -647,14 +647,14 @@ def apr_day_detail(request, report_id, date_str):
         from django.http import Http404
         raise Http404("Invalid date format")
 
-    legacy_attendance = EmployeeAttendance.objects.filter(
-        employee=employee_profile.user,
+    legacy_attendance = DashAttendance.objects.filter(
+        employee=employee_profile,
         date=target_date
     ).first()
 
     total_hours = None
-    if legacy_attendance and legacy_attendance.punch_in_time and legacy_attendance.punch_out_time:
-        delta = legacy_attendance.punch_out_time - legacy_attendance.punch_in_time
+    if legacy_attendance and legacy_attendance.punch_in and legacy_attendance.punch_out:
+        delta = legacy_attendance.punch_out - legacy_attendance.punch_in
         total_hours = round(delta.total_seconds() / 3600, 2)
 
     call_logs = CallLog.objects.filter(
