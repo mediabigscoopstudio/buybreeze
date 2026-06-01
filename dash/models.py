@@ -512,3 +512,24 @@ class SystemAPISettings(models.Model):
 
     def __str__(self):
         return self.key
+
+
+class AdAccount(models.Model):
+    PLATFORM_CHOICES = [
+        ('meta', 'Meta / Facebook Ads'),
+        ('google', 'Google Ads'),
+    ]
+    platform   = models.CharField(max_length=20, choices=PLATFORM_CHOICES)
+    name       = models.CharField(max_length=255)
+    account_id = models.CharField(max_length=255)
+    is_active  = models.BooleanField(default=True)
+    notes      = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['platform', 'name']
+        verbose_name = 'Ad Account'
+        verbose_name_plural = 'Ad Accounts'
+
+    def __str__(self):
+        return f"{self.get_platform_display()} — {self.name} ({self.account_id})"

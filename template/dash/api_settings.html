@@ -7,91 +7,109 @@
 {% block extra_css %}
 <style>
   .api-panel {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 24px;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; margin-bottom: 24px;
   }
   .api-panel-header {
     display: flex; align-items: center; gap: 10px;
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--border);
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
     background: var(--cloud);
   }
   .api-panel-icon {
     width: 32px; height: 32px; border-radius: 10px;
     background: var(--sage-lt); color: var(--sage);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
   }
   .api-panel-title { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .api-panel-body { padding: 20px 24px; }
+  .api-panel-body  { padding: 18px 22px; }
 
   .api-row {
     display: grid; grid-template-columns: 1fr 2fr auto;
     align-items: center; gap: 16px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--cloud);
+    padding: 13px 0; border-bottom: 1px solid var(--cloud);
   }
   .api-row:last-child { border-bottom: none; }
-
-  .api-key-label {
-    font-family: 'Geist Mono', monospace;
-    font-size: 11px; font-weight: 700;
-    color: var(--ink); letter-spacing: 0.3px;
-  }
-  .api-key-desc {
-    font-size: 11px; color: var(--stone);
-    margin-top: 3px;
-  }
+  .api-key-label { font-family:'Geist Mono',monospace; font-size:11px; font-weight:700; color:var(--ink); letter-spacing:.3px; }
+  .api-key-desc  { font-size:11px; color:var(--stone); margin-top:3px; }
 
   .api-input-wrap { position: relative; }
   .api-input {
-    width: 100%; padding: 9px 38px 9px 12px;
-    border: 1px solid var(--border); border-radius: 8px;
-    font-size: 13px; font-family: 'Geist Mono', monospace;
-    color: var(--ink); background: var(--white);
-    outline: none; transition: border-color .15s;
+    width:100%; padding:9px 38px 9px 12px;
+    border:1px solid var(--border); border-radius:8px;
+    font-size:13px; font-family:'Geist Mono',monospace;
+    color:var(--ink); background:var(--white);
+    outline:none; transition:border-color .15s;
   }
-  .api-input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(26,107,85,.08); }
+  .api-input:focus { border-color:var(--sage); box-shadow:0 0 0 3px rgba(26,107,85,.08); }
   .toggle-vis {
-    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; padding: 0; cursor: pointer;
-    color: var(--stone); font-size: 14px;
+    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+    background:none; border:none; padding:0; cursor:pointer;
+    color:var(--stone); font-size:14px;
   }
-  .toggle-vis:hover { color: var(--ink); }
+  .toggle-vis:hover { color:var(--ink); }
+  .status-icon { font-size:18px; flex-shrink:0; }
+  .si-ok      { color:#16a34a; }
+  .si-missing { color:#dc2626; }
 
-  .status-icon { font-size: 18px; flex-shrink: 0; }
-  .si-ok  { color: #16a34a; }
-  .si-missing { color: #dc2626; }
+  /* ── AD ACCOUNT TABLE ── */
+  .acc-table { width:100%; border-collapse:collapse; }
+  .acc-table th {
+    font-size:10px; font-weight:700; color:var(--stone);
+    text-transform:uppercase; letter-spacing:.8px;
+    padding:10px 12px; border-bottom:1px solid var(--border);
+    background:var(--cloud); text-align:left;
+  }
+  .acc-table td { padding:12px 12px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
+  .acc-table tr:last-child td { border-bottom:none; }
+  .acc-id { font-family:'Geist Mono',monospace; font-size:11px; color:var(--stone); }
+  .badge-active   { background:rgba(22,163,74,.1);  color:#16a34a; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+  .badge-inactive { background:rgba(107,114,128,.1); color:#6B7280; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+
+  /* ── ADD FORM ── */
+  .add-acc-form { background:var(--cloud); border-radius:12px; padding:18px 20px; margin-top:16px; }
+  .add-acc-form .row { gap:10px; }
+  .form-field { display:flex; flex-direction:column; gap:4px; }
+  .form-label { font-size:11px; font-weight:700; color:var(--ink); text-transform:uppercase; letter-spacing:.4px; }
+  .form-ctrl  {
+    border:1px solid var(--border); border-radius:8px; padding:8px 12px;
+    font-size:13px; color:var(--ink); background:var(--white); outline:none;
+    transition:border-color .15s; width:100%;
+  }
+  .form-ctrl:focus { border-color:var(--sage); }
+  .btn-add  { background:var(--sage); color:#fff; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-add:hover { opacity:.9; }
+  .btn-del  { background:none; border:1px solid #fecaca; color:#dc2626; border-radius:6px; padding:5px 10px; font-size:11px; font-weight:600; cursor:pointer; }
+  .btn-del:hover { background:#fef2f2; }
+  .btn-toggle { background:none; border:1px solid var(--border); color:var(--stone); border-radius:6px; padding:5px 10px; font-size:11px; font-weight:600; cursor:pointer; }
+  .btn-toggle:hover { background:var(--cloud); }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="main-content" style="max-width: 900px;">
+<div class="main-content" style="max-width:960px;">
 
-  {# PAGE HEADER #}
   <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
     <div>
       <h2 style="font-size:22px; font-weight:700; color:var(--ink); margin:0;">API Key Settings</h2>
       <div style="font-size:13px; color:var(--stone); margin-top:4px;">
-        Configure third-party integration credentials. Keys are stored encrypted in the database.
+        Configure third-party integration credentials and ad accounts.
       </div>
     </div>
   </div>
 
   {% if messages %}
   {% for msg in messages %}
-  <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert" style="font-size:13px;">
-    <i class="bi bi-check-circle-fill me-2"></i>{{ msg }}
+  <div class="alert alert-{% if 'error' in msg.tags %}danger{% else %}success{% endif %} alert-dismissible fade show rounded-3 mb-4" role="alert" style="font-size:13px;">
+    <i class="bi bi-{% if 'error' in msg.tags %}x-circle{% else %}check-circle{% endif %}-fill me-2"></i>{{ msg }}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   </div>
   {% endfor %}
   {% endif %}
 
+  {# ── API CREDENTIALS (one save form) ── #}
   <form method="POST" autocomplete="off">
     {% csrf_token %}
+    <input type="hidden" name="_action" value="save_keys">
 
     {% for group in groups %}
     <div class="api-panel fade-up">
@@ -107,25 +125,16 @@
             <div class="api-key-desc">{{ item.description }}</div>
           </div>
           <div class="api-input-wrap">
-            <input
-              type="password"
-              name="{{ item.key }}"
-              id="field_{{ item.key }}"
-              value="{{ item.value }}"
-              class="api-input"
-              placeholder="Enter {{ item.key }}…"
-              autocomplete="new-password"
-            >
+            <input type="password" name="{{ item.key }}" id="field_{{ item.key }}"
+              value="{{ item.value }}" class="api-input"
+              placeholder="Enter {{ item.key }}…" autocomplete="new-password">
             <button type="button" class="toggle-vis" onclick="toggleVis('field_{{ item.key }}', this)" title="Show/hide">
               <i class="bi bi-eye"></i>
             </button>
           </div>
           <div class="status-icon" title="{% if item.value %}Configured{% else %}Not set{% endif %}">
-            {% if item.value %}
-              <i class="bi bi-check-circle-fill si-ok"></i>
-            {% else %}
-              <i class="bi bi-x-circle-fill si-missing"></i>
-            {% endif %}
+            {% if item.value %}<i class="bi bi-check-circle-fill si-ok"></i>
+            {% else %}<i class="bi bi-x-circle-fill si-missing"></i>{% endif %}
           </div>
         </div>
         {% endfor %}
@@ -133,12 +142,170 @@
     </div>
     {% endfor %}
 
-    <div class="d-flex justify-content-end mt-2 mb-5">
+    <div class="d-flex justify-content-end mt-2 mb-4">
       <button type="submit" class="btn-primary-sage" style="padding:10px 32px; font-size:14px;">
-        <i class="bi bi-floppy-fill me-2"></i>Save All Keys
+        <i class="bi bi-floppy-fill me-2"></i>Save Credentials
       </button>
     </div>
   </form>
+
+  {# ── META AD ACCOUNTS ── #}
+  <div class="api-panel fade-up mb-4">
+    <div class="api-panel-header">
+      <div class="api-panel-icon" style="background:rgba(24,119,242,.1); color:#1877F2;"><i class="bi bi-facebook"></i></div>
+      <span class="api-panel-title">Meta Ad Accounts</span>
+      <span class="ms-auto" style="font-size:12px; color:var(--stone);">{{ meta_accounts|length }} account{{ meta_accounts|length|pluralize }}</span>
+    </div>
+    <div class="api-panel-body p-0">
+      {% if meta_accounts %}
+      <table class="acc-table">
+        <thead><tr><th>Name</th><th>Account ID</th><th>Notes</th><th>Status</th><th style="width:130px;"></th></tr></thead>
+        <tbody>
+          {% for acc in meta_accounts %}
+          <tr>
+            <td style="font-weight:600;">{{ acc.name }}</td>
+            <td><span class="acc-id">{{ acc.account_id }}</span></td>
+            <td style="font-size:12px; color:var(--stone);">{{ acc.notes|default:"—" }}</td>
+            <td>
+              {% if acc.is_active %}<span class="badge-active">Active</span>
+              {% else %}<span class="badge-inactive">Disabled</span>{% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <form method="POST">{% csrf_token %}
+                  <input type="hidden" name="_action" value="toggle_ad_account">
+                  <input type="hidden" name="acc_pk" value="{{ acc.pk }}">
+                  <button type="submit" class="btn-toggle">
+                    {% if acc.is_active %}Disable{% else %}Enable{% endif %}
+                  </button>
+                </form>
+                <form method="POST" onsubmit="return confirm('Remove {{ acc.name }}?')">{% csrf_token %}
+                  <input type="hidden" name="_action" value="delete_ad_account">
+                  <input type="hidden" name="acc_pk" value="{{ acc.pk }}">
+                  <button type="submit" class="btn-del"><i class="bi bi-trash3"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="text-center py-4" style="color:var(--stone); font-size:13px;">
+        <i class="bi bi-facebook" style="font-size:24px; display:block; margin-bottom:6px; opacity:.3;"></i>
+        No Meta ad accounts added yet.
+      </div>
+      {% endif %}
+
+      {# ADD META ACCOUNT FORM #}
+      <div class="px-3 pb-3">
+        <form method="POST" class="add-acc-form">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="add_ad_account">
+          <input type="hidden" name="platform" value="meta">
+          <div style="font-size:12px; font-weight:700; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+            <i class="bi bi-plus-circle-fill" style="color:var(--sage);"></i> Add Meta Ad Account
+          </div>
+          <div class="d-flex gap-3 flex-wrap">
+            <div class="form-field" style="flex:1; min-width:160px;">
+              <label class="form-label">Account Label</label>
+              <input type="text" name="acc_name" class="form-ctrl" placeholder="e.g. BuyBreeze Main" required>
+            </div>
+            <div class="form-field" style="flex:1; min-width:200px;">
+              <label class="form-label">Account ID</label>
+              <input type="text" name="acc_id" class="form-ctrl" placeholder="act_XXXXXXXXXXXXXXXXX" required>
+            </div>
+            <div class="form-field" style="flex:2; min-width:200px;">
+              <label class="form-label">Notes (optional)</label>
+              <input type="text" name="acc_notes" class="form-ctrl" placeholder="e.g. Used for lead gen campaigns">
+            </div>
+            <div class="form-field justify-content-end" style="padding-top:18px;">
+              <button type="submit" class="btn-add"><i class="bi bi-plus-lg me-1"></i>Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ── GOOGLE AD ACCOUNTS ── #}
+  <div class="api-panel fade-up mb-5">
+    <div class="api-panel-header">
+      <div class="api-panel-icon" style="background:rgba(234,67,53,.1); color:#EA4335;"><i class="bi bi-google"></i></div>
+      <span class="api-panel-title">Google Ad Accounts</span>
+      <span class="ms-auto" style="font-size:12px; color:var(--stone);">{{ google_accounts|length }} account{{ google_accounts|length|pluralize }}</span>
+    </div>
+    <div class="api-panel-body p-0">
+      {% if google_accounts %}
+      <table class="acc-table">
+        <thead><tr><th>Name</th><th>Customer ID</th><th>Notes</th><th>Status</th><th style="width:130px;"></th></tr></thead>
+        <tbody>
+          {% for acc in google_accounts %}
+          <tr>
+            <td style="font-weight:600;">{{ acc.name }}</td>
+            <td><span class="acc-id">{{ acc.account_id }}</span></td>
+            <td style="font-size:12px; color:var(--stone);">{{ acc.notes|default:"—" }}</td>
+            <td>
+              {% if acc.is_active %}<span class="badge-active">Active</span>
+              {% else %}<span class="badge-inactive">Disabled</span>{% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <form method="POST">{% csrf_token %}
+                  <input type="hidden" name="_action" value="toggle_ad_account">
+                  <input type="hidden" name="acc_pk" value="{{ acc.pk }}">
+                  <button type="submit" class="btn-toggle">
+                    {% if acc.is_active %}Disable{% else %}Enable{% endif %}
+                  </button>
+                </form>
+                <form method="POST" onsubmit="return confirm('Remove {{ acc.name }}?')">{% csrf_token %}
+                  <input type="hidden" name="_action" value="delete_ad_account">
+                  <input type="hidden" name="acc_pk" value="{{ acc.pk }}">
+                  <button type="submit" class="btn-del"><i class="bi bi-trash3"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="text-center py-4" style="color:var(--stone); font-size:13px;">
+        <i class="bi bi-google" style="font-size:24px; display:block; margin-bottom:6px; opacity:.3;"></i>
+        No Google ad accounts added yet.
+      </div>
+      {% endif %}
+
+      {# ADD GOOGLE ACCOUNT FORM #}
+      <div class="px-3 pb-3">
+        <form method="POST" class="add-acc-form">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="add_ad_account">
+          <input type="hidden" name="platform" value="google">
+          <div style="font-size:12px; font-weight:700; color:var(--ink); margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+            <i class="bi bi-plus-circle-fill" style="color:var(--sage);"></i> Add Google Ad Account
+          </div>
+          <div class="d-flex gap-3 flex-wrap">
+            <div class="form-field" style="flex:1; min-width:160px;">
+              <label class="form-label">Account Label</label>
+              <input type="text" name="acc_name" class="form-ctrl" placeholder="e.g. BuyBreeze Search" required>
+            </div>
+            <div class="form-field" style="flex:1; min-width:200px;">
+              <label class="form-label">Customer ID</label>
+              <input type="text" name="acc_id" class="form-ctrl" placeholder="e.g. 123-456-7890" required>
+            </div>
+            <div class="form-field" style="flex:2; min-width:200px;">
+              <label class="form-label">Notes (optional)</label>
+              <input type="text" name="acc_notes" class="form-ctrl" placeholder="e.g. Search campaigns account">
+            </div>
+            <div class="form-field justify-content-end" style="padding-top:18px;">
+              <button type="submit" class="btn-add"><i class="bi bi-plus-lg me-1"></i>Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
 </div>
 {% endblock %}
@@ -146,15 +313,13 @@
 {% block extra_js %}
 <script>
 function toggleVis(id, btn) {
-    const inp = document.getElementById(id);
-    const icon = btn.querySelector('i');
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        icon.className = 'bi bi-eye-slash';
-    } else {
-        inp.type = 'password';
-        icon.className = 'bi bi-eye';
-    }
+  const inp  = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  if (inp.type === 'password') {
+    inp.type = 'text'; icon.className = 'bi bi-eye-slash';
+  } else {
+    inp.type = 'password'; icon.className = 'bi bi-eye';
+  }
 }
 </script>
 {% endblock %}

@@ -20,14 +20,15 @@ def _get_api():
     return access_token
 
 
-def get_meta_campaigns(date_preset='last_30d'):
+def get_meta_campaigns(date_preset='last_30d', account_id=None):
     from facebook_business.adobjects.adaccount import AdAccount
     from facebook_business.adobjects.campaign import Campaign
 
     _get_api()
-    account_id = get_setting('META_AD_ACCOUNT_ID')
     if not account_id:
-        raise ValueError('META_AD_ACCOUNT_ID is not configured.')
+        account_id = get_setting('META_AD_ACCOUNT_ID')
+    if not account_id:
+        raise ValueError('No Meta Ad Account ID configured.')
 
     account = AdAccount(account_id)
     campaigns = account.get_campaigns(
@@ -54,14 +55,15 @@ def get_meta_campaigns(date_preset='last_30d'):
     return results
 
 
-def get_meta_leads(limit=50):
+def get_meta_leads(limit=50, account_id=None):
     from facebook_business.adobjects.adaccount import AdAccount
     from facebook_business.adobjects.lead import Lead
 
     _get_api()
-    account_id = get_setting('META_AD_ACCOUNT_ID')
     if not account_id:
-        raise ValueError('META_AD_ACCOUNT_ID is not configured.')
+        account_id = get_setting('META_AD_ACCOUNT_ID')
+    if not account_id:
+        raise ValueError('No Meta Ad Account ID configured.')
 
     account = AdAccount(account_id)
     lead_forms = account.get_ad_leads(

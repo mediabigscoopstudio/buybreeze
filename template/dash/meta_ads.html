@@ -56,13 +56,25 @@
 {% block content %}
 <div class="main-content" style="max-width: 1200px;">
 
-  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up flex-wrap gap-3">
     <div>
       <h2 style="font-size:22px; font-weight:700; color:var(--ink); margin:0;">Meta Ads Dashboard</h2>
-      <div style="font-size:13px; color:var(--stone); margin-top:4px;">Campaign performance and lead data from your Facebook Ad Account</div>
+      <div style="font-size:13px; color:var(--stone); margin-top:4px;">
+        {% if selected_acc %}{{ selected_acc.name }} — {{ selected_acc.account_id }}{% else %}Facebook Ad Account{% endif %}
+      </div>
     </div>
     {% if keys_configured %}
-    <form method="GET" class="d-flex align-items-center gap-2">
+    <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+      {% if all_accounts and all_accounts|length > 1 %}
+      <select name="account_id" class="grove-input m-0" style="min-width:200px; min-height:38px;" onchange="this.form.submit()">
+        {% for acc in all_accounts %}
+        <option value="{{ acc.id }}" {% if selected_acc and selected_acc.id == acc.id %}selected{% endif %}>
+          {{ acc.name }}
+        </option>
+        {% endfor %}
+      </select>
+      {% endif %}
+      {% if selected_acc %}<input type="hidden" name="account_id" value="{{ selected_acc.id }}">{% endif %}
       <select name="date_preset" class="grove-input m-0" style="min-width:160px; min-height:38px;" onchange="this.form.submit()">
         {% for val, label in date_preset_options %}
         <option value="{{ val }}" {% if date_preset == val %}selected{% endif %}>{{ label }}</option>
@@ -71,6 +83,21 @@
     </form>
     {% endif %}
   </div>
+
+  {% if all_accounts and all_accounts|length > 1 %}
+  <div class="d-flex gap-2 mb-4 flex-wrap fade-up">
+    {% for acc in all_accounts %}
+    <a href="?account_id={{ acc.id }}&date_preset={{ date_preset }}"
+       style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:30px; font-size:12px; font-weight:600; text-decoration:none;
+              {% if selected_acc and selected_acc.id == acc.id %}background:#1877F2; color:#fff;{% else %}background:var(--white); border:1px solid var(--border); color:var(--ink);{% endif %}">
+      <i class="bi bi-facebook"></i> {{ acc.name }}
+    </a>
+    {% endfor %}
+    <a href="{% url 'api_settings' %}" style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:30px; font-size:12px; font-weight:600; text-decoration:none; background:var(--white); border:1px solid var(--border); color:var(--stone);">
+      <i class="bi bi-plus-lg"></i> Manage Accounts
+    </a>
+  </div>
+  {% endif %}
 
   {% if not keys_configured %}
   <div class="no-keys-banner fade-up">

@@ -1800,9 +1800,50 @@ def meta_webhook(request):
 @user_passes_test(superadmin_required, login_url='/login/')
 def api_settings(request):
     from .utils import API_KEY_DEFAULTS, ensure_api_settings
+    from .models import AdAccount
     ensure_api_settings()
 
     if request.method == 'POST':
+        action = request.POST.get('_action', 'save_keys')
+
+        if action == 'add_ad_account':
+            platform   = request.POST.get('platform', '').strip()
+            name       = request.POST.get('acc_name', '').strip()
+            account_id = request.POST.get('acc_id', '').strip()
+            notes      = request.POST.get('acc_notes', '').strip()
+            if platform and name and account_id:
+                AdAccount.objects.create(
+                    platform=platform, name=name,
+                    account_id=account_id, notes=notes or None,
+                )
+                messages.success(request, f'Ad account "{name}" added successfully.')
+            else:
+                messages.error(request, 'Platform, name, and account ID are required.')
+            return redirect('api_settings')
+
+        if action == 'delete_ad_account':
+            acc_pk = request.POST.get('acc_pk')
+            try:
+                acc = AdAccount.objects.get(pk=acc_pk)
+                messages.success(request, f'Ad account "{acc.name}" removed.')
+                acc.delete()
+            except AdAccount.DoesNotExist:
+                messages.error(request, 'Ad account not found.')
+            return redirect('api_settings')
+
+        if action == 'toggle_ad_account':
+            acc_pk = request.POST.get('acc_pk')
+            try:
+                acc = AdAccount.objects.get(pk=acc_pk)
+                acc.is_active = not acc.is_active
+                acc.save()
+                state = 'enabled' if acc.is_active else 'disabled'
+                messages.success(request, f'Ad account "{acc.name}" {state}.')
+            except AdAccount.DoesNotExist:
+                messages.error(request, 'Ad account not found.')
+            return redirect('api_settings')
+
+        # default: save API keys
         for key, _ in API_KEY_DEFAULTS:
             val = request.POST.get(key, '').strip()
             SystemAPISettings.objects.filter(key=key).update(value=val)
@@ -1814,15 +1855,15 @@ def api_settings(request):
 
     groups = [
         {
-            'label': 'Meta / Facebook Ads',
+            'label': 'Meta / Facebook Ads — Credentials',
             'icon':  'bi-facebook',
-            'keys':  ['META_APP_ID', 'META_APP_SECRET', 'META_AD_ACCOUNT_ID', 'META_ACCESS_TOKEN'],
+            'keys':  ['META_APP_ID', 'META_APP_SECRET', 'META_ACCESS_TOKEN'],
         },
         {
-            'label': 'Google Ads',
+            'label': 'Google Ads — Credentials',
             'icon':  'bi-google',
             'keys':  ['GOOGLE_DEVELOPER_TOKEN', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET',
-                      'GOOGLE_REFRESH_TOKEN', 'GOOGLE_CUSTOMER_ID'],
+                      'GOOGLE_REFRESH_TOKEN'],
         },
         {
             'label': 'WhatsApp Business API',
@@ -1839,30 +1880,50 @@ def api_settings(request):
     for group in groups:
         group['items'] = [settings_map.get(k) for k in group['keys'] if k in settings_map]
 
-    return render(request, 'dash/api_settings.html', {'groups': groups})
+    meta_accounts   = AdAccount.objects.filter(platform='meta').order_by('name')
+    google_accounts = AdAccount.objects.filter(platform='google').order_by('name')
+
+    return render(request, 'dash/api_settings.html', {
+        'groups':          groups,
+        'meta_accounts':   meta_accounts,
+        'google_accounts': google_accounts,
+    })
 
 
 # ── META ADS DASHBOARD ───────────────────────────────────────────────────────
 @user_passes_test(superadmin_required, login_url='/login/')
 def meta_ads_dashboard(request):
     from .utils import get_setting
-    keys_configured = all([
+    from .models import AdAccount
+
+    creds_ok = all([
         get_setting('META_APP_ID'),
         get_setting('META_APP_SECRET'),
         get_setting('META_ACCESS_TOKEN'),
-        get_setting('META_AD_ACCOUNT_ID'),
     ])
 
-    campaigns = []
-    leads     = []
-    error     = None
+    all_accounts  = list(AdAccount.objects.filter(platform='meta', is_active=True).order_by('name'))
+    selected_acc  = None
+    campaigns     = []
+    leads         = []
+    error         = None
+    date_preset   = request.GET.get('date_preset', 'last_30d')
+    selected_id   = request.GET.get('account_id')
+
+    if all_accounts:
+        selected_acc = next((a for a in all_accounts if str(a.id) == selected_id), all_accounts[0])
+        account_id   = selected_acc.account_id
+        keys_configured = creds_ok
+    else:
+        # fall back to legacy single-account setting
+        account_id      = get_setting('META_AD_ACCOUNT_ID')
+        keys_configured = creds_ok and bool(account_id)
 
     if keys_configured:
-        date_preset = request.GET.get('date_preset', 'last_30d')
         try:
             from .meta_ads import get_meta_campaigns, get_meta_leads
-            campaigns = get_meta_campaigns(date_preset=date_preset)
-            leads     = get_meta_leads(limit=100)
+            campaigns = get_meta_campaigns(date_preset=date_preset, account_id=account_id)
+            leads     = get_meta_leads(limit=100, account_id=account_id)
         except ModuleNotFoundError:
             error = "missing_package"
         except Exception as e:
@@ -1871,15 +1932,15 @@ def meta_ads_dashboard(request):
                 error = "token_expired"
             else:
                 error = err_str
-    else:
-        date_preset = 'last_30d'
 
     return render(request, 'dash/meta_ads.html', {
-        'keys_configured': keys_configured,
-        'campaigns':       campaigns,
-        'leads':           leads,
-        'error':           error,
-        'date_preset':     date_preset,
+        'keys_configured':    keys_configured,
+        'all_accounts':       all_accounts,
+        'selected_acc':       selected_acc,
+        'campaigns':          campaigns,
+        'leads':              leads,
+        'error':              error,
+        'date_preset':        date_preset,
         'date_preset_options': [
             ('today',       'Today'),
             ('yesterday',   'Yesterday'),
@@ -1896,34 +1957,46 @@ def meta_ads_dashboard(request):
 @user_passes_test(superadmin_required, login_url='/login/')
 def google_ads_dashboard(request):
     from .utils import get_setting
-    keys_configured = all([
+    from .models import AdAccount
+
+    creds_ok = all([
         get_setting('GOOGLE_DEVELOPER_TOKEN'),
         get_setting('GOOGLE_CLIENT_ID'),
         get_setting('GOOGLE_CLIENT_SECRET'),
         get_setting('GOOGLE_REFRESH_TOKEN'),
-        get_setting('GOOGLE_CUSTOMER_ID'),
     ])
 
-    campaigns = []
-    error     = None
+    all_accounts  = list(AdAccount.objects.filter(platform='google', is_active=True).order_by('name'))
+    selected_acc  = None
+    campaigns     = []
+    error         = None
+    date_range    = request.GET.get('date_range', 'LAST_30_DAYS')
+    selected_id   = request.GET.get('account_id')
+
+    if all_accounts:
+        selected_acc = next((a for a in all_accounts if str(a.id) == selected_id), all_accounts[0])
+        customer_id  = selected_acc.account_id
+        keys_configured = creds_ok
+    else:
+        customer_id     = get_setting('GOOGLE_CUSTOMER_ID')
+        keys_configured = creds_ok and bool(customer_id)
 
     if keys_configured:
-        date_range = request.GET.get('date_range', 'LAST_30_DAYS')
         try:
             from .google_ads import get_google_campaigns
-            campaigns = get_google_campaigns(date_range=date_range)
-        except ModuleNotFoundError as e:
-            error = "Missing dependency: google-ads is not installed on the server. Run: pip install google-ads"
+            campaigns = get_google_campaigns(date_range=date_range, customer_id=customer_id)
+        except ModuleNotFoundError:
+            error = "missing_package"
         except Exception as e:
             error = str(e)
-    else:
-        date_range = 'LAST_30_DAYS'
 
     return render(request, 'dash/google_ads.html', {
-        'keys_configured': keys_configured,
-        'campaigns':       campaigns,
-        'error':           error,
-        'date_range':      date_range,
+        'keys_configured':    keys_configured,
+        'all_accounts':       all_accounts,
+        'selected_acc':       selected_acc,
+        'campaigns':          campaigns,
+        'error':              error,
+        'date_range':         date_range,
         'date_range_options': [
             ('TODAY',        'Today'),
             ('YESTERDAY',    'Yesterday'),

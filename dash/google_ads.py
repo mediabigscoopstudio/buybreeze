@@ -22,9 +22,13 @@ def _build_client():
     return GoogleAdsClient.load_from_dict(config)
 
 
-def get_google_campaigns(date_range='LAST_30_DAYS'):
-    client      = _build_client()
-    customer_id = get_setting('GOOGLE_CUSTOMER_ID').replace('-', '')
+def get_google_campaigns(date_range='LAST_30_DAYS', customer_id=None):
+    client = _build_client()
+    if not customer_id:
+        customer_id = get_setting('GOOGLE_CUSTOMER_ID')
+    customer_id = customer_id.replace('-', '') if customer_id else ''
+    if not customer_id:
+        raise ValueError('No Google Ads Customer ID configured.')
 
     ga_service = client.get_service('GoogleAdsService')
     query = f"""

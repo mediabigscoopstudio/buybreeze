@@ -51,13 +51,25 @@
 {% block content %}
 <div class="main-content" style="max-width: 1200px;">
 
-  <div class="d-flex align-items-center justify-content-between mb-4 fade-up">
+  <div class="d-flex align-items-center justify-content-between mb-4 fade-up flex-wrap gap-3">
     <div>
       <h2 style="font-size:22px; font-weight:700; color:var(--ink); margin:0;">Google Ads Dashboard</h2>
-      <div style="font-size:13px; color:var(--stone); margin-top:4px;">Campaign performance data from your Google Ads account</div>
+      <div style="font-size:13px; color:var(--stone); margin-top:4px;">
+        {% if selected_acc %}{{ selected_acc.name }} — {{ selected_acc.account_id }}{% else %}Google Ads Account{% endif %}
+      </div>
     </div>
     {% if keys_configured %}
-    <form method="GET" class="d-flex align-items-center gap-2">
+    <form method="GET" class="d-flex align-items-center gap-2 flex-wrap">
+      {% if all_accounts and all_accounts|length > 1 %}
+      <select name="account_id" class="grove-input m-0" style="min-width:200px; min-height:38px;" onchange="this.form.submit()">
+        {% for acc in all_accounts %}
+        <option value="{{ acc.id }}" {% if selected_acc and selected_acc.id == acc.id %}selected{% endif %}>
+          {{ acc.name }}
+        </option>
+        {% endfor %}
+      </select>
+      {% endif %}
+      {% if selected_acc %}<input type="hidden" name="account_id" value="{{ selected_acc.id }}">{% endif %}
       <select name="date_range" class="grove-input m-0" style="min-width:160px; min-height:38px;" onchange="this.form.submit()">
         {% for val, label in date_range_options %}
         <option value="{{ val }}" {% if date_range == val %}selected{% endif %}>{{ label }}</option>
@@ -66,6 +78,21 @@
     </form>
     {% endif %}
   </div>
+
+  {% if all_accounts and all_accounts|length > 1 %}
+  <div class="d-flex gap-2 mb-4 flex-wrap fade-up">
+    {% for acc in all_accounts %}
+    <a href="?account_id={{ acc.id }}&date_range={{ date_range }}"
+       style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:30px; font-size:12px; font-weight:600; text-decoration:none;
+              {% if selected_acc and selected_acc.id == acc.id %}background:#EA4335; color:#fff;{% else %}background:var(--white); border:1px solid var(--border); color:var(--ink);{% endif %}">
+      <i class="bi bi-google"></i> {{ acc.name }}
+    </a>
+    {% endfor %}
+    <a href="{% url 'api_settings' %}" style="display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:30px; font-size:12px; font-weight:600; text-decoration:none; background:var(--white); border:1px solid var(--border); color:var(--stone);">
+      <i class="bi bi-plus-lg"></i> Manage Accounts
+    </a>
+  </div>
+  {% endif %}
 
   {% if not keys_configured %}
   <div class="no-keys-banner fade-up">
@@ -78,12 +105,23 @@
       </div>
     </div>
   </div>
+  {% elif error == "missing_package" %}
+  <div class="no-keys-banner fade-up" style="background:#fef2f2; border-color:#fecaca;">
+    <i class="bi bi-box-seam" style="font-size:22px; color:#dc2626; flex-shrink:0; margin-top:2px;"></i>
+    <div>
+      <div style="font-weight:700; color:var(--ink); font-size:14px; margin-bottom:4px;">Missing Server Package</div>
+      <div style="font-size:12px; color:#7f1d1d; font-family:'Geist Mono',monospace;">Run on server: pip install google-ads</div>
+    </div>
+  </div>
   {% elif error %}
   <div class="no-keys-banner fade-up" style="background:#fef2f2; border-color:#fecaca;">
     <i class="bi bi-x-circle-fill" style="font-size:22px; color:#dc2626; flex-shrink:0; margin-top:2px;"></i>
     <div>
       <div style="font-weight:700; color:var(--ink); font-size:14px; margin-bottom:4px;">Google Ads API Error</div>
       <div style="font-size:12px; color:#7f1d1d; font-family:'Geist Mono',monospace;">{{ error }}</div>
+      <a href="{% url 'api_settings' %}" style="display:inline-flex; align-items:center; gap:6px; margin-top:10px; background:#dc2626; color:#fff; font-size:12px; font-weight:700; padding:7px 14px; border-radius:8px; text-decoration:none;">
+        <i class="bi bi-gear-fill"></i> Check API Settings
+      </a>
     </div>
   </div>
   {% else %}
