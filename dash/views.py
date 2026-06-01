@@ -1863,6 +1863,8 @@ def meta_ads_dashboard(request):
             from .meta_ads import get_meta_campaigns, get_meta_leads
             campaigns = get_meta_campaigns(date_preset=date_preset)
             leads     = get_meta_leads(limit=100)
+        except ModuleNotFoundError as e:
+            error = "Missing dependency: facebook-business is not installed on the server. Run: pip install facebook-business"
         except Exception as e:
             error = str(e)
     else:
@@ -1906,6 +1908,8 @@ def google_ads_dashboard(request):
         try:
             from .google_ads import get_google_campaigns
             campaigns = get_google_campaigns(date_range=date_range)
+        except ModuleNotFoundError as e:
+            error = "Missing dependency: google-ads is not installed on the server. Run: pip install google-ads"
         except Exception as e:
             error = str(e)
     else:
