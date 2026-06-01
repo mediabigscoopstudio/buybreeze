@@ -559,46 +559,46 @@ def apr_reports(request):
 
 @user_passes_test(manager_required, login_url='/login/')
 def individual_apr_report(request, id):
-    from employee.models import Attendance as EmployeeAttendance
-
     manager = request.user.profile
     team_leaders = UserProfile.objects.filter(reports_to=manager, role='tl')
     employee_profile = get_object_or_404(
-        UserProfile.objects.select_related(
-            'user',
-            'reports_to',
-            'reports_to__user'
-        ),
+        UserProfile.objects.select_related('user', 'reports_to', 'reports_to__user'),
         id=id,
         role='employee',
         reports_to__in=list(team_leaders) + [manager],
     )
-    attendance_qs = EmployeeAttendance.objects.filter(
-        employee=employee_profile.user
+
+    attendance_qs = Attendance.objects.filter(
+        employee=employee_profile,
     ).order_by('-date')
 
     attendances = []
     late_marks = 0
-    for attendance in attendance_qs:
-        is_late = bool(attendance.punch_in_time and attendance.punch_in_time.time() > datetime.strptime('09:30', '%H:%M').time())
+    for att in attendance_qs:
+        is_late = bool(
+            att.punch_in and
+            att.punch_in.time() > datetime.strptime('09:30', '%H:%M').time()
+        )
         if is_late:
             late_marks += 1
         working_hours = None
-        if attendance.punch_in_time and attendance.punch_out_time:
-            working_hours = round((attendance.punch_out_time - attendance.punch_in_time).total_seconds() / 3600, 2)
-        status = 'present' if attendance.punch_in_time else 'absent'
+        if att.punch_in and att.punch_out:
+            working_hours = round(
+                (att.punch_out - att.punch_in).total_seconds() / 3600, 2
+            )
+        status = 'present' if att.punch_in else 'absent'
         attendances.append({
-            'date': attendance.date,
-            'check_in': attendance.punch_in_time,
-            'check_out': attendance.punch_out_time,
+            'date': att.date,
+            'check_in': att.punch_in,
+            'check_out': att.punch_out,
             'working_hours': working_hours,
             'status': status,
             'is_late': is_late,
-            'notes': '',
+            'notes': att.notes or '',
         })
 
     total_days = attendance_qs.count()
-    present_days = attendance_qs.filter(punch_in_time__isnull=False).count()
+    present_days = attendance_qs.filter(punch_in__isnull=False).count()
     absent_days = max(total_days - present_days, 0)
     leave_days = 0
     half_days = 0
@@ -621,6 +621,7 @@ def individual_apr_report(request, id):
             'attendance_percentage': attendance_percentage,
             'last_attendance_date': last_attendance_date,
             'last_attendance_status': last_attendance_status,
+            'total_attendance': total_days,
         }
     )
 
