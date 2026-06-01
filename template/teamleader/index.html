@@ -11,6 +11,15 @@
   .stat-label { font-size: 12px; color: var(--brand-accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .table-custom th { font-size: 10px; font-weight: 700; color: var(--brand-accent); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 16px 12px; background: var(--brand-bg); }
   .table-custom td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; color: var(--brand-ink); }
+  .assign-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .assign-select { border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; background: var(--white); color: var(--brand-ink); min-width: 200px; }
+  .assign-btn { background: var(--brand-accent); color: #fff; border: none; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .assign-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .temp-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+  .t-hot { background: rgba(239,68,68,0.1); color: #DC2626; }
+  .t-warm { background: rgba(245,158,11,0.1); color: #D97706; }
+  .t-cold { background: rgba(59,130,246,0.1); color: #2563EB; }
+  .selected-count { font-size: 12px; font-weight: 600; color: var(--brand-accent); }
 </style>
 {% endblock css %}
 
@@ -18,9 +27,10 @@
 <div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
   <div class="mb-4">
     <h2 style="font-size: 24px; font-weight: 700; color: var(--brand-ink); margin: 0;">Team Leader Portal</h2>
-    <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Live view of your team’s lead and attendance activity</div>
+    <div style="font-size: 13px; color: var(--brand-accent); margin-top: 4px;">Live view of your team's lead and attendance activity</div>
   </div>
 
+  <!-- STAT CARDS -->
   <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
     <div class="col"><div class="grove-stat-card"><div class="stat-icon-box"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ total_team }}</div><div class="stat-label">Total Team Members</div></div></div>
     <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(16,185,129,0.1); color: #059669;"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div></div>
@@ -32,6 +42,73 @@
     <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(239,68,68,0.1); color: #DC2626;"><i class="bi bi-person-dash-fill"></i></div><div class="stat-value">{{ absent_today }}</div><div class="stat-label">Absent Today</div></div></div>
   </div>
 
+  <!-- NEW LEADS — SELECT & ASSIGN TO EMPLOYEE -->
+  <div class="grove-panel p-0 mb-4" style="overflow: hidden;" id="assignPanel">
+    <div class="px-4 pt-4 pb-3 d-flex align-items-center justify-content-between flex-wrap gap-3" style="border-bottom: 1px solid var(--border);">
+      <div>
+        <h5 class="fw-bold mb-0">New Leads</h5>
+        <div style="font-size: 12px; color: var(--brand-accent); margin-top: 2px;">
+          {{ unassigned_leads.count }} lead{{ unassigned_leads.count|pluralize }} waiting to be assigned to an employee
+        </div>
+      </div>
+      <div class="assign-bar" id="assignBar">
+        <span class="selected-count" id="selectedCount">0 selected</span>
+        <select class="assign-select" id="employeeSelect">
+          <option value="">— Select Employee —</option>
+          {% for emp in employees %}
+          <option value="{{ emp.id }}">{{ emp.user.get_full_name }}</option>
+          {% endfor %}
+        </select>
+        <button class="assign-btn" id="assignBtn" disabled onclick="assignLeads()">
+          <i class="bi bi-person-check-fill me-1"></i> Assign to Employee
+        </button>
+      </div>
+    </div>
+
+    {% if unassigned_leads %}
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4" style="width: 40px;">
+              <input type="checkbox" id="selectAll" onchange="toggleAll(this)" style="cursor:pointer;">
+            </th>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Temp</th>
+            <th>Source</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in unassigned_leads %}
+          <tr id="row-{{ lead.id }}">
+            <td class="ps-4">
+              <input type="checkbox" class="lead-check" value="{{ lead.id }}" onchange="updateCount()" style="cursor:pointer;">
+            </td>
+            <td style="font-family:'Geist Mono',monospace; color: var(--brand-accent); font-size: 12px;">{{ forloop.counter }}</td>
+            <td style="font-weight: 600;">{{ lead.name }}</td>
+            <td style="font-family:'Geist Mono',monospace; font-size: 12px;">{{ lead.phone }}</td>
+            <td>
+              <span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}">{{ lead.temperature|title }}</span>
+            </td>
+            <td style="font-size: 12px; text-transform: capitalize;">{{ lead.source|default:"—" }}</td>
+            <td style="font-size: 12px; color: var(--brand-accent);">{{ lead.created_at|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5" style="color: var(--brand-accent);">
+      <i class="bi bi-inbox" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
+      No new leads pending assignment
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- RECENT TABLES -->
   <div class="row g-4">
     <div class="col-xl-6">
       <div class="grove-panel p-0" style="overflow: hidden;">
@@ -79,4 +156,69 @@
     </div>
   </div>
 </div>
+
+<script>
+function toggleAll(master) {
+  document.querySelectorAll('.lead-check').forEach(cb => cb.checked = master.checked);
+  updateCount();
+}
+
+function updateCount() {
+  const checked = document.querySelectorAll('.lead-check:checked');
+  const total   = document.querySelectorAll('.lead-check');
+  document.getElementById('selectedCount').textContent = checked.length + ' selected';
+  document.getElementById('assignBtn').disabled = checked.length === 0;
+  document.getElementById('selectAll').indeterminate = checked.length > 0 && checked.length < total.length;
+  document.getElementById('selectAll').checked = checked.length === total.length && total.length > 0;
+}
+
+function assignLeads() {
+  const empId = document.getElementById('employeeSelect').value;
+  if (!empId) { alert('Please select an employee first.'); return; }
+
+  const leadIds = Array.from(document.querySelectorAll('.lead-check:checked')).map(cb => parseInt(cb.value));
+  if (!leadIds.length) { alert('Please select at least one lead.'); return; }
+
+  const btn = document.getElementById('assignBtn');
+  btn.disabled = true;
+  btn.textContent = 'Assigning…';
+
+  fetch('{% url "assign_to_employee" %}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+    body: JSON.stringify({ lead_ids: leadIds, employee_id: parseInt(empId) }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'success') {
+      leadIds.forEach(id => {
+        const row = document.getElementById('row-' + id);
+        if (row) row.remove();
+      });
+      const remaining = document.querySelectorAll('.lead-check').length;
+      document.querySelector('#assignPanel .fw-bold + div').textContent =
+        remaining + ' lead' + (remaining !== 1 ? 's' : '') + ' waiting to be assigned to an employee';
+      updateCount();
+      if (!remaining) {
+        document.querySelector('#assignPanel .table-responsive').innerHTML =
+          '<div class="text-center py-5" style="color:var(--brand-accent);"><i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:8px;"></i>No new leads pending assignment</div>';
+      }
+    } else {
+      alert('Error: ' + (data.message || 'Unknown error'));
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-check-fill me-1"></i> Assign to Employee';
+    }
+  })
+  .catch(() => {
+    alert('Network error. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-person-check-fill me-1"></i> Assign to Employee';
+  });
+}
+
+function getCsrf() {
+  const cookie = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+  return cookie ? cookie.split('=')[1] : '';
+}
+</script>
 {% endblock body %}

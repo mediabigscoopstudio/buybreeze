@@ -21,6 +21,7 @@ urlpatterns = [
     path('lead-list/', views.lead_list, name='manager_lead_list'),
     path('lead/<int:lead_id>/', views.lead_detail, name='manager_lead_detail'),
     path('lead/<int:lead_id>/assign/', views.assign_lead, name='manager_assign_lead'),
+    path('tl/<int:tl_id>/leads/', views.tl_leads, name='manager_tl_leads'),
     path('team/<int:tl_id>/', views.team_detail, name='manager_team_detail'),
     path('employee/<int:employee_id>/leads/', views.employee_leads, name='manager_employee_leads'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

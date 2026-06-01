@@ -1,0 +1,178 @@
+{% extends "manager/base.html" %}
+{% block title %}{{ tl.user.get_full_name }} — Leads{% endblock %}
+
+{% block css %}
+<style>
+  .grove-panel { background:var(--white); border:1px solid var(--border); border-radius:16px; }
+  .back-link { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--brand-accent); text-decoration:none; margin-bottom:20px; }
+  .back-link:hover { color:var(--brand-ink); }
+
+  /* KPI chips */
+  .kpi-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+  .kpi-chip { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 20px; display:flex; flex-direction:column; gap:4px; min-width:100px; }
+  .kpi-val  { font-family:'Geist Mono',monospace; font-size:24px; font-weight:700; color:var(--brand-ink); line-height:1; }
+  .kpi-lbl  { font-size:10px; font-weight:700; color:var(--brand-accent); text-transform:uppercase; letter-spacing:.5px; }
+  .kpi-hot  { border-top:3px solid #DC2626; }
+  .kpi-warm { border-top:3px solid #D97706; }
+  .kpi-cold { border-top:3px solid #2563EB; }
+
+  /* Table */
+  .table-custom th {
+    font-size:10px; font-weight:700; color:var(--brand-accent);
+    letter-spacing:1px; text-transform:uppercase;
+    border-bottom:1px solid var(--border); padding:14px 12px;
+    background:var(--brand-bg);
+  }
+  .table-custom td { padding:14px 12px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:13px; }
+  .table-custom tr:last-child td { border-bottom:none; }
+  .temp-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .t-hot  { background:rgba(239,68,68,.1);  color:#DC2626; }
+  .t-warm { background:rgba(245,158,11,.1); color:#D97706; }
+  .t-cold { background:rgba(59,130,246,.1); color:#2563EB; }
+  .stage-pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase; background:var(--accent-light); color:var(--brand-accent); }
+  .assignee-dim { font-size:11px; color:var(--brand-accent); font-weight:500; }
+
+  /* Search / filter bar */
+  .filter-bar { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .filter-input { border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:13px; background:var(--brand-bg); color:var(--brand-ink); min-width:200px; }
+  .filter-input:focus { outline:none; border-color:var(--brand-accent); background:var(--white); }
+  .filter-select { border:1px solid var(--border); border-radius:8px; padding:7px 12px; font-size:13px; background:var(--brand-bg); color:var(--brand-ink); }
+  .filter-select:focus { outline:none; border-color:var(--brand-accent); }
+</style>
+{% endblock css %}
+
+{% block body %}
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width:1400px;">
+
+  <a href="/" class="back-link">
+    <i class="bi bi-arrow-left-circle"></i> Back to Dashboard
+  </a>
+
+  <!-- HEADER -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div style="width:52px; height:52px; border-radius:14px; background:var(--brand-accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; flex-shrink:0;">
+      {{ tl.user.get_full_name|make_list|first|upper }}
+    </div>
+    <div>
+      <h2 style="font-size:22px; font-weight:700; color:var(--brand-ink); margin:0;">{{ tl.user.get_full_name }}</h2>
+      <div style="font-size:13px; color:var(--brand-accent); margin-top:2px;">
+        Team Leader{% if tl.branch %} · {{ tl.branch.name }}{% endif %} · {{ tl.phone }}
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI CHIPS -->
+  <div class="kpi-row">
+    <div class="kpi-chip">
+      <div class="kpi-val">{{ total }}</div>
+      <div class="kpi-lbl">Total Leads</div>
+    </div>
+    <div class="kpi-chip kpi-hot">
+      <div class="kpi-val" style="color:#DC2626;">{{ hot }}</div>
+      <div class="kpi-lbl">Hot</div>
+    </div>
+    <div class="kpi-chip kpi-warm">
+      <div class="kpi-val" style="color:#D97706;">{{ warm }}</div>
+      <div class="kpi-lbl">Warm</div>
+    </div>
+    <div class="kpi-chip kpi-cold">
+      <div class="kpi-val" style="color:#2563EB;">{{ cold }}</div>
+      <div class="kpi-lbl">Cold</div>
+    </div>
+  </div>
+
+  <!-- LEADS TABLE -->
+  <div class="grove-panel" style="overflow:hidden;">
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <input class="filter-input" type="text" id="searchInput" placeholder="Search by name or phone…" oninput="filterTable()">
+      <select class="filter-select" id="tempFilter" onchange="filterTable()">
+        <option value="">All Temperatures</option>
+        <option value="hot">Hot</option>
+        <option value="warm">Warm</option>
+        <option value="cold">Cold</option>
+      </select>
+      <select class="filter-select" id="stageFilter" onchange="filterTable()">
+        <option value="">All Stages</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="interested">Interested</option>
+        <option value="negotiation">Negotiation</option>
+        <option value="closed">Closed</option>
+        <option value="converted">Converted</option>
+        <option value="lost">Lost</option>
+      </select>
+      <span style="font-size:12px; color:var(--brand-accent); margin-left:auto;" id="rowCountLabel">{{ total }} leads</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0" id="leadsTable">
+        <thead>
+          <tr>
+            <th class="ps-4">#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Temperature</th>
+            <th>Stage</th>
+            <th>Assigned To</th>
+            <th>Source</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr data-name="{{ lead.name|lower }}" data-phone="{{ lead.phone }}" data-temp="{{ lead.temperature|lower }}" data-stage="{{ lead.stage|lower }}">
+            <td class="ps-4" style="font-family:'Geist Mono',monospace; font-size:12px; color:var(--brand-accent);">{{ forloop.counter }}</td>
+            <td style="font-weight:600;">{{ lead.name }}</td>
+            <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ lead.phone }}</td>
+            <td><span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}">{{ lead.temperature|title }}</span></td>
+            <td><span class="stage-pill">{{ lead.stage|title|default:"—" }}</span></td>
+            <td>
+              <div>{{ lead.assigned_to.user.get_full_name|default:"—" }}</div>
+              {% if lead.assigned_to.role == 'employee' %}
+              <div class="assignee-dim">Employee</div>
+              {% elif lead.assigned_to.role == 'tl' %}
+              <div class="assignee-dim">In TL queue</div>
+              {% endif %}
+            </td>
+            <td style="font-size:12px; text-transform:capitalize;">{{ lead.source|default:"—" }}</td>
+            <td style="font-size:12px; color:var(--brand-accent);">{{ lead.created_at|date:"d M Y" }}</td>
+            <td>
+              <a href="{% url 'manager_lead_detail' lead.id %}" class="btn btn-sm"
+                 style="border:1px solid var(--border); background:var(--white); color:var(--brand-ink); font-size:11px; font-weight:600; padding:4px 12px; border-radius:6px;">
+                View
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="text-center py-5" style="color:var(--brand-accent);">No leads in this team leader's queue yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% block script %}
+<script>
+function filterTable() {
+  const q     = document.getElementById('searchInput').value.toLowerCase().trim();
+  const temp  = document.getElementById('tempFilter').value;
+  const stage = document.getElementById('stageFilter').value;
+  const rows  = document.querySelectorAll('#leadsTable tbody tr[data-name]');
+  let visible = 0;
+  rows.forEach(row => {
+    const matchQ     = !q     || row.dataset.name.includes(q) || row.dataset.phone.includes(q);
+    const matchTemp  = !temp  || row.dataset.temp  === temp;
+    const matchStage = !stage || row.dataset.stage === stage;
+    const show = matchQ && matchTemp && matchStage;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('rowCountLabel').textContent = visible + ' lead' + (visible !== 1 ? 's' : '');
+}
+</script>
+{% endblock script %}
+{% endblock body %}

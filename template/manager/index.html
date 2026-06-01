@@ -1,54 +1,225 @@
 {% extends "manager/base.html" %}
-
 {% block title %}Manager Dashboard{% endblock title %}
 
 {% block css %}
 <style>
-  .grove-stat-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 20px; height: 100%; }
-  .grove-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-  .stat-icon-box { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 16px; background: var(--accent-light); color: var(--brand-accent); }
-  .stat-value { font-family: 'Geist Mono', monospace; font-size: 30px; font-weight: 700; color: var(--brand-ink); line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-size: 12px; color: var(--brand-accent); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .table-custom th { font-size: 10px; font-weight: 700; color: var(--brand-accent); letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding: 16px 12px; background: var(--brand-bg); }
-  .table-custom td { padding: 16px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; color: var(--brand-ink); }
+  /* ── STAT CARDS ── */
+  .grove-stat-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; height: 100%;
+    transition: box-shadow .2s;
+  }
+  .grove-stat-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+  .grove-panel { background: var(--white); border: 1px solid var(--border); border-radius: 16px; }
+  .stat-icon-box {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 16px;
+    background: var(--accent-light); color: var(--brand-accent);
+  }
+  .stat-value { font-family:'Geist Mono',monospace; font-size:30px; font-weight:700; color:var(--brand-ink); line-height:1; margin-bottom:4px; }
+  .stat-label { font-size:12px; color:var(--brand-accent); font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+
+  /* ── SECTION TABLES ── */
+  .panel-hd { padding:20px 24px 0; border-bottom:1px solid var(--border); margin-bottom:0; }
+  .panel-hd h5 { font-size:15px; font-weight:700; color:var(--brand-ink); margin-bottom:4px; }
+  .panel-hd p  { font-size:12px; color:var(--brand-accent); margin-bottom:16px; }
+  .table-custom th {
+    font-size:10px; font-weight:700; color:var(--brand-accent);
+    letter-spacing:1px; text-transform:uppercase;
+    border-bottom:1px solid var(--border); padding:14px 12px;
+    background:var(--brand-bg);
+  }
+  .table-custom td { padding:14px 12px; border-bottom:1px solid var(--border); vertical-align:middle; font-size:13px; color:var(--brand-ink); }
+  .table-custom tr:last-child td { border-bottom:none; }
+  .temp-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; text-transform:uppercase;
+  }
+  .t-hot  { background:rgba(239,68,68,.1);   color:#DC2626; }
+  .t-warm { background:rgba(245,158,11,.1);  color:#D97706; }
+  .t-cold { background:rgba(59,130,246,.1);  color:#2563EB; }
+
+  /* ── ASSIGN BAR ── */
+  .assign-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:16px 24px; background:var(--brand-bg); border-top:1px solid var(--border); }
+  .assign-select {
+    border:1px solid var(--border); border-radius:8px; padding:8px 12px;
+    font-size:13px; background:var(--white); color:var(--brand-ink); min-width:210px;
+  }
+  .assign-select:focus { outline:none; border-color:var(--brand-accent); }
+  .assign-btn {
+    background:var(--brand-ink); color:#fff; border:none;
+    border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px;
+    transition: background .2s;
+  }
+  .assign-btn:hover:not(:disabled) { background:#444; }
+  .assign-btn:disabled { opacity:.4; cursor:not-allowed; }
+  .sel-count { font-size:12px; font-weight:600; color:var(--brand-accent); white-space:nowrap; }
+
+  /* ── TL TILES ── */
+  .tl-tile {
+    background:var(--white); border:1px solid var(--border);
+    border-radius:16px; padding:20px 22px;
+    transition:box-shadow .2s, transform .2s;
+    cursor:pointer; text-decoration:none; display:block; color:inherit;
+  }
+  .tl-tile:hover { box-shadow:0 6px 24px rgba(0,0,0,.07); transform:translateY(-2px); color:inherit; }
+  .tl-avatar {
+    width:44px; height:44px; border-radius:12px;
+    background:var(--brand-accent); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:700; flex-shrink:0;
+  }
+  .tl-name  { font-size:14px; font-weight:700; color:var(--brand-ink); line-height:1.2; }
+  .tl-sub   { font-size:11px; color:var(--brand-accent); margin-top:2px; }
+  .tl-total { font-family:'Geist Mono',monospace; font-size:28px; font-weight:700; color:var(--brand-ink); line-height:1; }
+  .tl-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  .tl-chip  { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+  .chip-hot  { background:rgba(239,68,68,.1);  color:#DC2626; }
+  .chip-warm { background:rgba(245,158,11,.1); color:#D97706; }
+  .chip-cold { background:rgba(59,130,246,.1); color:#2563EB; }
+  .chip-total { background:var(--accent-light); color:var(--brand-accent); }
 </style>
 {% endblock css %}
 
 {% block body %}
-<div class="container-fluid py-4 px-3 px-md-4" style="max-width: 1400px;">
+<div class="container-fluid py-4 px-3 px-md-4" style="max-width:1400px;">
+
+  <!-- PAGE HEADER -->
   <div class="mb-4">
-    <h2 style="font-size: 24px; font-weight: 700; color: var(--ink); margin: 0;">Manager Portal</h2>
-    <div style="font-size: 13px; color: var(--stone); margin-top: 4px;">Strategic oversight of your reporting team</div>
+    <h2 style="font-size:24px; font-weight:700; color:var(--brand-ink); margin:0;">Manager Portal</h2>
+    <div style="font-size:13px; color:var(--brand-accent); margin-top:4px;">Strategic oversight of your reporting team</div>
   </div>
 
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-4 mb-4">
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ total_team }}</div><div class="stat-label">Total Team Members</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(16,185,129,0.1); color: #059669;"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(59,130,246,0.1); color: #2563EB;"><i class="bi bi-person-lines-fill"></i></div><div class="stat-value">{{ total_leads }}</div><div class="stat-label">Total Leads</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(245,158,11,0.1); color: #D97706;"><i class="bi bi-telephone-fill"></i></div><div class="stat-value">{{ calls_today }}</div><div class="stat-label">Calls Today</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(239,68,68,0.1); color: #DC2626;"><i class="bi bi-fire"></i></div><div class="stat-value">{{ hot_leads }}</div><div class="stat-label">Hot Leads</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(16,185,129,0.1); color: #059669;"><i class="bi bi-check2-circle"></i></div><div class="stat-value">{{ converted_leads }}</div><div class="stat-label">Converted Leads</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(245,158,11,0.1); color: #D97706;"><i class="bi bi-hourglass-split"></i></div><div class="stat-value">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div></div>
-    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background: rgba(239,68,68,0.1); color: #DC2626;"><i class="bi bi-person-dash-fill"></i></div><div class="stat-value">{{ absent_today }}</div><div class="stat-label">Absent Today</div></div></div>
+  <!-- ── STAT CARDS ── -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-4 g-3 mb-4">
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box"><i class="bi bi-people-fill"></i></div><div class="stat-value">{{ total_team }}</div><div class="stat-label">Total Team</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(16,185,129,.1);color:#059669;"><i class="bi bi-check-circle-fill"></i></div><div class="stat-value">{{ present_today }}</div><div class="stat-label">Present Today</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(59,130,246,.1);color:#2563EB;"><i class="bi bi-person-lines-fill"></i></div><div class="stat-value">{{ total_leads }}</div><div class="stat-label">Total Leads</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(245,158,11,.1);color:#D97706;"><i class="bi bi-telephone-fill"></i></div><div class="stat-value">{{ calls_today }}</div><div class="stat-label">Calls Today</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(239,68,68,.1);color:#DC2626;"><i class="bi bi-fire"></i></div><div class="stat-value">{{ hot_leads }}</div><div class="stat-label">Hot Leads</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(16,185,129,.1);color:#059669;"><i class="bi bi-check2-circle"></i></div><div class="stat-value">{{ converted_leads }}</div><div class="stat-label">Converted</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(245,158,11,.1);color:#D97706;"><i class="bi bi-hourglass-split"></i></div><div class="stat-value">{{ pending_leaves }}</div><div class="stat-label">Pending Leaves</div></div></div>
+    <div class="col"><div class="grove-stat-card"><div class="stat-icon-box" style="background:rgba(239,68,68,.1);color:#DC2626;"><i class="bi bi-person-dash-fill"></i></div><div class="stat-value">{{ absent_today }}</div><div class="stat-label">Absent Today</div></div></div>
   </div>
 
+  <!-- ── NEW LEADS — SELECT & ASSIGN ── -->
+  <div class="grove-panel mb-4" style="overflow:hidden;" id="assignPanel">
+    <div class="panel-hd">
+      <h5>New Leads</h5>
+      <p id="pendingLabel">{{ unassigned_leads.count }} lead{{ unassigned_leads.count|pluralize }} waiting to be assigned to a Team Leader</p>
+    </div>
+
+    {% if unassigned_leads %}
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4" style="width:40px;">
+              <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
+            </th>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Temperature</th>
+            <th>Source</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="newLeadsBody">
+          {% for lead in unassigned_leads %}
+          <tr id="row-{{ lead.id }}">
+            <td class="ps-4"><input type="checkbox" class="lead-check" value="{{ lead.id }}" onchange="updateCount()"></td>
+            <td style="font-family:'Geist Mono',monospace; font-size:12px; color:var(--brand-accent);">{{ forloop.counter }}</td>
+            <td style="font-weight:600;">{{ lead.name }}</td>
+            <td style="font-family:'Geist Mono',monospace; font-size:12px;">{{ lead.phone }}</td>
+            <td><span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}">{{ lead.temperature|title }}</span></td>
+            <td style="font-size:12px; text-transform:capitalize;">{{ lead.source|default:"—" }}</td>
+            <td style="font-size:12px; color:var(--brand-accent);">{{ lead.created_at|date:"d M Y" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ASSIGN BAR -->
+    <div class="assign-bar">
+      <span class="sel-count" id="selCount">0 selected</span>
+      <select class="assign-select" id="tlSelect">
+        <option value="">— Select Team Leader —</option>
+        {% for tl in team_leaders %}
+        <option value="{{ tl.id }}">{{ tl.user.get_full_name }}</option>
+        {% endfor %}
+      </select>
+      <button class="assign-btn" id="assignBtn" disabled onclick="assignLeads()">
+        <i class="bi bi-person-check-fill"></i> Assign Leads
+      </button>
+    </div>
+
+    {% else %}
+    <div class="text-center py-5" style="color:var(--brand-accent);" id="emptyState">
+      <i class="bi bi-inbox-fill" style="font-size:36px; display:block; margin-bottom:10px; opacity:.5;"></i>
+      <div style="font-size:14px; font-weight:600;">No new leads pending assignment</div>
+      <div style="font-size:12px; margin-top:4px;">All leads have been assigned to a Team Leader.</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── TEAM LEADER TILES ── -->
+  {% if tl_data %}
+  <div class="mb-4">
+    <div class="mb-3">
+      <h5 style="font-size:15px; font-weight:700; color:var(--brand-ink); margin:0;">Team Leaders</h5>
+      <div style="font-size:12px; color:var(--brand-accent); margin-top:3px;">Tap a tile to see the leads in that team leader's queue</div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
+      {% for item in tl_data %}
+      <div class="col">
+        <a href="{% url 'manager_tl_leads' item.tl.id %}" class="tl-tile">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="tl-avatar">
+              {{ item.tl.user.get_full_name|make_list|first|upper }}
+            </div>
+            <div>
+              <div class="tl-name">{{ item.tl.user.get_full_name }}</div>
+              <div class="tl-sub">Team Leader{% if item.tl.branch %} · {{ item.tl.branch.name }}{% endif %}</div>
+            </div>
+            <div class="ms-auto text-end">
+              <div class="tl-total">{{ item.total }}</div>
+              <div style="font-size:10px; color:var(--brand-accent); font-weight:600; text-transform:uppercase;">Leads</div>
+            </div>
+          </div>
+          <div class="tl-chips">
+            <span class="tl-chip chip-hot"><i class="bi bi-fire"></i> {{ item.hot }} Hot</span>
+            <span class="tl-chip chip-warm"><i class="bi bi-thermometer-half"></i> {{ item.warm }} Warm</span>
+            <span class="tl-chip chip-cold"><i class="bi bi-snow"></i> {{ item.cold }} Cold</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── RECENT LEADS & CALLS ── -->
   <div class="row g-4">
     <div class="col-xl-6">
-      <div class="grove-panel p-0" style="overflow: hidden;">
-        <div class="px-4 pt-4"><h5 class="fw-bold mb-3">Recent Leads</h5></div>
+      <div class="grove-panel" style="overflow:hidden; padding:0;">
+        <div class="px-4 pt-4 pb-2"><h5 class="fw-bold mb-0" style="font-size:15px;">Recent Leads</h5></div>
         <div class="table-responsive">
           <table class="table table-custom align-middle mb-0">
             <thead><tr><th class="ps-4">Lead</th><th>Assigned To</th><th>Temp</th><th>Date</th></tr></thead>
             <tbody>
               {% for lead in recent_leads %}
               <tr>
-                <td class="ps-4">{{ lead.name }}</td>
+                <td class="ps-4" style="font-weight:600;">{{ lead.name }}</td>
                 <td>{{ lead.assigned_to.user.get_full_name|default:"—" }}</td>
-                <td>{{ lead.temperature|title }}</td>
-                <td>{{ lead.created_at|date:"d M Y" }}</td>
+                <td><span class="temp-badge t-{{ lead.temperature|lower|default:'cold' }}">{{ lead.temperature|title }}</span></td>
+                <td style="font-size:12px; color:var(--brand-accent);">{{ lead.created_at|date:"d M Y" }}</td>
               </tr>
               {% empty %}
-              <tr><td colspan="4" class="text-center py-4">No leads found</td></tr>
+              <tr><td colspan="4" class="text-center py-4" style="color:var(--brand-accent);">No leads found</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -56,21 +227,21 @@
       </div>
     </div>
     <div class="col-xl-6">
-      <div class="grove-panel p-0" style="overflow: hidden;">
-        <div class="px-4 pt-4"><h5 class="fw-bold mb-3">Recent Calls</h5></div>
+      <div class="grove-panel" style="overflow:hidden; padding:0;">
+        <div class="px-4 pt-4 pb-2"><h5 class="fw-bold mb-0" style="font-size:15px;">Recent Calls</h5></div>
         <div class="table-responsive">
           <table class="table table-custom align-middle mb-0">
             <thead><tr><th class="ps-4">Lead</th><th>Employee</th><th>Outcome</th><th>Date</th></tr></thead>
             <tbody>
               {% for call in recent_calls %}
               <tr>
-                <td class="ps-4">{{ call.lead.name }}</td>
+                <td class="ps-4" style="font-weight:600;">{{ call.lead.name }}</td>
                 <td>{{ call.called_by.user.get_full_name|default:"—" }}</td>
-                <td>{{ call.get_call_outcome_display }}</td>
-                <td>{{ call.created_at|date:"d M Y g:i A" }}</td>
+                <td style="font-size:12px;">{{ call.get_call_outcome_display }}</td>
+                <td style="font-size:12px; color:var(--brand-accent);">{{ call.created_at|date:"d M Y g:i A" }}</td>
               </tr>
               {% empty %}
-              <tr><td colspan="4" class="text-center py-4">No calls found</td></tr>
+              <tr><td colspan="4" class="text-center py-4" style="color:var(--brand-accent);">No calls found</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -78,5 +249,86 @@
       </div>
     </div>
   </div>
-</div>
+
+</div><!-- /container -->
+
+{% block script %}
+<script>
+function toggleAll(master) {
+  document.querySelectorAll('.lead-check').forEach(cb => cb.checked = master.checked);
+  updateCount();
+}
+
+function updateCount() {
+  const checks = document.querySelectorAll('.lead-check');
+  const checked = document.querySelectorAll('.lead-check:checked');
+  document.getElementById('selCount').textContent = checked.length + ' selected';
+  document.getElementById('assignBtn').disabled = checked.length === 0;
+  const sa = document.getElementById('selectAll');
+  if (sa) {
+    sa.indeterminate = checked.length > 0 && checked.length < checks.length;
+    sa.checked = checks.length > 0 && checked.length === checks.length;
+  }
+}
+
+function assignLeads() {
+  const tlId = document.getElementById('tlSelect').value;
+  if (!tlId) { alert('Please select a Team Leader first.'); return; }
+
+  const leadIds = Array.from(document.querySelectorAll('.lead-check:checked'))
+                       .map(cb => parseInt(cb.value));
+  if (!leadIds.length) { alert('Please select at least one lead.'); return; }
+
+  const btn = document.getElementById('assignBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning…';
+
+  fetch('{% url "assign_to_tl" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    },
+    body: JSON.stringify({ lead_ids: leadIds, tl_id: parseInt(tlId) }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'success') {
+      leadIds.forEach(id => {
+        const row = document.getElementById('row-' + id);
+        if (row) row.remove();
+      });
+      const remaining = document.querySelectorAll('.lead-check').length;
+      document.getElementById('pendingLabel').textContent =
+        remaining + ' lead' + (remaining !== 1 ? 's' : '') + ' waiting to be assigned to a Team Leader';
+      if (!remaining) {
+        const tableWrap = document.querySelector('#assignPanel .table-responsive');
+        const assignBar = document.querySelector('#assignPanel .assign-bar');
+        if (tableWrap) tableWrap.remove();
+        if (assignBar)  assignBar.remove();
+        document.getElementById('assignPanel').insertAdjacentHTML('beforeend',
+          '<div class="text-center py-5" style="color:var(--brand-accent);">' +
+          '<i class="bi bi-inbox-fill" style="font-size:36px;display:block;margin-bottom:10px;opacity:.5;"></i>' +
+          '<div style="font-size:14px;font-weight:600;">No new leads pending assignment</div>' +
+          '<div style="font-size:12px;margin-top:4px;">All leads have been assigned to a Team Leader.</div>' +
+          '</div>');
+      } else {
+        updateCount();
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-person-check-fill"></i> Assign Leads';
+      }
+    } else {
+      alert('Error: ' + (data.message || 'Assignment failed.'));
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-check-fill"></i> Assign Leads';
+    }
+  })
+  .catch(() => {
+    alert('Network error. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-person-check-fill"></i> Assign Leads';
+  });
+}
+</script>
+{% endblock script %}
 {% endblock body %}

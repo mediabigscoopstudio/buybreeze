@@ -3,7 +3,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.db.models import Q
-from dash.models import Attendance, Branch, LeaveRequest, UserProfile, Lead, FollowUp
+from dash.models import (
+    Attendance, Branch, LeaveRequest, UserProfile, Lead, FollowUp,
+    LeadAssignmentHistory, CallLog, CallWrapUp,
+)
 from datetime import timedelta, datetime
 from dash.otp_utils import generate_otp, send_otp
 from django.utils import timezone
@@ -304,6 +307,26 @@ def index(request):
         assigned_to__in=employees
     ).select_related('assigned_to__user').order_by('-created_at')[:10]
 
+    # Leads sitting with the manager — not yet pushed to any TL
+    unassigned_leads = Lead.objects.filter(
+        assigned_to=manager_profile,
+    ).select_related('branch').order_by('-created_at')
+
+    # Per-TL tile stats: leads on the TL + leads on their employees
+    tl_data = []
+    for tl in team_leaders:
+        tl_employees = UserProfile.objects.filter(reports_to=tl, role='employee', status='Enabled')
+        tl_leads_qs = Lead.objects.filter(
+            Q(assigned_to=tl) | Q(assigned_to__in=tl_employees)
+        )
+        tl_data.append({
+            'tl': tl,
+            'total': tl_leads_qs.count(),
+            'hot':   tl_leads_qs.filter(temperature='hot').count(),
+            'warm':  tl_leads_qs.filter(temperature='warm').count(),
+            'cold':  tl_leads_qs.filter(temperature='cold').count(),
+        })
+
     return render(request, 'manager/index.html', {
         'total_leads': total_leads,
         'leads_today': leads_today,
@@ -316,6 +339,9 @@ def index(request):
         'recent_calls': recent_calls,
         'recent_leads': recent_leads,
         'total_team': employees.count(),
+        'unassigned_leads': unassigned_leads,
+        'team_leaders': team_leaders,
+        'tl_data': tl_data,
     })
 
 
@@ -410,8 +436,6 @@ def tl_performance(request, id):
     })
 
 
-from dash.models import UserProfile 
-from dash.models import Lead
 @user_passes_test(manager_required, login_url='/login/')
 def profile_settings(request):
     user = request.user
@@ -437,14 +461,6 @@ def profile_settings(request):
     return render(request, 'manager/profile.html', {
         'profile': profile
     })
-
-from dash.models import (
-    Lead,
-    LeadAssignmentHistory,
-    CallLog,
-    CallWrapUp,
-    FollowUp
-)
 
 @user_passes_test(manager_required, login_url='/login/')
 def view_lead(request, id):
@@ -759,6 +775,27 @@ def assign_lead(request, lead_id):
         lead.save()
         messages.success(request, f'Lead assigned to {tl.user.get_full_name()}.')
     return redirect('index')
+
+
+# ============================================================
+# TL LEADS (all leads in a TL's scope)
+# ============================================================
+@user_passes_test(manager_required, login_url='/login/')
+def tl_leads(request, tl_id):
+    manager = request.user.profile
+    tl = get_object_or_404(UserProfile, id=tl_id, role='tl', reports_to=manager)
+    tl_employees = UserProfile.objects.filter(reports_to=tl, role='employee', status='Enabled')
+    leads = Lead.objects.filter(
+        Q(assigned_to=tl) | Q(assigned_to__in=tl_employees)
+    ).select_related('assigned_to__user', 'branch').order_by('-created_at')
+    return render(request, 'manager/tl_leads.html', {
+        'tl': tl,
+        'leads': leads,
+        'total': leads.count(),
+        'hot':   leads.filter(temperature='hot').count(),
+        'warm':  leads.filter(temperature='warm').count(),
+        'cold':  leads.filter(temperature='cold').count(),
+    })
 
 
 # ============================================================
