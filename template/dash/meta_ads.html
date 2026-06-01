@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static dash_extras %}
 
 {% block title %}Meta Ads Dashboard — Buy Buzz CRM{% endblock %}
 {% block page_header %}Meta Ads Dashboard{% endblock %}
@@ -132,7 +132,7 @@
           <tr>
             <td style="font-family:'Geist Mono',monospace; color:var(--stone); font-size:12px;">{{ forloop.counter|stringformat:"02d" }}</td>
             <td style="font-weight:600;">{{ c.name }}</td>
-            <td style="font-size:12px; color:var(--stone); text-transform:capitalize;">{{ c.objective|lower|replace:"_":" " }}</td>
+            <td style="font-size:12px; color:var(--stone); text-transform:capitalize;">{{ c.objective|lower|str_replace:"_: " }}</td>
             <td>
               <span class="status-badge {% if c.status == 'ACTIVE' %}sb-active{% elif c.status == 'PAUSED' %}sb-paused{% else %}sb-other{% endif %}">
                 {{ c.status }}

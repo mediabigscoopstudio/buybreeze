@@ -302,6 +302,18 @@ def index(request):
         assigned_to=tl_profile,
     ).select_related('branch').order_by('-created_at')
 
+    # Per-employee tile stats
+    employee_tile_data = []
+    for emp in employees:
+        emp_leads = Lead.objects.filter(assigned_to=emp)
+        employee_tile_data.append({
+            'employee': emp,
+            'total': emp_leads.count(),
+            'hot':   emp_leads.filter(temperature='hot').count(),
+            'warm':  emp_leads.filter(temperature='warm').count(),
+            'cold':  emp_leads.filter(temperature='cold').count(),
+        })
+
     return render(request, 'teamleader/index.html', {
         'total_leads': total_leads,
         'leads_today': leads_today,
@@ -316,6 +328,7 @@ def index(request):
         'pending_leaves': pending_leaves,
         'unassigned_leads': unassigned_leads,
         'employees': employees,
+        'employee_tile_data': employee_tile_data,
     })
 
 @user_passes_test(tl_required, login_url='/login/')

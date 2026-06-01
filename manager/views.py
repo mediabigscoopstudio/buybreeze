@@ -741,7 +741,8 @@ def lead_detail(request, lead_id):
         role='employee',
         status='Enabled',
     )
-    allowed_ids = list(employees.values_list('id', flat=True)) + [manager.id]
+    tl_ids = list(team_leaders.values_list('id', flat=True))
+    allowed_ids = list(employees.values_list('id', flat=True)) + tl_ids + [manager.id]
     lead = get_object_or_404(Lead, id=lead_id, assigned_to_id__in=allowed_ids)
     call_logs = CallLog.objects.filter(lead=lead).select_related('called_by__user').order_by('-created_at')
     call_log_data = []

@@ -20,6 +20,29 @@
   .t-warm { background: rgba(245,158,11,0.1); color: #D97706; }
   .t-cold { background: rgba(59,130,246,0.1); color: #2563EB; }
   .selected-count { font-size: 12px; font-weight: 600; color: var(--brand-accent); }
+
+  /* ── EMPLOYEE TILES ── */
+  .emp-tile {
+    background:var(--white); border:1px solid var(--border);
+    border-radius:16px; padding:20px 22px;
+    transition:box-shadow .2s, transform .2s;
+    cursor:pointer; text-decoration:none; display:block; color:inherit;
+  }
+  .emp-tile:hover { box-shadow:0 6px 24px rgba(0,0,0,.07); transform:translateY(-2px); color:inherit; }
+  .emp-avatar {
+    width:44px; height:44px; border-radius:12px;
+    background:var(--brand-accent); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; font-weight:700; flex-shrink:0;
+  }
+  .emp-name  { font-size:14px; font-weight:700; color:var(--brand-ink); line-height:1.2; }
+  .emp-sub   { font-size:11px; color:var(--brand-accent); margin-top:2px; }
+  .emp-total { font-family:'Geist Mono',monospace; font-size:28px; font-weight:700; color:var(--brand-ink); line-height:1; }
+  .emp-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+  .emp-chip  { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+  .chip-hot  { background:rgba(239,68,68,.1);  color:#DC2626; }
+  .chip-warm { background:rgba(245,158,11,.1); color:#D97706; }
+  .chip-cold { background:rgba(59,130,246,.1); color:#2563EB; }
 </style>
 {% endblock css %}
 
@@ -107,6 +130,42 @@
     </div>
     {% endif %}
   </div>
+
+  <!-- ── EMPLOYEE TILES ── -->
+  {% if employee_tile_data %}
+  <div class="mb-4">
+    <div class="mb-3">
+      <h5 style="font-size:15px; font-weight:700; color:var(--brand-ink); margin:0;">My Team</h5>
+      <div style="font-size:12px; color:var(--brand-accent); margin-top:3px;">Tap a tile to see the leads assigned to that employee</div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
+      {% for item in employee_tile_data %}
+      <div class="col">
+        <a href="{% url 'tl_employee_leads' item.employee.id %}" class="emp-tile">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="emp-avatar">
+              {{ item.employee.user.get_full_name|make_list|first|upper }}
+            </div>
+            <div>
+              <div class="emp-name">{{ item.employee.user.get_full_name }}</div>
+              <div class="emp-sub">Employee{% if item.employee.branch %} · {{ item.employee.branch.name }}{% endif %}</div>
+            </div>
+            <div class="ms-auto text-end">
+              <div class="emp-total">{{ item.total }}</div>
+              <div style="font-size:10px; color:var(--brand-accent); font-weight:600; text-transform:uppercase;">Leads</div>
+            </div>
+          </div>
+          <div class="emp-chips">
+            <span class="emp-chip chip-hot"><i class="bi bi-fire"></i> {{ item.hot }} Hot</span>
+            <span class="emp-chip chip-warm"><i class="bi bi-thermometer-half"></i> {{ item.warm }} Warm</span>
+            <span class="emp-chip chip-cold"><i class="bi bi-snow"></i> {{ item.cold }} Cold</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 
   <!-- RECENT TABLES -->
   <div class="row g-4">
