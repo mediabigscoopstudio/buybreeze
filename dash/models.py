@@ -533,3 +533,23 @@ class AdAccount(models.Model):
 
     def __str__(self):
         return f"{self.get_platform_display()} — {self.name} ({self.account_id})"
+
+
+class MessageTemplate(models.Model):
+    TYPE_CHOICES = [
+        ("whatsapp", "whatsapp"),
+        ("sms", "sms"),
+        ("email", "email"),
+    ]
+    name       = models.CharField(max_length=200)
+    body       = models.TextField()
+    type       = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['type', 'name']
+        verbose_name = 'Message Template'
+        verbose_name_plural = 'Message Templates'
+
+    def __str__(self):
+        return f"[{self.type}] {self.name}"

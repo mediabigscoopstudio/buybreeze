@@ -16,7 +16,7 @@ from rest_framework import status
 
 from dash.models import (
     UserProfile, Attendance, Lead,
-    CallLog, CallWrapUp, FollowUp, Branch
+    CallLog, CallWrapUp, FollowUp, Branch, MessageTemplate
 )
 from dash.notifications import (
     create_notification, get_admins,
@@ -907,6 +907,48 @@ def followups(request):
     return Response({
         "success": True,
         "followups": followup_list,
+    })
+
+
+# -----------------------------------------
+# MESSAGE TEMPLATES (GLOBAL)
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def message_templates(request):
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response(
+            {"success": False, "message": "Phone required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # Templates are global — return all of them, not filtered by user.
+    templates = MessageTemplate.objects.all().order_by("type", "name")
+
+    template_list = [
+        {
+            "id":   t.id,
+            "name": t.name,
+            "body": t.body,
+            "type": t.type,
+        }
+        for t in templates
+    ]
+
+    return Response({
+        "success": True,
+        "templates": template_list,
     })
 
 

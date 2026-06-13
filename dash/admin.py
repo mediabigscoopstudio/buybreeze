@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting, Attendance, LeaveRequest, Payroll, Notification, NotificationRecipient
+from .models import Branch, UserProfile, Lead, CallLog, CallWrapUp, FollowUp, SystemSetting, Attendance, LeaveRequest, Payroll, Notification, NotificationRecipient, MessageTemplate
 
 admin.site.register(Branch)
 admin.site.register(UserProfile)
@@ -13,3 +13,10 @@ admin.site.register(LeaveRequest)
 admin.site.register(Payroll)
 admin.site.register(Notification)
 admin.site.register(NotificationRecipient)
+
+
+@admin.register(MessageTemplate)
+class MessageTemplateAdmin(admin.ModelAdmin):
+    list_display = ("name", "type", "created_at")
+    list_filter = ("type",)
+    search_fields = ("name", "body")
