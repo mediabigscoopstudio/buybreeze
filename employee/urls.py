@@ -32,6 +32,7 @@ urlpatterns = [
     path("api/calls/save/", android.save_call, name="api_save_call"),
     path("api/calls/upload-recording/", android.upload_recording, name="api_upload_recording"),
     path("api/calls/logs/", android.call_logs, name="api_call_logs"),
+    path("api/followups/", android.followups, name="api_followups"),
 
     # android — route tracking
     path("api/route/save/", android.save_route, name="api_save_route"),

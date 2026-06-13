@@ -862,6 +862,55 @@ def call_logs(request):
 
 
 # -----------------------------------------
+# FOLLOW-UPS
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def followups(request):
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response(
+            {"success": False, "message": "Phone required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    ist = pytz.timezone("Asia/Kolkata")
+    logs = (
+        CallLog.objects
+        .filter(called_by=profile, next_followup_at__isnull=False)
+        .select_related("lead")
+        .order_by("next_followup_at")
+    )
+
+    followup_list = []
+    for call in logs:
+        followup_list.append({
+            "id":          call.id,
+            "lead_id":     call.lead.id if call.lead else None,
+            "lead_name":   call.lead.name if call.lead else None,
+            "lead_phone":  call.lead.phone if call.lead else None,
+            "followup_at": timezone.localtime(call.next_followup_at, ist).strftime("%Y-%m-%d %H:%M:%S"),
+            "notes":       call.call_notes or "",
+            "is_done":     False,
+        })
+
+    return Response({
+        "success": True,
+        "followups": followup_list,
+    })
+
+
+# -----------------------------------------
 # DASHBOARD STATS
 # -----------------------------------------
 @csrf_exempt
