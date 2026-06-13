@@ -805,6 +805,63 @@ def upload_recording(request):
 
 
 # -----------------------------------------
+# CALL LOGS (ALL TIME)
+# -----------------------------------------
+@csrf_exempt
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def call_logs(request):
+    phone = request.query_params.get("phone")
+
+    if not phone:
+        return Response(
+            {"success": False, "message": "Phone required"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        profile = UserProfile.objects.get(phone=phone, role="employee")
+    except UserProfile.DoesNotExist:
+        return Response(
+            {"success": False, "message": "Employee not found"},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    ist = pytz.timezone("Asia/Kolkata")
+    logs = (
+        CallLog.objects
+        .filter(called_by=profile)
+        .select_related("lead")
+        .order_by("-created_at")
+    )
+
+    log_list = []
+    for call in logs:
+        recording_url = None
+        if call.recording:
+            try:
+                recording_url = request.build_absolute_uri(call.recording.url)
+            except Exception:
+                recording_url = None
+
+        log_list.append({
+            "id":            call.id,
+            "lead_name":     call.lead.name if call.lead else None,
+            "lead_phone":    call.lead.phone if call.lead else None,
+            "call_type":     call.call_type,
+            "call_outcome":  call.call_outcome,
+            "call_duration": call.call_duration,
+            "created_at":    timezone.localtime(call.created_at, ist).strftime("%Y-%m-%dT%H:%M:%S"),
+            "recording":     recording_url,
+        })
+
+    return Response({
+        "success": True,
+        "logs": log_list,
+    })
+
+
+# -----------------------------------------
 # DASHBOARD STATS
 # -----------------------------------------
 @csrf_exempt
